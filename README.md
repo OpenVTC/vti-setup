@@ -57,8 +57,9 @@ mindmap
       Interactive
       Non-interactive
     Deployment
-      Kubernetes
       Local Dev
+      Ubuntu Server
+      Kubernetes
       EC2 / VPS
 ```
 
@@ -67,7 +68,7 @@ mindmap
 | 1 | **Setup Type** | Online VTA · Offline VTA · Self-Managed | How your service gets its keys and DID |
 | 2 | **Transport** | REST · DIDComm | Protocol used to talk to the VTA |
 | 3 | **Mode** | Interactive · Non-interactive | Human in the loop vs fully scripted |
-| 4 | **Deployment** | Kubernetes · Local Dev · EC2/VPS | Runtime environment — affects keyring availability |
+| 4 | **Deployment** | Local Dev · Ubuntu Server · Kubernetes · EC2/VPS | Runtime environment — affects keyring availability |
 
 ### Setup Type explained
 
@@ -89,7 +90,7 @@ flowchart TD
 
 ## 12 Core Scenarios
 
-The three setup types × two transports × two modes produce **12 scenarios**. The deployment environment is a cross-cutting concern documented separately (see [Deployment Environments](#deployment-environments)).
+The three setup types × two transports × two modes produce **12 scenarios**. The deployment environment is a cross-cutting concern — any scenario can run on any of the four deployment environments.
 
 | | **REST** | **REST** | **DIDComm** | **DIDComm** |
 | --- | :---: | :---: | :---: | :---: |
@@ -97,127 +98,6 @@ The three setup types × two transports × two modes produce **12 scenarios**. T
 | **Online VTA** | [S01](scenarios/S01-online-vta-rest-interactive.md) | [S02](scenarios/S02-online-vta-rest-noninteractive.md) | [S03](scenarios/S03-online-vta-didcomm-interactive.md) | [S04](scenarios/S04-online-vta-didcomm-noninteractive.md) |
 | **Offline VTA** | [S05](scenarios/S05-offline-vta-rest-interactive.md) | [S06](scenarios/S06-offline-vta-rest-noninteractive.md) | [S07](scenarios/S07-offline-vta-didcomm-interactive.md) | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md) |
 | **Self-Managed** | [S09](scenarios/S09-self-managed-rest-interactive.md) | [S10](scenarios/S10-self-managed-rest-noninteractive.md) | [S11](scenarios/S11-self-managed-didcomm-interactive.md) | [S12](scenarios/S12-self-managed-didcomm-noninteractive.md) |
-
-### High-level flow per setup type
-
-#### Online VTA
-
-```mermaid
-sequenceDiagram
-    participant Admin as VTA Admin
-    participant VTA as VTA (running)
-    participant App as Your App
-
-    Admin->>VTA: provision context for App
-    VTA-->>Admin: credential bundle (base64url)
-    Admin->>App: hand over credential bundle
-    App->>VTA: authenticate with credential bundle
-    VTA-->>App: DidSecretsBundle (DID + private keys)
-    App->>App: cache secrets locally
-    note over App: App now operates with its own DID
-```
-
-#### Offline VTA (boot-strap / air-gapped)
-
-```mermaid
-sequenceDiagram
-    participant Wizard as VTA Setup Wizard
-    participant VTA as VTA Service
-    participant WebVH as WebVH Service
-    participant MED as Mediator
-
-    note over Wizard: Runs fully offline — no services up yet
-    Wizard->>Wizard: generate BIP-39 seed
-    Wizard->>Wizard: derive DIDs + key material
-    Wizard->>Wizard: write config.toml + secrets bundles
-
-    note over WebVH,MED: Services start and import pre-generated artifacts
-    VTA->>WebVH: import-did (did:webvh log)
-    MED->>MED: load-did / --import-bundle
-    WebVH-->>VTA: DID hosted publicly
-
-    note over VTA: VTA now reachable; normal Online VTA flow continues
-```
-
-#### Self-Managed
-
-```mermaid
-sequenceDiagram
-    participant Ops as Operator
-    participant VTA as VTA Service
-    participant WebVH as WebVH Service
-    participant MED as Mediator
-    participant App as Your App
-
-    Ops->>VTA: run setup wizard (interactive or scripted)
-    VTA->>WebVH: provision WebVH context + DID
-    VTA->>MED: provision mediator context + DID
-    Ops->>VTA: provision app context
-    VTA-->>Ops: credential bundle for App
-    Ops->>App: configure with credential bundle
-    App->>VTA: authenticate
-    VTA-->>App: DidSecretsBundle
-```
-
----
-
-## Deployment Environments
-
-The deployment environment is orthogonal to the 12 scenarios above — any scenario can run on any environment, but each environment has constraints that affect how secrets are stored.
-
-```mermaid
-graph LR
-    subgraph "Secret Storage Options"
-        KR["OS Keyring\n(macOS Keychain,\nGNOME Keyring,\nWindows Credential Mgr)"]
-        CFG["Config File\n(config-seed feature)\nK8s Secret → mounted file"]
-        AWS["AWS Secrets\nManager"]
-        GCP["GCP Secret\nManager"]
-        AZ["Azure Key Vault"]
-    end
-
-    D01["D01 Local Dev"] -->|default| KR
-    D02["D02 Ubuntu Server"] -->|no keyring daemon| CFG
-    D03["D03 Kubernetes"] -->|no keyring daemon| CFG
-    D03 --> AWS
-    D03 --> GCP
-    D03 --> AZ
-    D04["D04 AWS EC2"] -->|no desktop keyring| CFG
-    D04 --> AWS
-```
-
-| Environment | Keyring | Recommended seed storage | Notes |
-| ----------- | :-----: | ------------------------ | ----- |
-| [D01 Local Dev](deployments/D01-local-dev.md) | ✅ | `keyring` (default) | macOS Keychain / GNOME Keyring |
-| [D02 Ubuntu Server](deployments/D02-ubuntu-server.md) | ❌ | `config-seed` | Headless Linux |
-| [D03 Kubernetes](deployments/D03-kubernetes.md) | ❌ | `config-seed` | |
-| [D04 AWS EC2](deployments/D04-AWS-ec2.md) | ⚠️ | `aws-secrets` | IAM role for Secrets Manager access |
-
----
-
-## Repository Layout
-
-```text
-vti-setup/
-├── README.md
-├── scenarios/
-│   ├── S01-online-vta-rest-interactive.md
-│   ├── S02-online-vta-rest-noninteractive.md
-│   ├── S03-online-vta-didcomm-interactive.md
-│   ├── S04-online-vta-didcomm-noninteractive.md
-│   ├── S05-offline-vta-rest-interactive.md
-│   ├── S06-offline-vta-rest-noninteractive.md
-│   ├── S07-offline-vta-didcomm-interactive.md
-│   ├── S08-offline-vta-didcomm-noninteractive.md
-│   ├── S09-self-managed-rest-interactive.md
-│   ├── S10-self-managed-rest-noninteractive.md
-│   ├── S11-self-managed-didcomm-interactive.md
-│   └── S12-self-managed-didcomm-noninteractive.md
-└── deployments/
-    ├── D01-local-dev.md
-    ├── D02-ubuntu-server.md
-    ├── D03-kubernetes.md
-    └── D04-AWS-ec2.md
-```
 
 ---
 
