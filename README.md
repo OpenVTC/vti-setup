@@ -65,7 +65,7 @@ mindmap
 
 | # | Dimension | Options | Notes |
 | - | --------- | ------- | ----- |
-| 1 | **Setup Type** | Online VTA · Offline VTA · Self-Managed | How your service gets its keys and DID |
+| 1 | **Setup Type** | Online VTA · Offline VTA · Self-Managed | How Mediator and WebVH interact with the VTA |
 | 2 | **Transport** | REST · DIDComm | Protocol used to talk to the VTA |
 | 3 | **Mode** | Interactive · Non-interactive | Human in the loop vs fully scripted |
 | 4 | **Deployment** | Local Dev · Ubuntu Server · Kubernetes · EC2/VPS | Runtime environment — affects keyring availability |
@@ -74,16 +74,16 @@ mindmap
 
 ```mermaid
 flowchart TD
-    Q1{"Is there already\na running VTA\nyou can reach?"}
-    Q2{"Do you want\nto run your\nown VTA?"}
-    ONLINE["① Online VTA\nConnect your app/service\nto the existing VTA.\nNo private info leaves\nthe VTA."]
-    OFFLINE["② Offline VTA\nAir-gapped or\nboot-strapping order.\nVTA wizard runs offline;\nservices import\npre-generated bundles."]
-    SELF["③ Self-Managed\nYou operate the VTA\nyourself — full control,\nfull responsibility."]
+    Q1{"Is the VTA\nreachable?"}
+    Q2{"Do you have a VTA\nbut it is not reachable\nat setup time?"}
+    ONLINE["① Online VTA\nVTA is running and reachable.\nServices connect to it directly\nfor key issuance and DID management."]
+    OFFLINE["② Offline VTA\nVTA exists but is unreachable\n(air-gapped or bootstrapping).\nVTA wizard runs offline;\nservices import pre-generated bundles."]
+    SELF["③ Self-Managed\nNo VTA involved.\nMediator and WebVH operate\nindependently and manage\ntheir own keys."]
 
     Q1 -->|Yes| ONLINE
     Q1 -->|No| Q2
-    Q2 -->|"No (use a VTA\nbut it's unreachable\nat setup time)"| OFFLINE
-    Q2 -->|Yes| SELF
+    Q2 -->|Yes| OFFLINE
+    Q2 -->|No| SELF
 ```
 
 ---
