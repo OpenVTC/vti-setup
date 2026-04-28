@@ -101,6 +101,19 @@ The three setup types × two transports × two modes produce **12 scenarios**. T
 
 ---
 
+## Deployment Environments
+
+Before running any scenario, set up your target environment. Each guide covers infrastructure provisioning, DNS configuration, and service installation.
+
+| Environment | Guide |
+| --- | --- |
+| Local Dev | [D01 — Local Dev](deployments/D01-local-dev.md) |
+| Ubuntu Server | [D02 — Ubuntu Server](deployments/D02-ubuntu-server.md) |
+| Kubernetes | [D03 — Kubernetes](deployments/D03-kubernetes.md) |
+| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md) |
+
+---
+
 ## Contributing
 
 Each scenario file follows a common template:

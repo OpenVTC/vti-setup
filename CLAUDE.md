@@ -12,7 +12,7 @@ A documentation-only repository — no build system, no tests, no application co
 markdownlint-cli2 "**/*.md"
 ```
 
-`.markdownlint.json` disables MD013 (line length).
+`.markdownlint.json` disables MD013 (line length). Do not manually wrap long lines — leave prose as single lines and let the editor handle soft-wrapping.
 
 ## Document structure
 
