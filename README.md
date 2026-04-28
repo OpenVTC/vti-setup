@@ -10,6 +10,34 @@ The goal is to document every realistic combination of setup type, transport, mo
 
 ---
 
+## Quick Start
+
+Get up and running in two steps: pick a deployment environment, then pick a scenario.
+
+### Step 1 — Choose a deployment environment
+
+Set up your target infrastructure first. Each guide covers provisioning, DNS, and service installation.
+
+| Environment | Guide | Best for |
+| --- | --- | --- |
+| Local Dev | [D01 — Local Dev](deployments/D01-local-dev.md) | Development and testing on a laptop |
+| Ubuntu Server | [D02 — Ubuntu Server](deployments/D02-ubuntu-server.md) | Single-server staging or production |
+| Kubernetes | [D03 — Kubernetes](deployments/D03-kubernetes.md) | Scalable production clusters |
+| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md) | Cloud-hosted virtual machines |
+
+### Step 2 — Choose a scenario
+
+Once your environment is running, pick the combination of setup type, transport, and mode that fits your use case. Not sure which to pick? See [The Four Dimensions](#the-four-dimensions) for a decision flowchart.
+
+| | **REST** | **REST** | **DIDComm** | **DIDComm** |
+| --- | :---: | :---: | :---: | :---: |
+| | Interactive | Non-interactive | Interactive | Non-interactive |
+| **Online VTA** | [S01](scenarios/S01-online-vta-rest-interactive.md) | [S02](scenarios/S02-online-vta-rest-noninteractive.md) | [S03](scenarios/S03-online-vta-didcomm-interactive.md) | [S04](scenarios/S04-online-vta-didcomm-noninteractive.md) |
+| **Offline VTA** | [S05](scenarios/S05-offline-vta-rest-interactive.md) | [S06](scenarios/S06-offline-vta-rest-noninteractive.md) | [S07](scenarios/S07-offline-vta-didcomm-interactive.md) | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md) |
+| **Self-Managed** | [S09](scenarios/S09-self-managed-rest-interactive.md) | [S10](scenarios/S10-self-managed-rest-noninteractive.md) | [S11](scenarios/S11-self-managed-didcomm-interactive.md) | [S12](scenarios/S12-self-managed-didcomm-noninteractive.md) |
+
+---
+
 ## Components
 
 ```mermaid
@@ -85,32 +113,6 @@ flowchart TD
     Q2 -->|Yes| OFFLINE
     Q2 -->|No| SELF
 ```
-
----
-
-## 12 Core Scenarios
-
-The three setup types × two transports × two modes produce **12 scenarios**. The deployment environment is a cross-cutting concern — any scenario can run on any of the four deployment environments.
-
-| | **REST** | **REST** | **DIDComm** | **DIDComm** |
-| --- | :---: | :---: | :---: | :---: |
-| | Interactive | Non-interactive | Interactive | Non-interactive |
-| **Online VTA** | [S01](scenarios/S01-online-vta-rest-interactive.md) | [S02](scenarios/S02-online-vta-rest-noninteractive.md) | [S03](scenarios/S03-online-vta-didcomm-interactive.md) | [S04](scenarios/S04-online-vta-didcomm-noninteractive.md) |
-| **Offline VTA** | [S05](scenarios/S05-offline-vta-rest-interactive.md) | [S06](scenarios/S06-offline-vta-rest-noninteractive.md) | [S07](scenarios/S07-offline-vta-didcomm-interactive.md) | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md) |
-| **Self-Managed** | [S09](scenarios/S09-self-managed-rest-interactive.md) | [S10](scenarios/S10-self-managed-rest-noninteractive.md) | [S11](scenarios/S11-self-managed-didcomm-interactive.md) | [S12](scenarios/S12-self-managed-didcomm-noninteractive.md) |
-
----
-
-## Deployment Environments
-
-Before running any scenario, set up your target environment. Each guide covers infrastructure provisioning, DNS configuration, and service installation.
-
-| Environment | Guide |
-| --- | --- |
-| Local Dev | [D01 — Local Dev](deployments/D01-local-dev.md) |
-| Ubuntu Server | [D02 — Ubuntu Server](deployments/D02-ubuntu-server.md) |
-| Kubernetes | [D03 — Kubernetes](deployments/D03-kubernetes.md) |
-| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md) |
 
 ---
 
