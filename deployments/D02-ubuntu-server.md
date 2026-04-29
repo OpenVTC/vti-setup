@@ -159,11 +159,11 @@ git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
 ```
 
-> **Testing phase only:** Switch to the `nightly` branch for the latest changes:
+> **Testing phase only:** Switch to the `release/0.6.0` branch for the latest changes:
 
 ```bash
-git fetch origin nightly
-git checkout nightly
+git fetch origin release/0.6.0
+git checkout release/0.6.0
 ```
 
 ```bash
