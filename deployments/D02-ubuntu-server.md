@@ -179,3 +179,11 @@ cargo install --path webvh-server --no-default-features --features "store-fjall"
 | `https://vta-p.yourdomain.com` | `localhost:8101` |
 | `https://webvh.yourdomain.com` | `localhost:8000` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
+
+## Next: Run a scenario
+
+Once services are installed, proceed to the scenario file for your setup type:
+
+| Scenario | Link |
+| --- | --- |
+| Online VTA · REST · Interactive | [S01](../scenarios/S01-online-vta-rest-interactive.md) |
