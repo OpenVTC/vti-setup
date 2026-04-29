@@ -1,8 +1,10 @@
 # S02 · Online VTA · REST · Non-interactive
 
-> **Setup Type:** Online VTA — connecting to an already-running VTA
-> **Transport:** REST
-> **Mode:** Non-interactive
+| | |
+| --- | --- |
+| **Setup Type** | Online VTA — connecting to an already-running VTA |
+| **Transport** | REST |
+| **Mode** | Non-interactive |
 
 ## Prerequisites
 

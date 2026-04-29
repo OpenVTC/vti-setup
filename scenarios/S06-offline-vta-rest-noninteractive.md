@@ -1,8 +1,10 @@
 # S06 · Offline VTA · REST · Non-interactive
 
-> **Setup Type:** Offline VTA — VTA unreachable at setup time
-> **Transport:** REST
-> **Mode:** Non-interactive
+| | |
+| --- | --- |
+| **Setup Type** | Offline VTA — VTA unreachable at setup time |
+| **Transport** | REST |
+| **Mode** | Non-interactive |
 
 ## Prerequisites
 

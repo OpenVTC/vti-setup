@@ -1,9 +1,11 @@
 # S01 · Online VTA · REST · Interactive
 
-> **Setup Type:** Online VTA — connecting to an already-running VTA
-> **Transport:** REST
-> **Mode:** Interactive
-> **Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
+| | |
+| --- | --- |
+| **Setup Type** | Online VTA — connecting to an already-running VTA |
+| **Transport** | REST |
+| **Mode** | Interactive |
+| **Tested on** | [Ubuntu Server](../deployments/D02-ubuntu-server.md) |
 
 ## Prerequisites
 

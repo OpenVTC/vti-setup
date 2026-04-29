@@ -1,9 +1,11 @@
 # S11 · Self-Managed · DIDComm · Interactive
 
-> **Setup Type:** Self-Managed — you operate the VTA yourself
-> **Transport:** DIDComm
-> **Mode:** Interactive
-> **Tested on:** [Kubernetes](../deployments/D03-kubernetes.md)
+| | |
+| --- | --- |
+| **Setup Type** | Self-Managed — you operate the VTA yourself |
+| **Transport** | DIDComm |
+| **Mode** | Interactive |
+| **Tested on** | [Kubernetes](../deployments/D03-kubernetes.md) |
 
 ## Prerequisites
 

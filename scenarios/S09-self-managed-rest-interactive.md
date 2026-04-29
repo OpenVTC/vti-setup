@@ -1,8 +1,10 @@
 # S09 · Self-Managed · REST · Interactive
 
-> **Setup Type:** Self-Managed — you operate the VTA yourself
-> **Transport:** REST
-> **Mode:** Interactive
+| | |
+| --- | --- |
+| **Setup Type** | Self-Managed — you operate the VTA yourself |
+| **Transport** | REST |
+| **Mode** | Interactive |
 
 ## Prerequisites
 

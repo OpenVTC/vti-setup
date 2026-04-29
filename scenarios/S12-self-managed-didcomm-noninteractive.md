@@ -1,8 +1,10 @@
 # S12 · Self-Managed · DIDComm · Non-interactive
 
-> **Setup Type:** Self-Managed — you operate the VTA yourself
-> **Transport:** DIDComm
-> **Mode:** Non-interactive
+| | |
+| --- | --- |
+| **Setup Type** | Self-Managed — you operate the VTA yourself |
+| **Transport** | DIDComm |
+| **Mode** | Non-interactive |
 
 ## Prerequisites
 

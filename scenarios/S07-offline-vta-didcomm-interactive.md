@@ -1,8 +1,10 @@
 # S07 · Offline VTA · DIDComm · Interactive
 
-> **Setup Type:** Offline VTA — VTA unreachable at setup time
-> **Transport:** DIDComm
-> **Mode:** Interactive
+| | |
+| --- | --- |
+| **Setup Type** | Offline VTA — VTA unreachable at setup time |
+| **Transport** | DIDComm |
+| **Mode** | Interactive |
 
 ## Prerequisites
 
