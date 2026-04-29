@@ -1,39 +1,45 @@
 # VTI Setup Guide
 
-An IC3-maintained collection of setup paths for the stack: VTA, WebVH, and the DIDComm Mediator.
+A collection of setup paths for the stack: VTA, WebVH, and the DIDComm Mediator.
 
 - [Verifiable Trust Infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure)
 - [WebVH](https://github.com/affinidi/affinidi-webvh-service)
 - [Mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator)
 
-The goal is to document every realistic combination of setup type, transport, mode, and deployment environment so that anyone — from a first-time developer to an ops team deploying to production — can find a tested, reproducible path.
+The goal is to document every realistic combination of setup type, transport,
+mode, and deployment environment so that anyone — from a first-time developer to
+an ops team deploying to production — can find a tested, reproducible path.
 
 ---
 
 ## Quick Start
 
-Get up and running in two steps: pick a deployment environment, then pick a scenario.
+Get up and running in two steps: pick a deployment environment, then pick a
+scenario.
 
 ### Step 1 — Choose a deployment environment
 
-Set up your target infrastructure first. Each guide covers provisioning, DNS, and service installation.
+Set up your target infrastructure first. Each guide covers provisioning, DNS,
+and service installation.
 
-| Environment | Guide | Best for |
-| --- | --- | --- |
-| Local Dev | [D01 — Local Dev](deployments/D01-local-dev.md) | Development and testing on a laptop |
+| Environment   | Guide                                                   | Best for                            |
+| ------------- | ------------------------------------------------------- | ----------------------------------- |
+| Local Dev     | [D01 — Local Dev](deployments/D01-local-dev.md)         | Development and testing on a laptop |
 | Ubuntu Server | [D02 — Ubuntu Server](deployments/D02-ubuntu-server.md) | Single-server staging or production |
-| Kubernetes | [D03 — Kubernetes](deployments/D03-kubernetes.md) | Scalable production clusters |
-| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md) | Cloud-hosted virtual machines |
+| Kubernetes    | [D03 — Kubernetes](deployments/D03-kubernetes.md)       | Scalable production clusters        |
+| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md)             | Cloud-hosted virtual machines       |
 
 ### Step 2 — Choose a scenario
 
-Once your environment is running, pick the combination of setup type, transport, and mode that fits your use case. Not sure which to pick? See [The Four Dimensions](#the-four-dimensions) for a decision flowchart.
+Once your environment is running, pick the combination of setup type, transport,
+and mode that fits your use case. Not sure which to pick? See
+[The Four Dimensions](#the-four-dimensions) for a decision flowchart.
 
-| | **REST** | **REST** | **DIDComm** | **DIDComm** |
-| --- | :---: | :---: | :---: | :---: |
-| | Interactive | Non-interactive | Interactive | Non-interactive |
-| **Online VTA** | [S01](scenarios/S01-online-vta-rest-interactive.md) | [S02](scenarios/S02-online-vta-rest-noninteractive.md) | [S03](scenarios/S03-online-vta-didcomm-interactive.md) | [S04](scenarios/S04-online-vta-didcomm-noninteractive.md) |
-| **Offline VTA** | [S05](scenarios/S05-offline-vta-rest-interactive.md) | [S06](scenarios/S06-offline-vta-rest-noninteractive.md) | [S07](scenarios/S07-offline-vta-didcomm-interactive.md) | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md) |
+|                  |                       **REST**                        |                         **REST**                         |                       **DIDComm**                        |                         **DIDComm**                         |
+| ---------------- | :---------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: | :---------------------------------------------------------: |
+|                  |                      Interactive                      |                     Non-interactive                      |                       Interactive                        |                       Non-interactive                       |
+| **Online VTA**   |  [S01](scenarios/S01-online-vta-rest-interactive.md)  |  [S02](scenarios/S02-online-vta-rest-noninteractive.md)  |  [S03](scenarios/S03-online-vta-didcomm-interactive.md)  |  [S04](scenarios/S04-online-vta-didcomm-noninteractive.md)  |
+| **Offline VTA**  | [S05](scenarios/S05-offline-vta-rest-interactive.md)  | [S06](scenarios/S06-offline-vta-rest-noninteractive.md)  | [S07](scenarios/S07-offline-vta-didcomm-interactive.md)  | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md)  |
 | **Self-Managed** | [S09](scenarios/S09-self-managed-rest-interactive.md) | [S10](scenarios/S10-self-managed-rest-noninteractive.md) | [S11](scenarios/S11-self-managed-didcomm-interactive.md) | [S12](scenarios/S12-self-managed-didcomm-noninteractive.md) |
 
 ---
@@ -59,11 +65,11 @@ graph TB
     APP -->|"sends / receives messages"| MED
 ```
 
-| Component | Repo | Role |
-| --------- | ---- | ---- |
-| **VTA** | [OpenVTC/verifiable-trust-infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure) | Master key store — manages BIP-39 seed, DIDs, contexts, and ACL |
-| **WebVH** | [affinidi/affinidi-webvh-service](https://github.com/affinidi/affinidi-webvh-service) | Hosts `did:webvh` DID documents publicly |
-| **Mediator** | [affinidi/affinidi-tdk-rs · affinidi-messaging-mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator) | DIDComm v2 relay and message routing |
+| Component    | Repo                                                                                                                                                         | Role                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| **VTA**      | [OpenVTC/verifiable-trust-infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure)                                                        | Master key store — manages BIP-39 seed, DIDs, contexts, and ACL |
+| **WebVH**    | [affinidi/affinidi-webvh-service](https://github.com/affinidi/affinidi-webvh-service)                                                                        | Hosts `did:webvh` DID documents publicly                        |
+| **Mediator** | [affinidi/affinidi-tdk-rs · affinidi-messaging-mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator) | DIDComm v2 relay and message routing                            |
 
 ---
 
@@ -91,12 +97,12 @@ mindmap
       EC2 / VPS
 ```
 
-| # | Dimension | Options | Notes |
-| - | --------- | ------- | ----- |
-| 1 | **Setup Type** | Online VTA · Offline VTA · Self-Managed | How Mediator and WebVH interact with the VTA |
-| 2 | **Transport** | REST · DIDComm | Protocol used to talk to the VTA |
-| 3 | **Mode** | Interactive · Non-interactive | Human in the loop vs fully scripted |
-| 4 | **Deployment** | Local Dev · Ubuntu Server · Kubernetes · EC2/VPS | Runtime environment — affects keyring availability |
+| #   | Dimension      | Options                                          | Notes                                              |
+| --- | -------------- | ------------------------------------------------ | -------------------------------------------------- |
+| 1   | **Setup Type** | Online VTA · Offline VTA · Self-Managed          | How Mediator and WebVH interact with the VTA       |
+| 2   | **Transport**  | REST · DIDComm                                   | Protocol used to talk to the VTA                   |
+| 3   | **Mode**       | Interactive · Non-interactive                    | Human in the loop vs fully scripted                |
+| 4   | **Deployment** | Local Dev · Ubuntu Server · Kubernetes · EC2/VPS | Runtime environment — affects keyring availability |
 
 ### Setup Type explained
 
@@ -126,4 +132,5 @@ Each scenario file follows a common template:
 4. **Verification** — how to confirm it worked
 5. **Known issues** — edge cases encountered during testing
 
-If you have tested a path, please open a PR filling in the corresponding scenario file and deployment notes.
+If you have tested a path, please open a PR filling in the corresponding
+scenario file and deployment notes.
