@@ -103,10 +103,10 @@ Wait for DNS propagation before proceeding:
 dig +short vta-c.yourdomain.com
 ```
 
-## Step 4: Deploy Mediator
+## Next: Run a scenario
 
-Follow the README in [ic3software/mediator-helm](https://github.com/ic3software/mediator-helm).
+Once DNS has propagated, proceed to the scenario file for your setup type:
 
-## Step 5: Deploy VTA Services
-
-Follow the README in [ic3software/vta-helm](https://github.com/ic3software/vta-helm).
+| Scenario | Link |
+| --- | --- |
+| Self-Managed · DIDComm · Interactive | [S11](../scenarios/S11-self-managed-didcomm-interactive.md) |

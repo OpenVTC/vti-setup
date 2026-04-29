@@ -7,11 +7,21 @@
 
 ## Prerequisites
 
-> _To be documented._
+Complete [D03 Steps 1–3](../deployments/D03-kubernetes.md) (cert-manager, ClusterIssuer, DNS records) before continuing.
 
 ## Steps
 
-> _To be documented._
+### Step 1: Deploy Mediator
+
+Follow the README in [ic3software/mediator-helm](https://github.com/ic3software/mediator-helm).
+
+> Tested with Mediator **v0.13.0**.
+
+### Step 2: Deploy VTA Services
+
+Follow the README in [ic3software/vta-helm](https://github.com/ic3software/vta-helm).
+
+> Tested with VTA **v0.4.0** and WebVH **v0.5.0**.
 
 ## Verification
 
