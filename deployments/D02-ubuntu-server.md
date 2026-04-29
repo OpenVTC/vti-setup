@@ -116,11 +116,11 @@ git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
 ```
 
-> **Testing phase only:** Switch to the `nightly` branch for the latest changes:
+Switch to the `sealed-bootstrap` branch:
 
 ```bash
-git fetch origin nightly
-git checkout nightly
+git fetch origin sealed-bootstrap
+git checkout sealed-bootstrap
 ```
 
 ```bash
@@ -135,7 +135,18 @@ cargo install --path pnm-cli --no-default-features --features "config-session"
 cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
-cd affinidi-tdk-rs/crates/messaging
+cd affinidi-tdk-rs
+```
+
+Switch to the `fix/mediator-deployment` branch:
+
+```bash
+git fetch origin fix/mediator-deployment
+git checkout fix/mediator-deployment
+```
+
+```bash
+cd crates/messaging
 cargo install --path affinidi-messaging-mediator
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
