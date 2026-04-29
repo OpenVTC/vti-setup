@@ -1,10 +1,8 @@
 # S04 · Online VTA · DIDComm · Non-interactive
 
-| | |
-| --- | --- |
-| **Setup Type** | Online VTA — connecting to an already-running VTA |
-| **Transport** | DIDComm |
-| **Mode** | Non-interactive |
+**Setup Type:** Online VTA — connecting to an already-running VTA\
+**Transport:** DIDComm\
+**Mode:** Non-interactive
 
 ## Prerequisites
 

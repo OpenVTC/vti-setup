@@ -1,10 +1,8 @@
 # S05 · Offline VTA · REST · Interactive
 
-| | |
-| --- | --- |
-| **Setup Type** | Offline VTA — VTA unreachable at setup time (air-gapped or bootstrapping order) |
-| **Transport** | REST |
-| **Mode** | Interactive |
+**Setup Type:** Offline VTA — VTA unreachable at setup time (air-gapped or bootstrapping order)\
+**Transport:** REST\
+**Mode:** Interactive
 
 ## Prerequisites
 

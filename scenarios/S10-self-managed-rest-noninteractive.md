@@ -1,10 +1,8 @@
 # S10 · Self-Managed · REST · Non-interactive
 
-| | |
-| --- | --- |
-| **Setup Type** | Self-Managed — you operate the VTA yourself |
-| **Transport** | REST |
-| **Mode** | Non-interactive |
+**Setup Type:** Self-Managed — you operate the VTA yourself\
+**Transport:** REST\
+**Mode:** Non-interactive
 
 ## Prerequisites
 
