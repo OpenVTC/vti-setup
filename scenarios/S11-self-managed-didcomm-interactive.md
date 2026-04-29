@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-Complete [D03 Steps 1–3](../deployments/D03-kubernetes.md) (cert-manager, ClusterIssuer, DNS records) before continuing.
+Complete [D03 — Kubernetes](../deployments/D03-kubernetes.md) before continuing.
 
 ## Steps
 

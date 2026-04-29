@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-Complete [D02 Steps 1–5](../deployments/D02-ubuntu-server.md) (server, DNS, setup script, shell reload, service install) before continuing.
+Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
