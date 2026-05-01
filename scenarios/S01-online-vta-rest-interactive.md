@@ -68,6 +68,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 
 - Choose: **Create a new did:webvh DID**
 - VTA DID URL [http://localhost:8534/]: `https://webvh.yourdomain.com/vta-p`
+  > **Note:** WebVH is not yet running at this stage. Use a temporarily accessible URL instead — for example, a Cloudflare R2 public URL (e.g. `https://pub-xxx.r2.dev/vta-p`). You can migrate the DID to the final WebVH URL after the daemon is deployed.
 - Is this correct? [Y/n]: → **Y**
 - DID creation mode: → **Simple — VTA creates keys and document (recommended)**
 - Make this DID portable (can move to a different domain later)? [Y/n]: → **Y**
@@ -77,6 +78,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
   > (e.g. `Created DID: did:webvh:...:webvh.yourdomain.com:vta-p`)
   > to your notes.
 - Save DID log to file [VTA-did.jsonl]: → Press **Enter** (saves to `VTA-did.jsonl`)
+  > **Note:** Upload `VTA-did.jsonl` to the URL used above (e.g., your Cloudflare R2 bucket) so the DID document is publicly resolvable.
 
 ### Step 2: Connect PNM to VTA
 
