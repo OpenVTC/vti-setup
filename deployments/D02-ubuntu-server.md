@@ -168,12 +168,6 @@ git checkout release/0.6.0
 
 ```bash
 cd webvh-ui && npm install && npm run build:web && cd ..
-cargo install --path webvh-server --no-default-features --features "store-fjall"
-```
-
-If you want to use the all-in-one WebVH daemon instead:
-
-```bash
 cargo install --path webvh-daemon --no-default-features --features "store-fjall,ui"
 ```
 
