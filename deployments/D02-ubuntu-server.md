@@ -6,7 +6,7 @@ This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx a
 
 | Service | Default Port | DNS Record | WebVH Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8000 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
+| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
 | Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
 | Personal Community VTA | 8101 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
@@ -171,13 +171,19 @@ cd webvh-ui && npm install && npm run build:web && cd ..
 cargo install --path webvh-server --no-default-features --features "store-fjall"
 ```
 
+If you want to use the all-in-one WebVH daemon instead:
+
+```bash
+cargo install --path webvh-daemon --no-default-features --features "store-fjall,ui"
+```
+
 ## Resulting URL Map
 
 | URL | Backend |
 | --- | --- |
 | `https://vta-c.yourdomain.com` | `localhost:8100` |
 | `https://vta-p.yourdomain.com` | `localhost:8101` |
-| `https://webvh.yourdomain.com` | `localhost:8000` |
+| `https://webvh.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
 ## Next: Run a scenario

@@ -17,6 +17,8 @@ The following values will be collected during setup. Save each one as prompted �
 | 1b | Personal VTA DID | Step 2, Step 3 |
 | 3a | Mediator DID | Later |
 | 3b | Admin DID | Later |
+| 4a | WebVH Daemon DID | Later |
+| 4b | WebVH Admin DID | Step 4 |
 
 ## Steps
 
@@ -65,7 +67,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 **VTA DID:**
 
 - Choose: **Create a new did:webvh DID**
-- VTA DID URL [http://localhost:8000/]: `https://webvh.yourdomain.com/vta-p`
+- VTA DID URL [http://localhost:8534/]: `https://webvh.yourdomain.com/vta-p`
 - Is this correct? [Y/n]: → **Y**
 - DID creation mode: → **Simple — VTA creates keys and document (recommended)**
 - Make this DID portable (can move to a different domain later)? [Y/n]: → **Y**
@@ -199,7 +201,7 @@ Press **Enter** to continue to the next step.
 Before starting the mediator, start Redis:
 
 ```bash
-docker run --name=redis-local --publish=6379:6379 --hostname=redis \
+docker run --name=redis-local --publish=127.0.0.1:6379:6379 --hostname=redis \
   --restart=on-failure --detach redis:latest
 ```
 
@@ -208,8 +210,6 @@ Then start the mediator:
 ```bash
 nohup mediator > log.txt 2>&1 &
 ```
-
-## Verification
 
 Visit the following URL to confirm the Mediator DID document is publicly accessible:
 
@@ -221,6 +221,99 @@ You should see a JSONL file returned in the browser or via `curl`:
 
 ```bash
 curl https://mediator.yourdomain.com/.well-known/did.jsonl
+```
+
+### Step 4: Set up WebVH Daemon
+
+```bash
+cd ~
+mkdir webvh
+cd webvh
+webvh-daemon setup
+```
+
+When prompted:
+
+| Prompt | Action |
+| --- | --- |
+| How will the daemon obtain its identity?: | Choose **Online — VTA reachable from this host** |
+| Configuration file path [config.toml]: | Press **Enter** (use default) |
+
+**Services to enable:**
+
+| Prompt | Action |
+| --- | --- |
+| Which services should the daemon run?: | Press **Enter** (default: control, server, witness) |
+
+**Connection:**
+
+| Prompt | Action |
+| --- | --- |
+| Public URL: | `https://webvh.yourdomain.com` |
+| VTA DID: | Paste the **Personal VTA DID** from 1b |
+| Context ID [webvh]: | Press **Enter** (use default) |
+
+The wizard generates a `pnm contexts create` command. Open a new terminal tab and run it in `~/vta-p`:
+
+```bash
+pnm contexts create --id webvh --name "WebVH daemon" \
+  --admin-did did:key:z6Mk... --admin-expires 1h
+```
+
+Back in `webvh-daemon setup`:
+
+| Prompt | Action |
+| --- | --- |
+| Has the context been created?: | **yes** |
+| DIDComm mediator: | Choose **No mediator** |
+
+The wizard will provision a daemon DID via VTA and then continue:
+
+| Prompt | Action |
+| --- | --- |
+| Listen host: | Press **Enter** (default: `0.0.0.0`) |
+| Listen port: | Press **Enter** (default: `8534`) |
+| Log level: | Press **Enter** (default: `info`) |
+| Log format: | Press **Enter** (default: `text`) |
+| Data directory root [data/daemon]: | Press **Enter** (use default) |
+| Continue with plaintext secrets storage? [y/N]: | **y** |
+| Admin ACL entry: | Choose **Generate a new did:key identity for the operator** |
+
+The wizard will import the daemon DID and print the results:
+
+> **⚠️ SAVE THESE** (4a, 4b)
+>
+> - Save the **Daemon DID** (4a) (e.g. `did:webvh:...:webvh.yourdomain.com`)
+> - Save the **Admin DID** (4b) (e.g. `did:key:z6Mk...`)
+
+Generate an enrollment token using the **Admin DID** from 4b:
+
+```bash
+webvh-daemon invite \
+  --did did:key:z6Mk... \
+  --role admin
+```
+
+The command outputs an **Enrollment URL**, for example:
+
+```text
+https://webvh.yourdomain.com/enroll?token=...
+```
+
+Start the daemon:
+
+```bash
+nohup webvh-daemon > log.txt 2>&1 &
+```
+
+Visit the Enrollment URL in a browser to log in to the WebVH admin panel.
+
+## Verification
+
+Visit the WebVH admin panel and confirm you can log in:
+
+```text
+https://webvh.yourdomain.com
 ```
 
 ## Known Issues / Edge Cases
