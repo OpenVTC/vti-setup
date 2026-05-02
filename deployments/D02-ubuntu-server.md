@@ -116,9 +116,10 @@ git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
 ```
 
-Switch to the `sealed-bootstrap` branch:
+> **Branch selection:** Note the git fetch/checkout commands for the current development branches. You can ignore these and just use the `main` branch unless you are testing.
 
 ```bash
+# FOR TESTING ONLY
 git fetch origin sealed-bootstrap
 git checkout sealed-bootstrap
 ```
@@ -138,9 +139,8 @@ git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs
 ```
 
-Switch to the `fix/mediator-deployment` branch:
-
 ```bash
+# FOR TESTING ONLY
 git fetch origin fix/mediator-deployment
 git checkout fix/mediator-deployment
 ```
@@ -159,9 +159,8 @@ git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
 ```
 
-> **Testing phase only:** Switch to the `release/0.6.0` branch for the latest changes:
-
 ```bash
+# FOR TESTING ONLY
 git fetch origin release/0.6.0
 git checkout release/0.6.0
 ```
