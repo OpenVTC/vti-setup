@@ -168,7 +168,7 @@ server {
     server_name webvh.${DOMAIN};
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8534;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -281,7 +281,7 @@ echo -e "${GREEN}Setup complete.${NC}"
 echo -e "  Sites:"
 echo -e "    - https://vta-c.${DOMAIN}    → localhost:8100"
 echo -e "    - https://vta-p.${DOMAIN}    → localhost:8101"
-echo -e "    - https://webvh.${DOMAIN}    → localhost:8000"
+echo -e "    - https://webvh.${DOMAIN}    → localhost:8534"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
 echo ""
 echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"

@@ -8,7 +8,7 @@ The steps below should work on any Kubernetes cluster as long as it has an Nginx
 
 | Service | Default Port | DNS Record | WebVH Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8000 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
+| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
 | Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
 | Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |

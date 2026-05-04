@@ -6,7 +6,7 @@ This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx a
 
 | Service | Default Port | DNS Record | WebVH Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8000 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
+| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
 | Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
 | Personal Community VTA | 8101 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
@@ -116,9 +116,10 @@ git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
 ```
 
-Switch to the `sealed-bootstrap` branch:
+> **Branch selection:** Note the git fetch/checkout commands for the current development branches. You can ignore these and just use the `main` branch unless you are testing.
 
 ```bash
+# FOR TESTING ONLY
 git fetch origin sealed-bootstrap
 git checkout sealed-bootstrap
 ```
@@ -138,9 +139,8 @@ git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs
 ```
 
-Switch to the `fix/mediator-deployment` branch:
-
 ```bash
+# FOR TESTING ONLY
 git fetch origin fix/mediator-deployment
 git checkout fix/mediator-deployment
 ```
@@ -159,16 +159,15 @@ git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
 ```
 
-> **Testing phase only:** Switch to the `release/0.6.0` branch for the latest changes:
-
 ```bash
+# FOR TESTING ONLY
 git fetch origin release/0.6.0
 git checkout release/0.6.0
 ```
 
 ```bash
 cd webvh-ui && npm install && npm run build:web && cd ..
-cargo install --path webvh-server --no-default-features --features "store-fjall"
+cargo install --path webvh-daemon --no-default-features --features "store-fjall,ui"
 ```
 
 ## Resulting URL Map
@@ -177,7 +176,7 @@ cargo install --path webvh-server --no-default-features --features "store-fjall"
 | --- | --- |
 | `https://vta-c.yourdomain.com` | `localhost:8100` |
 | `https://vta-p.yourdomain.com` | `localhost:8101` |
-| `https://webvh.yourdomain.com` | `localhost:8000` |
+| `https://webvh.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
 ## Next: Run a scenario
