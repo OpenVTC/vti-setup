@@ -2,7 +2,7 @@
 
 **Setup Type:** Offline VTA — VTA unreachable at setup time (air-gapped or bootstrapping order)\
 **Transport:** REST\
-**Mode:** Interactive
+**Mode:** Interactive\
 **Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
 
 ## Prerequisites
