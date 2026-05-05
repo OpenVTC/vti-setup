@@ -42,16 +42,16 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 SSH into your server and run the setup script directly:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain>
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain>
 # or with email (used for Let's Encrypt expiry notifications):
-curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> <email>
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> <email>
 ```
 
 Example:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com
-curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com admin@example.com
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com admin@example.com
 ```
 
 The script will:
