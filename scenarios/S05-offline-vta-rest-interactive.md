@@ -3,7 +3,6 @@
 **Setup Type:** Offline VTA — VTA unreachable at setup time (air-gapped or bootstrapping order)\
 **Transport:** REST\
 **Mode:** Interactive
-
 **Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
 
 ## Prerequisites
@@ -376,7 +375,7 @@ Resolution TBD.
 Setup error: bootstrap seed missing from secret store — phase 1 may not have run
 ```
 
-**Fix:** Open `~/webvh/config.toml`. The `plaintext_bootstrap_seed` key may be at the top level instead of under `[secrets]`. Move it into the `[secrets]` section:
+**Fix:** Open `~/webvh/config.toml`. The `plaintext_bootstrap_seed` is at the top level. Move it into the `[secrets]` section in `setup-offline-state.toml`:
 
 ```toml
 [secrets]
