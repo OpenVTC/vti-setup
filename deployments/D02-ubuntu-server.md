@@ -98,8 +98,8 @@ chmod +x pnm && sudo mv pnm /usr/local/bin/
 curl -O https://fpp.ic3.dev/mediator/latest/mediator
 chmod +x mediator && sudo mv mediator /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/mediator/latest/mediator-setup-vta
-chmod +x mediator-setup-vta && sudo mv mediator-setup-vta /usr/local/bin/
+curl -O https://fpp.ic3.dev/mediator/latest/mediator-setup
+chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
 curl -O https://fpp.ic3.dev/webvh-daemon/latest/webvh-daemon
 chmod +x webvh-daemon && sudo mv webvh-daemon /usr/local/bin/
