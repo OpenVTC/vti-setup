@@ -14,11 +14,10 @@ The following values will be collected during setup. Save each one as prompted �
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Personal VTA mediator DID (from `mediator-did.jsonl`) | Later |
+| 1b | Mediator DID | Step 4 |
 | 1c | Personal VTA DID | Step 2, Step 3 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
-| 3b | Mediator DID | Step 4 |
-| 3c | Admin DID | Later |
+| 3b | Admin DID | Later |
 | 4a | WebVH Admin DID | Step 4 |
 | 4b | WebVH Admin private key | Step 4 |
 | 4c | SHA-256 digest (WebVH bundle) | Step 4 |
@@ -162,11 +161,8 @@ mediator-setup
 
 | Prompt | Action |
 | --- | --- |
-| Decide whether the VTA should...: | Choose **Full setup — VTA mints my mediator DID** |
-| Pick online or sealed handoff: | Choose **Sealed handoff (air-gapped)** |
+| Decide whether the VTA should...: | Choose **Pick up pre-provisioned mediator (offline export)** |
 | Which VTA context should the admin credential live in?: | `mediator` |
-| URL this mediator will serve at: | `https://mediator.yourdomain.com/mediator/v1` |
-| Pin a webvh hosting server for this DID's log (optional). | Press **Enter** (skip) |
 
 The wizard outputs:
 
@@ -182,28 +178,31 @@ Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` comma
 
 ```bash
 cd ~/vta-p
-vim bootstrap-request-vp.json
+vim bootstrap-request.json
 ```
 
 Paste the copied JSON, save, and run:
 
 ```bash
-vta bootstrap provision-integration --request bootstrap-request-vp.json --context mediator --create-context --assertion pinned-only --out bundle.armor
+vta contexts reprovision --id mediator --recipient bootstrap-request.json --out bundle.armor
 ```
 
 The command outputs the bundle details:
 
 ```text
-Integration provisioned — sealed bundle written to bundle.armor
+╔══════════════════════════════════════════════════════════════╗
+║  Context provision bundle (sealed — hand off armored output) ║
+╚══════════════════════════════════════════════════════════════╝
+
+  Context:   mediator (DIDComm Messaging Mediator)
+  Admin DID: did:key:z6Mk...
+  DID:       did:webvh:...:webvh.yourdomain.com:mediator
+  Recipient: mediator/conf/mediator.toml
+
+Armored bundle written to bundle.armor
 
   Bundle-Id:       <id>
-  Client DID:      did:key:z6Mk...
-  Admin DID:       did:key:z6Mk... (VTA-minted, rolled over from client)
-  Admin template:  vta-admin
-  Integration DID: did:webvh:...:mediator.yourdomain.com
-  Template:        didcomm-mediator (mediator)
-  Secrets:         2
-  Outputs:         1
+  Producer DID:    did:key:z6Mk...
   SHA-256 digest:  <hex>
 ```
 
@@ -228,17 +227,16 @@ The wizard completes the VTA integration:
 
 ```text
 Bundle opened successfully.
-  Admin DID:    did:key:z6Mk... (VTA-minted)
+  Admin DID:    did:key:z6Mk...
   VTA DID:      did:webvh:...:webvh.yourdomain.com:vta-p
   Mediator DID: did:webvh:...:mediator.yourdomain.com
   Keys:         1 signing + 1 key-agreement
   did.jsonl:    included (will be written next to mediator.toml)
 ```
 
-> **⚠️ SAVE THESE** (3b, 3c)
+> **⚠️ SAVE THIS** (3b)
 >
-> - Save the **Mediator DID** (3b) (the `Mediator DID:` line)
-> - Save the **Admin DID** (3c) (the `Admin DID:` line)
+> Save the **Admin DID** (3b) (the `Admin DID:` line)
 
 Press **Enter** to continue to Protocol.
 
@@ -301,7 +299,7 @@ When prompted:
 | --- | --- |
 | Public URL: | `https://webvh.yourdomain.com` |
 | Context ID [webvh]: | Press **Enter** (use default) |
-| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (3b) |
+| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1b) |
 
 The wizard prompts for additional configuration:
 
@@ -487,6 +485,13 @@ Visit the WebVH admin panel and confirm you can log in:
 
 ```text
 https://webvh.yourdomain.com
+```
+
+Run a health check from the PNM directory:
+
+```bash
+cd ~/vta-p
+pnm health
 ```
 
 ## Known Issues / Edge Cases
