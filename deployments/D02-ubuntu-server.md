@@ -186,3 +186,5 @@ Once services are installed, proceed to the scenario file for your setup type:
 | Scenario | Link |
 | --- | --- |
 | Online VTA · REST · Interactive | [S01](../scenarios/S01-online-vta-rest-interactive.md) |
+| Offline VTA · REST · Interactive | [S05](../scenarios/S05-offline-vta-rest-interactive.md) |
+| Offline VTA · DIDComm · Interactive | [S07](../scenarios/S07-offline-vta-didcomm-interactive.md) |
