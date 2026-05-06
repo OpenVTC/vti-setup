@@ -71,7 +71,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | --- | --- |
 | DIDComm messaging: | Choose **Create a new mediator DID (did:webvh)** |
 | Trust context for the mediator DID [mediator]: | Press **Enter** (use default) |
-| Mediator URL: | `https://mediator.yourdomain.com` |
+| Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
 | mediator DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/mediator` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
