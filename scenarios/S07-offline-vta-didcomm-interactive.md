@@ -336,14 +336,15 @@ The wizard completes phase 1 and prints:
 > - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
 > - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
 
-In a new SSH session, move the bootstrap request to the VTA directory and create the WebVH context:
+Move the bootstrap request to the VTA directory and create the WebVH context:
 
 ```bash
 mv ~/webvh/bootstrap-request.json ~/vta-p/
 cd ~/vta-p
-vta contexts create --id webvh \
-  --admin-did did:key:z6Mk... \
-  --admin-expires 1h
+```
+
+```bash
+vta contexts create --id webvh --admin-expires 1h --admin-did <Admin DID (4a)>
 ```
 
 Seal the bundle:
@@ -373,14 +374,17 @@ Integration provisioned — sealed bundle written to bundle.armor
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next command.
 
-Move the bundle to the webvh directory and complete offline setup (phase 2):
+Move the bundle to the webvh directory:
 
 ```bash
 mv ~/vta-p/bundle.armor ~/webvh/
 cd ~/webvh
-webvh-daemon setup-offline-complete \
-  --bundle bundle.armor \
-  --expect-digest <hex-digest>
+```
+
+Complete offline setup (phase 2):
+
+```bash
+webvh-daemon setup-offline-complete --bundle bundle.armor --expect-digest <SHA-256 digest (4c)>
 ```
 
 The wizard prints the completed setup:
@@ -418,9 +422,10 @@ Generate an enrollment token using the **Admin DID** from 4a:
 
 ```bash
 cd ~/webvh
-webvh-daemon invite \
-  --did did:key:z6Mk... \
-  --role admin
+```
+
+```bash
+webvh-daemon invite --role admin --did <Admin DID (4a)>
 ```
 
 The command outputs an **Enrollment URL**, for example:
@@ -429,20 +434,52 @@ The command outputs an **Enrollment URL**, for example:
 https://webvh.yourdomain.com/enroll?token=...
 ```
 
-Start all services:
+Start the WebVH daemon:
 
 ```bash
 cd ~/webvh
 nohup webvh-daemon > log.txt 2>&1 &
+```
 
+Visit the Enrollment URL in a browser, then save a passkey when prompted.
+
+**Upload DID logs:**
+
+Go to `https://webvh.yourdomain.com/dids`.
+
+Click **+ New DID** (top right), enter `mediator`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/vta-p/mediator-did.jsonl
+```
+
+Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/vta-p/VTA-did.jsonl
+```
+
+Before starting the mediator, comment out the `did_web_self_hosted` line in `~/mediator/conf/mediator.toml`:
+
+```bash
+vim ~/mediator/conf/mediator.toml
+```
+
+Find and comment out:
+
+```toml
+#did_web_self_hosted = "file://./conf/did.jsonl"
+```
+
+Start the remaining services:
+
+```bash
 cd ~/mediator
 nohup mediator > log.txt 2>&1 &
 
 cd ~/vta-p
 nohup vta > log.txt 2>&1 &
 ```
-
-Visit the Enrollment URL in a browser to log in to the WebVH admin panel.
 
 ## Verification
 
