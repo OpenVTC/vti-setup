@@ -14,12 +14,15 @@ The following values will be collected during setup. Save each one as prompted �
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Personal Mediator DID | Later |
+| 1b | Personal VTA mediator DID (from `mediator-did.jsonl`) | Later |
 | 1c | Personal VTA DID | Step 2, Step 3 |
-| 3a | Mediator DID | Later |
-| 3b | Admin DID | Later |
-| 4a | WebVH Daemon DID | Later |
-| 4b | WebVH Admin DID | Step 4 |
+| 3a | SHA-256 digest (mediator bundle) | Step 3 |
+| 3b | Mediator DID | Step 4 |
+| 3c | Admin DID | Later |
+| 4a | WebVH Admin DID | Step 4 |
+| 4b | WebVH Admin private key | Step 4 |
+| 4c | SHA-256 digest (WebVH bundle) | Step 4 |
+| 4d | WebVH Daemon DID | Later |
 
 ## Steps
 
@@ -175,7 +178,7 @@ Hotkeys:  [c] copy JSON   [v] copy vta cmd   [p] copy pnm-cli cmd
 
 Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` command.
 
-**Open a new SSH session** and save the JSON to the VTA directory:
+**→ VTA session** — open a new SSH session and save the JSON to the VTA directory:
 
 ```bash
 cd ~/vta-p
@@ -204,7 +207,9 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ NOTE the `SHA-256 digest`** — you will need it in the next step.
+> **⚠️ SAVE THIS** (3a)
+>
+> Save the **SHA-256 digest** — you will paste it in the Mediator session for OOB verification.
 
 Move the bundle to the mediator directory:
 
@@ -212,11 +217,12 @@ Move the bundle to the mediator directory:
 mv ~/vta-p/bundle.armor ~/mediator/
 ```
 
-Switch back to the mediator SSH session. Press **Enter** to continue. When prompted:
+**→ Mediator session** — press **Enter** to continue. When prompted:
 
 | Prompt | Action |
 | --- | --- |
-| Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** from above |
+| Enter a path to bundle.armor, or paste its contents. | `/root/mediator/bundle.armor` |
+| Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** (3a) |
 
 The wizard completes the VTA integration:
 
@@ -228,6 +234,11 @@ Bundle opened successfully.
   Keys:         1 signing + 1 key-agreement
   did.jsonl:    included (will be written next to mediator.toml)
 ```
+
+> **⚠️ SAVE THESE** (3b, 3c)
+>
+> - Save the **Mediator DID** (3b) (the `Mediator DID:` line)
+> - Save the **Admin DID** (3c) (the `Admin DID:` line)
 
 Press **Enter** to continue to Protocol.
 
@@ -244,7 +255,7 @@ Press **Enter** to continue to Protocol.
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
 
-**Storage:**
+**Database:**
 
 | Prompt | Action |
 | --- | --- |
@@ -257,6 +268,8 @@ Press **Enter** to continue to Protocol.
 | --- | --- |
 | Configure the admin DID for mediator management: | Choose **Generate admin DID from VTA** |
 | Where should the wizard write mediator.toml?: | Press **Enter** (default: `conf/mediator.toml`) |
+
+The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
 
 ### Step 4: Set up WebVH Daemon
 
@@ -288,7 +301,7 @@ When prompted:
 | --- | --- |
 | Public URL: | `https://webvh.yourdomain.com` |
 | Context ID [webvh]: | Press **Enter** (use default) |
-| Mediator DID (leave empty to skip): | Press **Enter** |
+| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (3b) |
 
 The wizard prompts for additional configuration:
 
@@ -318,10 +331,10 @@ The wizard completes phase 1 and prints:
   Nonce:          <nonce>
 ```
 
-> **⚠️ SAVE THESE** (4b)
+> **⚠️ SAVE THESE** (4a, 4b)
 >
-> - Save the **Admin DID** (4b) (the `Generated admin did:key:` line)
-> - Save the **Admin private key** (the `Private key:` line — shown only once)
+> - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
+> - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
 
 In a new SSH session, move the bootstrap request to the VTA directory and create the WebVH context:
 
@@ -356,7 +369,9 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ NOTE the `SHA-256 digest`** — you will need it in the next step.
+> **⚠️ SAVE THIS** (4c)
+>
+> Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next command.
 
 Move the bundle to the webvh directory and complete offline setup (phase 2):
 
@@ -395,11 +410,11 @@ WebVH Daemon — Offline Setup (step 2/2)
   Daemon DID: did:webvh:...:webvh.yourdomain.com
 ```
 
-> **⚠️ SAVE THIS** (4a)
+> **⚠️ SAVE THIS** (4d)
 >
-> Save the **Daemon DID** (4a) (the `Daemon DID:` line, e.g. `did:webvh:...:webvh.yourdomain.com`)
+> Save the **Daemon DID** (4d) (the `Daemon DID:` line, e.g. `did:webvh:...:webvh.yourdomain.com`)
 
-Generate an enrollment token using the **Admin DID** from 4b:
+Generate an enrollment token using the **Admin DID** from 4a:
 
 ```bash
 cd ~/webvh
