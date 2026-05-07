@@ -229,20 +229,35 @@ mv ~/vta-p/bundle.armor ~/mediator/
 | Enter a path to bundle.armor, or paste its contents. | `/root/mediator/bundle.armor` |
 | Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** (3a) |
 
-The wizard completes the VTA integration:
+The wizard completes the VTA integration and displays:
 
 ```text
-Bundle opened successfully.
-  Admin DID:    did:key:z6Mk...
-  VTA DID:      did:webvh:...:webvh.yourdomain.com:vta-p
-  Mediator DID: did:webvh:...:mediator.yourdomain.com
-  Keys:         1 signing + 1 key-agreement
-  did.jsonl:    included (will be written next to mediator.toml)
+Bundle opened successfully — sealed handoff complete.
+
+  Mediator DID  [m]
+    did:webvh:...:webvh.yourdomain.com:mediator
+
+  Admin DID  [a]
+    did:key:z6Mk...
+
+  VTA DID  [v]
+    did:webvh:...:webvh.yourdomain.com:vta-p
+
+  ── Bundle contents ─────────────────────────────────────────
+  Keys:          3 signing + 1 key-agreement
+  DID document:  included (matches exported DID)
+  did.jsonl:     included (will be written next to mediator.toml)
+
+  Hotkeys:  [m] copy mediator DID   [a] copy admin DID   [v] copy VTA DID
+
+  Press Enter — the wizard will skip the Did step (already provisioned) and continue
+  to Protocol. Private key bytes are written to your secret backend at the end of
+  the flow without passing through the TUI.
 ```
 
 > **⚠️ SAVE THIS** (3b)
 >
-> Save the **Admin DID** (3b) (the `Admin DID:` line)
+> Press **[a]** to copy the **Admin DID** (3b) and save it to your notes.
 
 Press **Enter** to continue to Protocol.
 
