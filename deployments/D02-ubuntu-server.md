@@ -147,7 +147,7 @@ git checkout chore/mediator-setup-cosmetics
 
 ```bash
 cd crates/messaging
-cargo build --release -p affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
+cargo install --path affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
 
