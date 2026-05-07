@@ -492,12 +492,22 @@ vim ~/mediator/conf/mediator.toml
 #did_web_self_hosted = "file://./conf/did.jsonl"
 ```
 
-Start the remaining services:
+Start the mediator:
+
+> If you configured a passphrase for the key storage backend, set it before starting:
+>
+> ```bash
+> export MEDIATOR_FILE_BACKEND_PASSPHRASE='your-passphrase'
+> ```
 
 ```bash
 cd ~/mediator
 nohup mediator > log.txt 2>&1 &
+```
 
+Wait one minute for the mediator to fully initialize, then start the VTA:
+
+```bash
 cd ~/vta-p
 nohup vta > log.txt 2>&1 &
 ```
