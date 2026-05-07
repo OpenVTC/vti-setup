@@ -147,7 +147,7 @@ git checkout fix/mediator-deployment
 
 ```bash
 cd crates/messaging
-cargo install --path affinidi-messaging-mediator
+cargo build --release -p affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
 
