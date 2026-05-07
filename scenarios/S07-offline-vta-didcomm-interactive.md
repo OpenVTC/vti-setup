@@ -267,25 +267,27 @@ Press **Enter** to continue to Protocol.
 | --- | --- |
 | Toggle protocols with Enter: | Select **DIDComm v2 (recommended)** |
 
-**SSL/TLS & JWT:**
+**Security:**
 
 | Prompt | Action |
 | --- | --- |
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
+| Network access posture: | Press **Enter** (default: **Open network**) |
 
 **Database:**
 
 | Prompt | Action |
 | --- | --- |
 | Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Fjall** |
-| Connection string for the mediator's Redis-compatible database: | Press **Enter** (default: `./data/mediator`) |
+| Use an absolute path on a persistent volume in production | Press **Enter** (default: `./data/mediator`) |
+| Fjall directory `./data/mediator` does not exist. Create it now?: | Choose **Yes — create the directory now** |
 
-**Admin:**
+**Admin Account:**
 
 | Prompt | Action |
 | --- | --- |
-| Configure the admin DID for mediator management: | Choose **Generate admin DID from VTA** |
+| Configure the admin DID for mediator management: | Choose **Generate a new admin did:key** |
 | Where should the wizard write mediator.toml?: | Press **Enter** (default: `conf/mediator.toml`) |
 
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
@@ -478,23 +480,14 @@ Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the *
 cat ~/vta-p/VTA-did.jsonl
 ```
 
-Before starting the mediator, make two edits to `~/mediator/conf/mediator.toml`:
+Before starting the mediator, comment out `did_web_self_hosted` in `~/mediator/conf/mediator.toml`:
 
 ```bash
 vim ~/mediator/conf/mediator.toml
 ```
 
-**1.** Find and comment out `did_web_self_hosted`:
-
 ```toml
 #did_web_self_hosted = "file://./conf/did.jsonl"
-```
-
-**2.** In the `[security]` section, set:
-
-```toml
-mediator_acl_mode = "explicit_deny"
-global_acl_default = "ALLOW_ALL"
 ```
 
 Start the remaining services:
