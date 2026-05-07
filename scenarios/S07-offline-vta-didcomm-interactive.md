@@ -7,7 +7,7 @@
 
 **Verified with:**
 
-| VTA | Mediator | Webvh-daemon |
+| VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
 | 0.5.1 | 0.15.1 | 0.6.0 |
 
