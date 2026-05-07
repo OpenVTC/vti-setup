@@ -3,7 +3,8 @@
 **Setup Type:** Offline VTA — VTA unreachable at setup time\
 **Transport:** DIDComm\
 **Mode:** Interactive\
-**Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
+**Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)\
+**Verified with:** VTA 0.5.1, Mediator 0.15.1, webvh-daemon 0.6.0
 
 ## Prerequisites
 
