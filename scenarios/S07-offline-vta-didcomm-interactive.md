@@ -457,16 +457,23 @@ Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the *
 cat ~/vta-p/VTA-did.jsonl
 ```
 
-Before starting the mediator, comment out the `did_web_self_hosted` line in `~/mediator/conf/mediator.toml`:
+Before starting the mediator, make two edits to `~/mediator/conf/mediator.toml`:
 
 ```bash
 vim ~/mediator/conf/mediator.toml
 ```
 
-Find and comment out:
+**1.** Find and comment out `did_web_self_hosted`:
 
 ```toml
 #did_web_self_hosted = "file://./conf/did.jsonl"
+```
+
+**2.** In the `[security]` section, set:
+
+```toml
+mediator_acl_mode = "explicit_deny"
+global_acl_default = "ALLOW_ALL"
 ```
 
 Start the remaining services:
