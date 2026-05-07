@@ -120,8 +120,8 @@ cd verifiable-trust-infrastructure
 
 ```bash
 # FOR TESTING ONLY
-git fetch origin sealed-bootstrap
-git checkout sealed-bootstrap
+git fetch origin feat/runtime-services-P6
+git checkout feat/runtime-services-P6
 ```
 
 ```bash
@@ -141,8 +141,8 @@ cd affinidi-tdk-rs
 
 ```bash
 # FOR TESTING ONLY
-git fetch origin fix/mediator-deployment
-git checkout fix/mediator-deployment
+git fetch origin chore/mediator-setup-cosmetics
+git checkout chore/mediator-setup-cosmetics
 ```
 
 ```bash
