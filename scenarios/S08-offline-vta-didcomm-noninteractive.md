@@ -53,7 +53,7 @@ The following values will be collected during setup. Save each one as prompted â
 The non-interactive flow seeds the admin DID directly into the VTA setup file, so PNM must mint its ephemeral key **before** the VTA is created. This replaces the interactive `vta import-did` step.
 
 ```bash
-ADMIN_DID=$(pnm setup --name "personal-vta" | jq -r .admin_did)
+ADMIN_DID=$(pnm setup --name "personal-vta" | grep "Admin DID:" | awk '{print $NF}')
 echo "PNM Admin DID: $ADMIN_DID"
 ```
 
@@ -68,7 +68,7 @@ mkdir ~/vta-p
 cd ~/vta-p
 ```
 
-Create `~/vta-p/vta-setup.toml`. Replace `yourdomain.com` with your actual domain and `<ADMIN_DID>` with the value saved above:
+Create `~/vta-p/vta-setup.toml`. Replace **all three** `yourdomain.com` occurrences (`public_url`, `messaging.url`, and `vta_did.url`) with your actual domain, and replace `<ADMIN_DID>` with the value saved above:
 
 ```toml
 config_path = "config.toml"
