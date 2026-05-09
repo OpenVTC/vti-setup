@@ -31,16 +31,16 @@ The following values will be collected during setup. Save each one as prompted �
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | PNM admin DID | Step 1 (vta-setup.toml) |
-| 2a | Mediator DID | Step 4 |
-| 2b | Personal VTA DID | Step 2 |
-| 3a | SHA-256 digest (mediator bundle) | Step 3 |
-| 3b | Admin DID (mediator context) | Later |
-| 4a | WebVH Admin DID | Step 4 |
-| 4b | WebVH Admin private key | Step 4 |
-| 4c | SHA-256 digest (WebVH bundle) | Step 4 |
-| 4d | WebVH Daemon DID | Later |
+| 1b | Mediator DID | Step 3 |
+| 1c | Personal VTA DID | Step 1 |
+| 2a | SHA-256 digest (mediator bundle) | Step 2 |
+| 2b | Admin DID (mediator context) | Later |
+| 3a | WebVH Admin DID | Step 3 |
+| 3b | WebVH Admin private key | Step 3 |
+| 3c | SHA-256 digest (WebVH bundle) | Step 3 |
+| 3d | WebVH Daemon DID | Later |
 
-> **Note on mnemonic:** In non-interactive VTA setup the 24-word BIP-39 mnemonic is auto-generated and stored in the configured secrets backend — it is never displayed. After PNM connects in Step 2, back it up with:
+> **Note on mnemonic:** In non-interactive VTA setup the 24-word BIP-39 mnemonic is auto-generated and stored in the configured secrets backend — it is never displayed. After PNM connects in Step 1, back it up with:
 >
 > ```bash
 > pnm backup export --output vta-backup.vtabak
@@ -53,22 +53,23 @@ The following values will be collected during setup. Save each one as prompted �
 The non-interactive flow seeds the admin DID directly into the VTA setup file, so PNM must mint its ephemeral key **before** the VTA is created. This replaces the interactive `vta import-did` step.
 
 ```bash
-ADMIN_DID=$(pnm setup --name "personal-vta" | grep "Admin DID:" | awk '{print $NF}')
-echo "PNM Admin DID: $ADMIN_DID"
+pnm setup --name "personal-vta"
 ```
 
 > **⚠️ SAVE THIS** (1a)
 >
-> Save the **PNM Admin DID** — you will paste it into `vta-setup.toml` below.
+> Copy the **Admin DID** printed in the output (e.g. `did:key:z6Mk…`) — you will paste it into `vta-setup.toml` below.
 
-Create the directory and the setup file:
+Create the directory and open the setup file:
 
 ```bash
 mkdir ~/vta-p
-cd ~/vta-p
+vim ~/vta-p/vta-setup.toml
 ```
 
-Create `~/vta-p/vta-setup.toml`. Replace **all three** `yourdomain.com` occurrences (`public_url`, `messaging.url`, and `vta_did.url`) with your actual domain, and replace `<ADMIN_DID>` with the value saved above:
+> **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
+
+Paste the following content. Replace **all four** `yourdomain.com` occurrences (`public_url`, `messaging.url`, `messaging.webvh_url`, and `vta_did.url`) with your actual domain, and replace `<ADMIN_DID (1a)>` with the Admin DID saved above:
 
 ```toml
 config_path = "config.toml"
@@ -94,9 +95,10 @@ format = "text"
 backend = "plaintext"
 
 [messaging]
-kind    = "create_mediator"
-context = "mediator"
-url     = "https://mediator.yourdomain.com/mediator/v1"
+kind      = "create_mediator"
+context   = "mediator"
+url       = "https://mediator.yourdomain.com/mediator/v1"
+webvh_url = "https://webvh.yourdomain.com/mediator"
 
 [vta_did]
 kind               = "create_webvh"
@@ -114,22 +116,22 @@ vta setup --from vta-setup.toml
 
 The command prints the created DIDs and writes DID log files under `data/vta/did-logs/`.
 
-### Step 2: Connect PNM to VTA
-
-Save the DIDs printed by `vta setup` in Step 1:
-
-> **⚠️ SAVE THESE** (2a, 2b)
+> **⚠️ SAVE THESE** (1b, 1c)
 >
-> - **2a — Mediator DID** (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
-> - **2b — Personal VTA DID** (e.g. `did:webvh:...:webvh.yourdomain.com:vta-p`)
+> From the summary printed at the end:
+>
+> - **1b — Mediator DID** — the `Mediator:` line (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
+> - **1c — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta-p`)
 
-Complete the binding by passing the VTA DID saved above:
+Complete the PNM binding by passing the VTA DID saved above:
 
 ```bash
-pnm setup continue personal-vta --vta-did <Personal VTA DID (2b)>
+pnm setup continue personal-vta --vta-did <Personal VTA DID (1c)>
 ```
 
-### Step 3: Set up Mediator
+> **Note:** The output suggests running `vta import-did` — you can ignore this. The `admin_did` field in `vta-setup.toml` already registered the PNM admin DID during non-interactive setup. `state: complete` confirms the binding is done.
+
+### Step 2: Set up Mediator
 
 The VTA already holds the mediator DID (created in Step 1 via `messaging.kind = "create_mediator"`). Use `vta_mode = "sealed-export"` to retrieve the existing context material.
 
@@ -138,7 +140,11 @@ mkdir ~/mediator
 cd ~/mediator
 ```
 
-Create `~/mediator/mediator-recipe.toml`:
+```bash
+vim ~/mediator/mediator-recipe.toml
+```
+
+> **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
 
 ```toml
 [deployment]
@@ -183,7 +189,7 @@ cd ~/vta-p
 vta contexts reprovision \
   --id mediator \
   --recipient ~/mediator/bootstrap-request.json \
-  --out bundle.armor
+  --out ~/mediator/bundle.armor
 ```
 
 The command outputs the bundle details:
@@ -198,23 +204,17 @@ The command outputs the bundle details:
   DID:       did:webvh:...:webvh.yourdomain.com:mediator
   Recipient: mediator/conf/mediator.toml
 
-Armored bundle written to bundle.armor
+Armored bundle written to ~/mediator/bundle.armor
 
   Bundle-Id:       <id>
   Producer DID:    did:key:z6Mk...
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THESE** (3a, 3b)
+> **⚠️ SAVE THESE** (2a, 2b)
 >
-> - **3a — SHA-256 digest** — you will pass it as `--digest` in Phase 2.
-> - **3b — Admin DID** (the `Admin DID:` line)
-
-Move the bundle to the mediator directory:
-
-```bash
-mv ~/vta-p/bundle.armor ~/mediator/
-```
+> - **2a — SHA-256 digest** — you will pass it as `--digest` in Phase 2.
+> - **2b — Admin DID** (the `Admin DID:` line)
 
 **Phase 2** — apply the bundle:
 
@@ -222,7 +222,7 @@ mv ~/vta-p/bundle.armor ~/mediator/
 cd ~/mediator
 mediator-setup --from mediator-recipe.toml \
   --bundle bundle.armor \
-  --digest <SHA-256 digest (3a)>
+  --digest <SHA-256 digest (2a)>
 ```
 
 Before starting the mediator, comment out `did_web_self_hosted` in `~/mediator/conf/mediator.toml`:
@@ -235,18 +235,24 @@ vim ~/mediator/conf/mediator.toml
 #did_web_self_hosted = "file://./conf/did.jsonl"
 ```
 
-### Step 4: Set up WebVH Daemon
+### Step 3: Set up WebVH Daemon
 
 ```bash
 mkdir ~/webvh
 cd ~/webvh
 ```
 
-Create `~/webvh/config.toml`. Replace `yourdomain.com` and `<Mediator DID (1b)>` with actual values:
+```bash
+vim ~/webvh/config.toml
+```
+
+> **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
+
+Paste the following content. Replace `yourdomain.com` and `<Mediator DID (1b)>` with actual values:
 
 ```toml
 public_url   = "https://webvh.yourdomain.com"
-mediator_did = "<Mediator DID (2a)>"
+mediator_did = "<Mediator DID (1b)>"
 
 [identity]
 mode = "vta"
@@ -302,10 +308,10 @@ The command generates `bootstrap-request.json` and `setup-offline-state.toml`, a
   ...
 ```
 
-> **⚠️ SAVE THESE** (4a, 4b)
+> **⚠️ SAVE THESE** (3a, 3b)
 >
-> - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
-> - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
+> - Save the **Admin DID** (3a) (the `Generated admin did:key:` line)
+> - Save the **Admin private key** (3b) (the `Private key:` line — shown only once)
 
 Move the bootstrap request to the VTA directory and create the WebVH context:
 
@@ -315,7 +321,7 @@ cd ~/vta-p
 ```
 
 ```bash
-vta contexts create --id webvh --admin-expires 1h --admin-did <Admin DID (4a)>
+vta contexts create --id webvh --admin-expires 1h --admin-did <Admin DID (3a)>
 ```
 
 Seal the bundle:
@@ -328,7 +334,7 @@ vta bootstrap provision-integration \
 
 The command outputs the bundle details.
 
-> **⚠️ SAVE THIS** (4c)
+> **⚠️ SAVE THIS** (3c)
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in Phase 2.
 
@@ -344,12 +350,12 @@ cd ~/webvh
 ```bash
 webvh-daemon setup-offline-complete \
   --bundle bundle.armor \
-  --expect-digest <SHA-256 digest (4c)>
+  --expect-digest <SHA-256 digest (3c)>
 ```
 
 The command prints the completed setup including the daemon DID.
 
-> **⚠️ SAVE THIS** (4d)
+> **⚠️ SAVE THIS** (3d)
 >
 > Save the **Daemon DID** (the `Daemon DID:` line, e.g. `did:webvh:...:webvh.yourdomain.com`)
 
@@ -357,7 +363,7 @@ Generate an enrollment token using the Admin DID from 4a:
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (4a)>
+webvh-daemon invite --role admin --did <Admin DID (3a)>
 ```
 
 Start the WebVH daemon:
@@ -448,7 +454,7 @@ kill -9 $(pgrep -f webvh-daemon)
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (4a)>
+webvh-daemon invite --role admin --did <Admin DID (3a)>
 ```
 
 **3.** Restart the daemon:
