@@ -197,14 +197,13 @@ Hotkeys:  [c] copy JSON   [v] copy vta cmd   [p] copy pnm-cli cmd
 
 Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` command.
 
-**→ VTA session** — open a new SSH session and save the JSON to the VTA directory:
+**→ VTA session** — mediator-setup automatically generates the JSON; move it to the VTA directory:
 
 ```bash
-cd ~/vta-p
-vim bootstrap-request.json
+mv ~/mediator/bootstrap-request.json ~/vta-p
 ```
 
-Paste the copied JSON, save, and run:
+Run:
 
 ```bash
 vta contexts reprovision --id mediator --recipient bootstrap-request.json --out bundle.armor
@@ -288,8 +287,6 @@ Press **Enter** to continue to Protocol.
 
 | Prompt | Action |
 | --- | --- |
-| Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
-| Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
 | Network access posture: | Press **Enter** (default: **Open network**) |
 
 **Database:**
@@ -422,8 +419,18 @@ cd ~/webvh
 Complete offline setup (phase 2):
 
 ```bash
-webvh-daemon setup-offline-complete --bundle bundle.armor --expect-digest <SHA-256 digest (4c)>
+cd ~/webvh
+webvh-daemon setup
 ```
+
+When prompted:
+
+| Prompt | Action |
+| --- | --- |
+| How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
+| ASCII-armored sealed bundle path: | `/root/webvh/bundle.armor` |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4c |
+| Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
 
 The wizard prints the completed setup:
 
@@ -497,16 +504,6 @@ Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the *
 
 ```bash
 cat ~/vta-p/VTA-did.jsonl
-```
-
-Before starting the mediator, comment out `did_web_self_hosted` in `~/mediator/conf/mediator.toml`:
-
-```bash
-vim ~/mediator/conf/mediator.toml
-```
-
-```toml
-#did_web_self_hosted = "file://./conf/did.jsonl"
 ```
 
 Start the mediator:
