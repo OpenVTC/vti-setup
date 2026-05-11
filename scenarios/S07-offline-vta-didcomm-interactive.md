@@ -60,6 +60,8 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTA REST URL [http://localhost:8101]: | `https://vta-p.yourdomain.com` |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
+| Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
+| Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory: | Press **Enter** (default: `data/vta`) |
 
 **BIP-39 mnemonic:**
@@ -81,6 +83,8 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | DIDComm messaging: | Choose **Create a new mediator DID (did:webvh)** |
 | Trust context for the mediator DID [mediator]: | Press **Enter** (use default) |
 | Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
+| Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
+| Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
 | mediator DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/mediator` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
@@ -88,29 +92,41 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
 | Save DID log to file [mediator-did.jsonl]: | Press **Enter** (use default) |
 
-> **⚠️ SAVE THIS** (1b)
->
-> Save the **created Mediator DID**
-> (e.g. `Created DID: did:webvh:...:webvh.yourdomain.com:mediator`)
-> to your notes.
-
 **VTA DID:**
 
 | Prompt | Action |
 | --- | --- |
 | VTA DID: | Choose **Create a new did:webvh DID** |
-| VTA DID URL [http://localhost:8534/]: | `https://webvh.yourdomain.com/vta-p` |
+| VTA DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/vta-p` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
 
-> **⚠️ SAVE THIS** (1c)
+When all prompts are complete, the wizard prints:
+
+```text
+Setup complete!
+  Config saved to: config.toml
+  Seed stored in configured backend
+  Seed backend: config file (hex-encoded in config.toml)
+  VTA Name: <your VTA name>
+  VTA REST URL: https://vta-p.yourdomain.com
+  VTA DID: did:webvh:...:webvh.yourdomain.com:vta-p
+  Services: REST, DIDComm
+  Server: 0.0.0.0:8101
+  Mediator DID: did:webvh:...:webvh.yourdomain.com:mediator
+  Mediator URL: https://mediator.yourdomain.com/mediator/v1
+  Contexts: vta (m/26'/2'/0')
+```
+
+> **⚠️ SAVE THESE** (1b, 1c)
 >
-> Save the **created DID**
-> (e.g. `Created DID: did:webvh:...:webvh.yourdomain.com:vta-p`)
-> to your notes.
+> From the summary above:
+>
+> - **Mediator DID** (1b): the `Mediator DID:` line
+> - **Personal VTA DID** (1c): the `VTA DID:` line
 
 ### Step 2: Connect PNM to VTA
 
