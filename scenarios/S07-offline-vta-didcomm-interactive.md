@@ -287,6 +287,8 @@ Press **Enter** to continue to Protocol.
 
 | Prompt | Action |
 | --- | --- |
+| Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
+| Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
 | Network access posture: | Press **Enter** (default: **Open network**) |
 
 **Database:**
