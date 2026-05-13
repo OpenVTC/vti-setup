@@ -186,11 +186,16 @@ mediator-setup --from mediator-recipe.toml
 
 This writes `./bootstrap-request.json` and prints the VTA-side command to run.
 
-Switch to the VTA directory and run the reprovision command printed above:
+Switch to the VTA directory and unseal VTA (interactive — follow the challenge/signature prompts):
 
 ```bash
 cd ~/vta-p
 vta unseal
+```
+
+Once unsealed, run the reprovision command:
+
+```bash
 vta contexts reprovision \
   --id mediator \
   --recipient ~/mediator/bootstrap-request.json \
