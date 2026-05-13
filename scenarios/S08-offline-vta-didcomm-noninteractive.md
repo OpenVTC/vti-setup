@@ -168,6 +168,10 @@ network_mode = "open"
 [database]
 url = "redis://127.0.0.1/"
 
+[storage]
+backend = "fjall"
+data_dir = "./data/mediator"
+
 [output]
 config_path    = "conf/mediator.toml"
 listen_address = "0.0.0.0:7037"
@@ -182,10 +186,11 @@ mediator-setup --from mediator-recipe.toml
 
 This writes `./bootstrap-request.json` and prints the VTA-side command to run.
 
-**→ VTA session** — open a new SSH session and run:
+Switch to the VTA directory and run the reprovision command printed above:
 
 ```bash
 cd ~/vta-p
+vta unseal
 vta contexts reprovision \
   --id mediator \
   --recipient ~/mediator/bootstrap-request.json \
