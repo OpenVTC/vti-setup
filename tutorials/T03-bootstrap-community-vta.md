@@ -1,6 +1,6 @@
-# T04 · Self-Managed WebVH Host
+# T03 · Bootstrap Community VTA
 
-**Description:** Stand up a WebVH daemon that manages its own keys and hosts `did:webvh` DID documents, independent of any VTA.
+**Description:** Bootstrap a Community VTA — the shared trust anchor for a VTC. Performed once, by the community owner, to bring the community into existence.
 **Tested on:** _To be documented._
 
 ## Prerequisites

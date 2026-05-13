@@ -1,6 +1,6 @@
-# T02 · Bootstrap Community VTA
+# T04 · Self-Managed Mediator
 
-**Description:** Bootstrap a Community VTA — the shared trust anchor for a VTC. Performed once, by the community owner, to bring the community into existence.
+**Description:** Stand up a DIDComm Mediator that manages its own keys, independent of any VTA.
 **Tested on:** _To be documented._
 
 ## Prerequisites

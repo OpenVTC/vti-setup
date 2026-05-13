@@ -1,6 +1,6 @@
-# T03 · Self-Managed Mediator
+# T02 · OpenVTC TUI Setup
 
-**Description:** Stand up a DIDComm Mediator that manages its own keys, independent of any VTA.
+**Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting M-DIDs, managing community contexts, and exchanging credentials.
 **Tested on:** _To be documented._
 
 ## Prerequisites
