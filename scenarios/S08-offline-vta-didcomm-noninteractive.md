@@ -9,8 +9,7 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
-| 0.6.0 | 0.15.3 | 0.7.0 |
-| 0.6.0 | 0.15.2 | 0.6.0 |
+| 0.6.0 | 0.15.3 | 0.7.1 |
 
 ## Overview
 
@@ -21,7 +20,7 @@ This guide replaces all interactive TUI prompts from [S07 (Interactive)](./S07-o
 | Personal VTA | `vta setup` | `vta setup --from vta-setup.toml` |
 | PNM connection | `pnm setup` (wizard) | `pnm setup --name <name>` → `pnm setup continue` |
 | Mediator | `mediator-setup` (TUI) | `mediator-setup --from recipe.toml` (two phases) |
-| WebVH Daemon | `webvh-daemon setup` (offline wizard) | `webvh-daemon setup-offline-prepare` → *(VTA admin)* → `webvh-daemon setup-offline-complete` |
+| WebVH Daemon | `webvh-daemon setup` (offline wizard) | `webvh-daemon setup --from recipe.toml` → *(VTA admin)* → `webvh-daemon setup --from recipe.toml` |
 
 ## Prerequisites
 
@@ -31,14 +30,14 @@ The following values will be collected during setup. Save each one as prompted �
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1a | Mediator DID | Step 3 |
-| 1b | Personal VTA DID | Step 4 |
+| 1a | Personal VTA DID | Step 4 |
+| 1b | Mediator DID | Step 3 |
 | 2a | SHA-256 digest (mediator bundle) | Step 2 |
 | 2b | Mediator Admin DID | Later |
 | 2c | Mediator Admin private key | Offline backup |
-| 3a | WebVH Admin DID | Step 3 |
-| 3b | WebVH Admin private key | Offline backup |
-| 3c | SHA-256 digest (WebVH bundle) | Step 3 |
+| 3a | SHA-256 digest (WebVH bundle) | Step 3 |
+| 3b | WebVH Admin DID | Step 3 |
+| 3c | WebVH Admin private key | Offline backup |
 | 3d | WebVH Daemon DID | Later |
 | 4a | PNM admin DID | Step 4 |
 
@@ -104,8 +103,8 @@ The command prints the created DIDs and writes DID log files under `data/vta/did
 >
 > From the summary printed at the end:
 >
-> - **1a — Mediator DID** — the `Mediator:` line (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
-> - **1b — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta-p`)
+> - **1a — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta-p`)
+> - **1b — Mediator DID** — the `Mediator:` line (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
 
 ### Step 2: Set up Mediator
 
@@ -252,87 +251,170 @@ mkdir ~/webvh
 cd ~/webvh
 ```
 
+Create the setup recipe:
+
+```bash
+vim ~/webvh/webvh-recipe.toml
+```
+
+> **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
+
+Paste the following content. Replace `yourdomain.com` with your actual domain:
+
+```toml
+[deployment]
+service  = "daemon"
+vta_mode = "offline-prepare"
+
+[output]
+config_path = "config.toml"
+
+[server]
+host       = "0.0.0.0"
+port       = 8534
+log_level  = "info"
+log_format = "text"
+data_dir   = "data/daemon"
+
+[identity]
+public_url   = "https://webvh.yourdomain.com"
+mediator_did = "<Mediator DID (1b)>"
+
+[vta]
+request_path = "bootstrap-request.json"
+
+[daemon]
+enable_control  = true
+enable_server   = true
+enable_witness  = true
+enable_watcher  = false
+
+[secrets]
+backend = "plaintext"
+confirm_plaintext = true
+
+[admin]
+mode = "generate"
+
+[reprovision]
+force = false
+```
+
 **Phase 1** — generate the bootstrap request:
 
 ```bash
-webvh-daemon setup-offline-prepare
+cd ~/webvh
+webvh-daemon setup --from webvh-recipe.toml
 ```
 
-When prompted:
-
-| Prompt | Action |
-| --- | --- |
-| Configuration file path [config.toml]: | Press **Enter** (use default) |
-| Which services should the daemon run?: | Press **Enter** (default: control, server, witness) |
-| Public URL: | `https://webvh.yourdomain.com` |
-| VTA context ID [webvh]: | Press **Enter** (use default) |
-| Mediator DID (leave empty to skip) []: | Paste the **Mediator DID** (1a) |
-| Listen host [0.0.0.0]: | Press **Enter** (use default) |
-| Listen port [8534]: | Press **Enter** (use default) |
-| Log level [info]: | Press **Enter** (use default) |
-| Log format [text]: | Press **Enter** (use default) |
-| Data directory root [data/daemon]: | Press **Enter** (use default) |
-| Continue with plaintext secrets storage? [y/N]: | **y** |
-| Admin ACL entry: | Choose **Generate a new did:key identity for the operator** |
-
-The command generates `bootstrap-request.json` and `setup-offline-state.toml`, and prints:
+The command generates `bootstrap-request.json`, stores the bootstrap seed in the configured secret backend, and prints:
 
 ```text
-  Generated admin did:key: did:key:z6Mk...
-  Private key (save this now — will not be re-shown): z3u2...
+  [setup-recipe] service       = webvh-daemon
+  [setup-recipe] vta_mode      = offline-prepare
+  [setup-recipe] config_path   = config.toml
+  [setup-recipe] public_url    = https://webvh.yourdomain.com
 
-  Offline setup step 1/2 complete.
+  [setup-recipe:offline-prepare] phase 1 complete
+  [setup-recipe:offline-prepare] request_path = bootstrap-request.json
+  [setup-recipe:offline-prepare] client_did   = did:key:z6Mk...
+  [setup-recipe:offline-prepare] nonce        = <nonce>
+  [setup-recipe:offline-prepare] seed stored in configured secret backend
 
-  Request file:   bootstrap-request.json
-  State file:     setup-offline-state.toml
-  ...
+  Next steps:
+    1. Ferry bootstrap-request.json to your VTA admin.
+    2. Ask them to seal the response and communicate the SHA-256 digest OOB.
+    3. Edit your recipe (config.toml): set vta_mode = "offline-complete",
+       [vta].bundle_path, [vta].expect_digest.
+    4. Re-run phase 2: webvh-daemon setup --from <recipe>
 ```
 
-> **⚠️ SAVE THESE** (3a, 3b)
->
-> - Save the **Admin DID** (3a) (the `Generated admin did:key:` line)
-> - Save the **Admin private key** (3b) (the `Private key:` line — shown only once)
+> The `client_did` line is printed for verification only — it is already embedded in `bootstrap-request.json`. Nothing to save here.
 
-**Phase 2 (VTA admin)** — create the WebVH context and seal the bundle:
+**Phase 2 (VTA admin)** — seal the bundle:
 
 ```bash
 cd ~/vta-p
-vta contexts create --id webvh --admin-expires 1h --admin-did <Admin DID (3a)>
-```
-
-```bash
 vta bootstrap provision-integration \
   --request ~/webvh/bootstrap-request.json \
-  --out ~/webvh/bundle.armor
+  --out ~/webvh/bundle.armor \
+  --create-context
 ```
 
 The command outputs the bundle details.
 
-> **⚠️ SAVE THIS** (3c)
+> **⚠️ SAVE THIS** (3a)
 >
-> Save the **SHA-256 digest** — you will pass it to `--expect-digest` in Phase 3.
+> Save the **SHA-256 digest** — you will pass it as `expect_digest` in Phase 3.
 
-**Phase 3** — complete offline setup (non-interactive):
+**Phase 3** — complete offline setup:
+
+Open the recipe and make two changes: set `vta_mode` to `"offline-complete"` and replace the `[vta]` section with `bundle_path` and `expect_digest`:
+
+```bash
+vim ~/webvh/webvh-recipe.toml
+```
+
+Update these two sections (leave the rest of the file unchanged):
+
+```toml
+[deployment]
+service  = "daemon"
+vta_mode = "offline-complete"
+
+[vta]
+bundle_path   = "bundle.armor"
+expect_digest = "<SHA-256 digest (3a)>"
+```
+
+Then run the same command:
 
 ```bash
 cd ~/webvh
-webvh-daemon setup-offline-complete \
-  --bundle bundle.armor \
-  --state setup-offline-state.toml \
-  --expect-digest <SHA-256 digest (3c)>
+webvh-daemon setup --from webvh-recipe.toml
 ```
 
-The command prints the completed setup including the daemon DID.
+The command writes `config.toml` and prints:
+
+```text
+  [setup-recipe] service       = webvh-daemon
+  [setup-recipe] vta_mode      = offline-complete
+  [setup-recipe] config_path   = config.toml
+  [setup-recipe] public_url    = https://webvh.yourdomain.com
+
+  Existing config.toml backed up to config.toml.bak before re-provisioning.
+  [setup-recipe] config written to config.toml
+  [setup-recipe] secrets stored in Plaintext backend
+  [setup-recipe] daemon DID imported at '.well-known' (scid=<scid>)
+  Generated admin did:key: did:key:z6Mk...
+  Private key (save now, not re-shown): z3u2...
+  [setup-recipe] admin ACL entry added for did:key:z6Mk...
+
+  [setup-recipe] setup complete
+
+  Next: webvh-daemon --config config.toml
+```
+
+> **⚠️ SAVE THESE** (3b, 3c)
+>
+> - **3b — Admin DID** — the `Generated admin did:key:` line
+> - **3c — Admin private key** — the `Private key (save now, not re-shown):` line — shown only once; clear your terminal scrollback after copying
+
+Read the Daemon DID from the generated config:
+
+```bash
+grep '^server_did' ~/webvh/config.toml
+```
 
 > **⚠️ SAVE THIS** (3d)
 >
-> Save the **Daemon DID** (the `Daemon DID:` line, e.g. `did:webvh:...:webvh.yourdomain.com`)
+> Save the **Daemon DID** (the `server_did` value, e.g. `did:webvh:...:webvh.yourdomain.com`)
 
 Generate an enrollment token using the Admin DID from 3a:
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (3a)>
+webvh-daemon invite --role admin --did <Admin DID (3b)>
 ```
 
 Start the WebVH daemon:
@@ -412,7 +494,7 @@ Community VTA URL: https://vta-p.yourdomain.com
 ```
 
 ```bash
-pnm setup continue personal-vta --vta-did <Personal VTA DID (1b)>
+pnm setup continue personal-vta --vta-did <Personal VTA DID (1a)>
 ```
 
 ```text
@@ -462,7 +544,7 @@ kill -9 $(pgrep -f webvh-daemon)
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (3a)>
+webvh-daemon invite --role admin --did <Admin DID (3b)>
 ```
 
 **3.** Restart the daemon:
