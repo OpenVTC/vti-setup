@@ -259,7 +259,7 @@ vim ~/webvh/webvh-recipe.toml
 
 > **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
 
-Paste the following content. Replace `yourdomain.com` with your actual domain:
+Paste the following content. Replace `yourdomain.com` with your actual domain, and replace `<Mediator DID (1b)>` with your actual mediator DID:
 
 ```toml
 [deployment]
