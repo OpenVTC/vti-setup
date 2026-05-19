@@ -11,14 +11,17 @@
 
 ## Prerequisites
 
-Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing, but only install `vta` and `pnm` in Step 5.
+Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing, but only install `vta` and `pnm` in **D02 Step 5**.
+
+You also need the **Community Mediator DID** before starting — obtain it from the operator of the mediator you intend to use. You will paste it in Step 1.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
+| 0a | Community Mediator DID (pre-collected) | Step 1 |
 | 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Personal VTA DID | Step 3 |
+| 1b | Personal VTA DID | Step 2, Step 3 |
 
 ## Steps
 
@@ -70,14 +73,14 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Prompt | Action |
 | --- | --- |
 | DIDComm messaging: | Choose **Use an existing mediator DID** |
-| Mediator DID: | `did:webvh:...:webvh-host.com:mediator` (Enter mediator DID provided to you) |
+| Mediator DID: | Paste the **Community Mediator DID** from 0a (e.g. `did:webvh:...:webvh-host.com:mediator`) |
 | Mediator hostname for vsock-bridged TEE deployments: | Press **Enter** (skip) |
 
 **VTA DID:**
 
 | Prompt | Action |
 | --- | --- |
-| VTA DID: | Choose **Create a new `did:webvh` DID |
+| VTA DID: | Choose **Create a new `did:webvh` DID** |
 | VTA DID URL: | `https://webvh-host.com/your-did-path` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
@@ -118,7 +121,13 @@ cd ~/vta-p
 cat VTA-did.jsonl
 ```
 
-You need to publish that file (renamed to `did.jsonl`) at the matching URL. You do **not** need to run a webvh-daemon for this tutorial — any plain static-file host will work.
+You need to publish that file (renamed to `did.jsonl`) at the matching URL. Stage it for upload by copying it under the chosen name:
+
+```bash
+cp ~/vta-p/VTA-did.jsonl did.jsonl
+```
+
+You do **not** need to run a webvh-daemon for this tutorial — any plain static-file host will work.
 
 Common hosting options:
 
@@ -145,9 +154,11 @@ You should see the first line of the DID log returned over HTTPS.
 
 ### Step 3: Connect PNM to VTA
 
-> **ℹ️NOTE**
+> **ℹ️ NOTE**
 >
-> You can run the PNM from anywhere; it does not need to be running on the same machine as your VTA
+> You can run the PNM from anywhere; it does not need to be running on the same machine as your VTA.
+
+Step 3 depends on Step 2 — the PNM resolves your Personal VTA DID over HTTPS, so the `did.jsonl` must already be reachable at the URL you configured.
 
 ```bash
 pnm setup
@@ -189,12 +200,13 @@ Community VTA URL: https://vta-p.yourdomain.com
 Now start up the VTA:
 
 ```bash
+cd ~/vta-p
 nohup vta > log.txt 2>&1 &
 ```
 
 ## Verification
 
-Visit the health check page to ensure the VTA is running:
+Confirm the VTA is responding:
 
 ```bash
 curl -sSf https://vta-p.yourdomain.com/health
