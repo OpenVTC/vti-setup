@@ -15,6 +15,11 @@ Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before con
 
 You also need the **Community Mediator DID** before starting — obtain it from the operator of the mediator you intend to use. You will paste it in Step 1.
 
+This tutorial uses two host placeholders. Replace them with your real domains:
+
+- **`yourdomain.com`** — a host **you control**, where your Personal VTA's REST API runs (e.g. `https://vta-p.yourdomain.com`).
+- **`webvh-host.com`** — a host serving `did:webvh` content over HTTPS. The same placeholder stands in for two distinct hosts in the examples: the **community mediator's** webvh host (operated by whoever runs the mediator) and the host where **you** will publish your own VTA's DID (your choice — see Step 2). These may or may not be the same domain; if you control both, you can use the same one throughout.
+
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
 | ID | What to Save | Used In |
@@ -41,7 +46,7 @@ cd ~/vta-p
 vta setup
 ```
 
-When prompted, use the values below. Replace `yourdomain.com` with your actual domain.
+When prompted, use the values below. Replace the host placeholders (see Prerequisites) with your real domains.
 
 | Prompt | Action |
 | --- | --- |
