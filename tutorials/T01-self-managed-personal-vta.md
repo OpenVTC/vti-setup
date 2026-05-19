@@ -1,6 +1,6 @@
 # T01 · Self-Managed Personal VTA
 
-**Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.
+**Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.  
 **Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
 
 **Verified with:**
