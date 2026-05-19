@@ -120,8 +120,8 @@ cd verifiable-trust-infrastructure
 
 ```bash
 # FOR TESTING ONLY
-git fetch origin sealed-bootstrap
-git checkout sealed-bootstrap
+git fetch origin feat/runtime-services-P6
+git checkout feat/runtime-services-P6
 ```
 
 ```bash
@@ -141,13 +141,13 @@ cd affinidi-tdk-rs
 
 ```bash
 # FOR TESTING ONLY
-git fetch origin fix/mediator-deployment
-git checkout fix/mediator-deployment
+git fetch origin chore/mediator-setup-cosmetics
+git checkout chore/mediator-setup-cosmetics
 ```
 
 ```bash
 cd crates/messaging
-cargo install --path affinidi-messaging-mediator
+cargo install --path affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
 
@@ -188,3 +188,4 @@ Once services are installed, proceed to the scenario file for your setup type:
 | Online VTA · REST · Interactive | [S01](../scenarios/S01-online-vta-rest-interactive.md) |
 | Offline VTA · REST · Interactive | [S05](../scenarios/S05-offline-vta-rest-interactive.md) |
 | Offline VTA · DIDComm · Interactive | [S07](../scenarios/S07-offline-vta-didcomm-interactive.md) |
+| Offline VTA · DIDComm · Non-interactive | [S08](../scenarios/S08-offline-vta-didcomm-noninteractive.md) |

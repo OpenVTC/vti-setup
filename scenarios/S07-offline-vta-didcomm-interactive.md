@@ -9,6 +9,7 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
+| 0.6.0 | 0.15.2 | 0.6.0 |
 | 0.5.1 | 0.15.1 | 0.6.0 |
 
 ## Prerequisites
@@ -59,6 +60,8 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTA REST URL [http://localhost:8101]: | `https://vta-p.yourdomain.com` |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
+| Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
+| Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory: | Press **Enter** (default: `data/vta`) |
 
 **BIP-39 mnemonic:**
@@ -80,6 +83,8 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | DIDComm messaging: | Choose **Create a new mediator DID (did:webvh)** |
 | Trust context for the mediator DID [mediator]: | Press **Enter** (use default) |
 | Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
+| Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
+| Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
 | mediator DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/mediator` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
@@ -87,29 +92,41 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
 | Save DID log to file [mediator-did.jsonl]: | Press **Enter** (use default) |
 
-> **⚠️ SAVE THIS** (1b)
->
-> Save the **created Mediator DID**
-> (e.g. `Created DID: did:webvh:...:webvh.yourdomain.com:mediator`)
-> to your notes.
-
 **VTA DID:**
 
 | Prompt | Action |
 | --- | --- |
 | VTA DID: | Choose **Create a new did:webvh DID** |
-| VTA DID URL [http://localhost:8534/]: | `https://webvh.yourdomain.com/vta-p` |
+| VTA DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/vta-p` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
 
-> **⚠️ SAVE THIS** (1c)
+When all prompts are complete, the wizard prints:
+
+```text
+Setup complete!
+  Config saved to: config.toml
+  Seed stored in configured backend
+  Seed backend: config file (hex-encoded in config.toml)
+  VTA Name: <your VTA name>
+  VTA REST URL: https://vta-p.yourdomain.com
+  VTA DID: did:webvh:...:webvh.yourdomain.com:vta-p
+  Services: REST, DIDComm
+  Server: 0.0.0.0:8101
+  Mediator DID: did:webvh:...:webvh.yourdomain.com:mediator
+  Mediator URL: https://mediator.yourdomain.com/mediator/v1
+  Contexts: vta (m/26'/2'/0')
+```
+
+> **⚠️ SAVE THESE** (1b, 1c)
 >
-> Save the **created DID**
-> (e.g. `Created DID: did:webvh:...:webvh.yourdomain.com:vta-p`)
-> to your notes.
+> From the summary above:
+>
+> - **Mediator DID** (1b): the `Mediator DID:` line
+> - **Personal VTA DID** (1c): the `VTA DID:` line
 
 ### Step 2: Connect PNM to VTA
 
@@ -180,14 +197,13 @@ Hotkeys:  [c] copy JSON   [v] copy vta cmd   [p] copy pnm-cli cmd
 
 Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` command.
 
-**→ VTA session** — open a new SSH session and save the JSON to the VTA directory:
+**→ VTA session** — mediator-setup automatically generates the JSON; move it to the VTA directory:
 
 ```bash
-cd ~/vta-p
-vim bootstrap-request.json
+mv ~/mediator/bootstrap-request.json ~/vta-p
 ```
 
-Paste the copied JSON, save, and run:
+Run:
 
 ```bash
 vta contexts reprovision --id mediator --recipient bootstrap-request.json --out bundle.armor
@@ -229,20 +245,35 @@ mv ~/vta-p/bundle.armor ~/mediator/
 | Enter a path to bundle.armor, or paste its contents. | `/root/mediator/bundle.armor` |
 | Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** (3a) |
 
-The wizard completes the VTA integration:
+The wizard completes the VTA integration and displays:
 
 ```text
-Bundle opened successfully.
-  Admin DID:    did:key:z6Mk...
-  VTA DID:      did:webvh:...:webvh.yourdomain.com:vta-p
-  Mediator DID: did:webvh:...:mediator.yourdomain.com
-  Keys:         1 signing + 1 key-agreement
-  did.jsonl:    included (will be written next to mediator.toml)
+Bundle opened successfully — sealed handoff complete.
+
+  Mediator DID  [m]
+    did:webvh:...:webvh.yourdomain.com:mediator
+
+  Admin DID  [a]
+    did:key:z6Mk...
+
+  VTA DID  [v]
+    did:webvh:...:webvh.yourdomain.com:vta-p
+
+  ── Bundle contents ─────────────────────────────────────────
+  Keys:          3 signing + 1 key-agreement
+  DID document:  included (matches exported DID)
+  did.jsonl:     included (will be written next to mediator.toml)
+
+  Hotkeys:  [m] copy mediator DID   [a] copy admin DID   [v] copy VTA DID
+
+  Press Enter — the wizard will skip the Did step (already provisioned) and continue
+  to Protocol. Private key bytes are written to your secret backend at the end of
+  the flow without passing through the TUI.
 ```
 
 > **⚠️ SAVE THIS** (3b)
 >
-> Save the **Admin DID** (3b) (the `Admin DID:` line)
+> Press **[a]** to copy the **Admin DID** (3b) and save it to your notes.
 
 Press **Enter** to continue to Protocol.
 
@@ -252,25 +283,27 @@ Press **Enter** to continue to Protocol.
 | --- | --- |
 | Toggle protocols with Enter: | Select **DIDComm v2 (recommended)** |
 
-**SSL/TLS & JWT:**
+**Security:**
 
 | Prompt | Action |
 | --- | --- |
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
+| Network access posture: | Press **Enter** (default: **Open network**) |
 
 **Database:**
 
 | Prompt | Action |
 | --- | --- |
 | Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Fjall** |
-| Connection string for the mediator's Redis-compatible database: | Press **Enter** (default: `./data/mediator`) |
+| Use an absolute path on a persistent volume in production | Press **Enter** (default: `./data/mediator`) |
+| Fjall directory `./data/mediator` does not exist. Create it now?: | Choose **Yes — create the directory now** |
 
-**Admin:**
+**Admin Account:**
 
 | Prompt | Action |
 | --- | --- |
-| Configure the admin DID for mediator management: | Choose **Generate admin DID from VTA** |
+| Configure the admin DID for mediator management: | Choose **Generate a new admin did:key** |
 | Where should the wizard write mediator.toml?: | Press **Enter** (default: `conf/mediator.toml`) |
 
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
@@ -388,8 +421,18 @@ cd ~/webvh
 Complete offline setup (phase 2):
 
 ```bash
-webvh-daemon setup-offline-complete --bundle bundle.armor --expect-digest <SHA-256 digest (4c)>
+cd ~/webvh
+webvh-daemon setup
 ```
+
+When prompted:
+
+| Prompt | Action |
+| --- | --- |
+| How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
+| ASCII-armored sealed bundle path: | `/root/webvh/bundle.armor` |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4c |
+| Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
 
 The wizard prints the completed setup:
 
@@ -447,6 +490,8 @@ nohup webvh-daemon > log.txt 2>&1 &
 
 Visit the Enrollment URL in a browser, then save a passkey when prompted.
 
+> The enrollment URL is **single-use**. If you missed it or the passkey prompt failed, see [Enrollment URL is single-use](#enrollment-url-is-single-use).
+
 **Upload DID logs:**
 
 Go to `https://webvh.yourdomain.com/dids`.
@@ -463,31 +508,22 @@ Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the *
 cat ~/vta-p/VTA-did.jsonl
 ```
 
-Before starting the mediator, make two edits to `~/mediator/conf/mediator.toml`:
+Start the mediator:
 
-```bash
-vim ~/mediator/conf/mediator.toml
-```
-
-**1.** Find and comment out `did_web_self_hosted`:
-
-```toml
-#did_web_self_hosted = "file://./conf/did.jsonl"
-```
-
-**2.** In the `[security]` section, set:
-
-```toml
-mediator_acl_mode = "explicit_deny"
-global_acl_default = "ALLOW_ALL"
-```
-
-Start the remaining services:
+> If you configured a passphrase for the key storage backend, set it before starting:
+>
+> ```bash
+> export MEDIATOR_FILE_BACKEND_PASSPHRASE='your-passphrase'
+> ```
 
 ```bash
 cd ~/mediator
 nohup mediator > log.txt 2>&1 &
+```
 
+Wait one minute for the mediator to fully initialize, then start the VTA:
+
+```bash
 cd ~/vta-p
 nohup vta > log.txt 2>&1 &
 ```
@@ -509,7 +545,30 @@ pnm health
 
 ## Known Issues / Edge Cases
 
-> _To be documented._
+### Enrollment URL is single-use
+
+The enrollment URL generated by `webvh-daemon invite` can only be used once. If you missed saving it, let it expire, or the browser visit failed, you need to regenerate it:
+
+**1.** Stop the running daemon:
+
+```bash
+kill -9 $(pgrep -f webvh-daemon)
+```
+
+**2.** Regenerate the enrollment token:
+
+```bash
+cd ~/webvh
+webvh-daemon invite --role admin --did <Admin DID (4a)>
+```
+
+**3.** Restart the daemon:
+
+```bash
+nohup webvh-daemon > log.txt 2>&1 &
+```
+
+Then visit the new Enrollment URL in a browser and save a passkey when prompted.
 
 ## Deployment Notes
 
