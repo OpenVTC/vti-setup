@@ -9,6 +9,7 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
+| 0.7.0 | 0.15.4 | 0.7.0 |
 | 0.6.0 | 0.15.2 | 0.6.0 |
 | 0.5.1 | 0.15.1 | 0.6.0 |
 
@@ -206,6 +207,7 @@ mv ~/mediator/bootstrap-request.json ~/vta-p
 Run:
 
 ```bash
+cd ~/vta-p
 vta contexts reprovision --id mediator --recipient bootstrap-request.json --out bundle.armor
 ```
 
@@ -314,7 +316,7 @@ The wizard shows a **Summary — Review Configuration** screen. Press **Enter** 
 cd ~
 mkdir webvh
 cd webvh
-webvh-daemon setup
+did-hosting-daemon setup
 ```
 
 When prompted:

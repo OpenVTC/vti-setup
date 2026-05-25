@@ -101,8 +101,8 @@ chmod +x mediator && sudo mv mediator /usr/local/bin/
 curl -O https://fpp.ic3.dev/mediator/latest/mediator-setup
 chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/webvh-daemon/latest/webvh-daemon
-chmod +x webvh-daemon && sudo mv webvh-daemon /usr/local/bin/
+curl -O https://fpp.ic3.dev/did-hosting-daemon/latest/did-hosting-daemon
+chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
 ### Option B: Build from Source
@@ -167,7 +167,7 @@ git checkout release/0.6.0
 
 ```bash
 cd webvh-ui && npm install && npm run build:web && cd ..
-cargo install --path webvh-daemon --no-default-features --features "store-fjall,ui"
+cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui"
 ```
 
 ## Resulting URL Map
