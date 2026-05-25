@@ -7,8 +7,8 @@ This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx a
 | Service | Default Port | DNS Record | WebVH Path |
 | --- | --- | --- | --- |
 | WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
-| Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
-| Personal Community VTA | 8101 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
+| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://webvh.yourdomain.com/vtc` |
+| Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://webvh.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
@@ -30,8 +30,8 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 
 | Type | Name | Content (IPv4) | Notes |
 | --- | --- | --- | --- |
-| A | `vta-c` | `<SERVER_PUBLIC_IP>` | DNS only |
-| A | `vta-p` | `<SERVER_PUBLIC_IP>` | DNS only |
+| A | `vtc` | `<SERVER_PUBLIC_IP>` | DNS only |
+| A | `vta` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `webvh` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `mediator` | `<SERVER_PUBLIC_IP>` | DNS only |
 
@@ -89,6 +89,9 @@ Saves 15–40 minutes of build time depending on your hardware:
 curl -O https://fpp.ic3.dev/vta/latest/vta
 chmod +x vta && sudo mv vta /usr/local/bin/
 
+curl -O https://fpp.ic3.dev/vtc/latest/vtc
+chmod +x vtc && sudo mv vtc /usr/local/bin/
+
 curl -O https://fpp.ic3.dev/cnm/latest/cnm
 chmod +x cnm && sudo mv cnm /usr/local/bin/
 
@@ -126,6 +129,7 @@ git checkout feat/runtime-services-P6
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret"
 cargo install --path cnm-cli --no-default-features --features "config-session"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```
@@ -174,8 +178,8 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 
 | URL | Backend |
 | --- | --- |
-| `https://vta-c.yourdomain.com` | `localhost:8100` |
-| `https://vta-p.yourdomain.com` | `localhost:8101` |
+| `https://vtc.yourdomain.com` | `localhost:8200` |
+| `https://vta.yourdomain.com` | `localhost:8100` |
 | `https://webvh.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
