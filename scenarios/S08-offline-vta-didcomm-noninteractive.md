@@ -9,6 +9,7 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
+| 0.6.0 | 0.15.4 | 0.7.1 |
 | 0.6.0 | 0.15.3 | 0.7.1 |
 
 ## Overview
@@ -304,13 +305,13 @@ force = false
 
 ```bash
 cd ~/webvh
-webvh-daemon setup --from webvh-recipe.toml
+did-hosting-daemon setup --from webvh-recipe.toml
 ```
 
 The command generates `bootstrap-request.json`, stores the bootstrap seed in the configured secret backend, and prints:
 
 ```text
-  [setup-recipe] service       = webvh-daemon
+  [setup-recipe] service       = did-hosting-daemon
   [setup-recipe] vta_mode      = offline-prepare
   [setup-recipe] config_path   = config.toml
   [setup-recipe] public_url    = https://webvh.yourdomain.com
