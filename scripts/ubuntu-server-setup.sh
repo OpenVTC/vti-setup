@@ -32,7 +32,7 @@ if [ -z "$DOMAIN" ]; then
   usage
 fi
 
-echo -e "${GREEN}=== VTA-C / VTA-P Nginx Setup ===${NC}"
+echo -e "${GREEN}=== VTI Stack Nginx Setup ===${NC}"
 echo -e "${GREEN}Domain: $DOMAIN${NC}"
 if [ -n "$EMAIL" ]; then
   echo -e "${GREEN}Email: $EMAIL${NC}"
@@ -42,17 +42,17 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 1/11: Update system <<<${NC}"
+echo -e "${GREEN}>>> Step 1/10: Update system <<<${NC}"
 # -----------------------------------------------------------------------------
 sudo apt update && sudo apt upgrade -y
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 2/11: Install build and runtime dependencies <<<${NC}"
+echo -e "${GREEN}>>> Step 2/10: Install build and runtime dependencies <<<${NC}"
 # -----------------------------------------------------------------------------
 sudo apt -y install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 3/11: Configure UFW firewall <<<${NC}"
+echo -e "${GREEN}>>> Step 3/10: Configure UFW firewall <<<${NC}"
 # -----------------------------------------------------------------------------
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
@@ -63,7 +63,7 @@ sudo ufw --force enable
 sudo ufw status
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 4/11: Install Rust <<<${NC}"
+echo -e "${GREEN}>>> Step 4/10: Install Rust <<<${NC}"
 # -----------------------------------------------------------------------------
 if command -v rustc &>/dev/null; then
   echo -e "${GREEN}Rust already installed: $(rustc --version)${NC}"
@@ -75,7 +75,7 @@ rustc --version
 cargo --version
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 5/11: Install Node.js (v22) <<<${NC}"
+echo -e "${GREEN}>>> Step 5/10: Install Node.js (v22) <<<${NC}"
 # -----------------------------------------------------------------------------
 if command -v node &>/dev/null && [ "$(node -v | cut -d. -f1 | tr -d 'v')" -ge 22 ] 2>/dev/null; then
   echo -e "${GREEN}Node.js already installed: $(node -v)${NC}"
@@ -87,13 +87,7 @@ node -v
 npm -v
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 6/11: Source .bashrc <<<${NC}"
-# -----------------------------------------------------------------------------
-# shellcheck disable=SC1090
-[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
-
-# -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 7/11: Install Docker <<<${NC}"
+echo -e "${GREEN}>>> Step 6/10: Install Docker <<<${NC}"
 # -----------------------------------------------------------------------------
 if command -v docker &>/dev/null; then
   echo -e "${GREEN}Docker already installed: $(docker --version)${NC}"
@@ -114,7 +108,7 @@ sudo usermod -aG docker "$USER"
 docker --version
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 8/11: Install Nginx and Certbot <<<${NC}"
+echo -e "${GREEN}>>> Step 7/10: Install Nginx and Certbot <<<${NC}"
 # -----------------------------------------------------------------------------
 sudo apt -y install nginx
 sudo systemctl enable --now nginx
@@ -126,17 +120,17 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 9/11: Create Nginx configs and enable sites <<<${NC}"
+echo -e "${GREEN}>>> Step 8/10: Create Nginx configs and enable sites <<<${NC}"
 # -----------------------------------------------------------------------------
 echo -e "${YELLOW}Creating Nginx configuration files...${NC}"
 
-VTA_C_CONFIG=$(cat <<EOF
+VTC_CONFIG=$(cat <<EOF
 server {
     listen 80;
-    server_name vta-c.${DOMAIN};
+    server_name vtc.${DOMAIN};
 
     location / {
-        proxy_pass http://127.0.0.1:8100;
+        proxy_pass http://127.0.0.1:8200;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -146,13 +140,13 @@ server {
 EOF
 )
 
-VTA_P_CONFIG=$(cat <<EOF
+VTA_CONFIG=$(cat <<EOF
 server {
     listen 80;
-    server_name vta-p.${DOMAIN};
+    server_name vta.${DOMAIN};
 
     location / {
-        proxy_pass http://127.0.0.1:8101;
+        proxy_pass http://127.0.0.1:8100;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -203,12 +197,12 @@ server {
 EOF
 )
 
-sudo tee /etc/nginx/sites-available/vta-c.conf > /dev/null <<EOF
-${VTA_C_CONFIG}
+sudo tee /etc/nginx/sites-available/vtc.conf > /dev/null <<EOF
+${VTC_CONFIG}
 EOF
 
-sudo tee /etc/nginx/sites-available/vta-p.conf > /dev/null <<EOF
-${VTA_P_CONFIG}
+sudo tee /etc/nginx/sites-available/vta.conf > /dev/null <<EOF
+${VTA_CONFIG}
 EOF
 
 sudo tee /etc/nginx/sites-available/webvh.conf > /dev/null <<EOF
@@ -220,8 +214,8 @@ ${MEDIATOR_CONFIG}
 EOF
 
 echo -e "${YELLOW}Enabling sites...${NC}"
-sudo ln -sf /etc/nginx/sites-available/vta-c.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/vta-p.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/vtc.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/webvh.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/mediator.conf /etc/nginx/sites-enabled/
 
@@ -237,33 +231,33 @@ echo -e "${YELLOW}Reloading Nginx...${NC}"
 sudo systemctl reload nginx || sudo service nginx reload
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 10/11: Obtain SSL certificates (Certbot) <<<${NC}"
+echo -e "${GREEN}>>> Step 9/10: Obtain SSL certificates (Certbot) <<<${NC}"
 # -----------------------------------------------------------------------------
 
 if [ -n "$EMAIL" ]; then
   if sudo certbot --nginx \
-    -d "vta-c.${DOMAIN}" -d "vta-p.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
+    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
     --email "$EMAIL" --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vta-c.${DOMAIN} -d vta-p.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --email $EMAIL --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --email $EMAIL --agree-tos"
   fi
 else
   if sudo certbot --nginx \
-    -d "vta-c.${DOMAIN}" -d "vta-p.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
+    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
     --register-unsafely-without-email --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vta-c.${DOMAIN} -d vta-p.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --register-unsafely-without-email --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --register-unsafely-without-email --agree-tos"
   fi
 fi
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 11/11: Verify URLs <<<${NC}"
+echo -e "${GREEN}>>> Step 10/10: Verify URLs <<<${NC}"
 # -----------------------------------------------------------------------------
 echo ""
 
@@ -280,16 +274,16 @@ check_url() {
   fi
 }
 
-check_url "https://vta-c.${DOMAIN}"
-check_url "https://vta-p.${DOMAIN}"
+check_url "https://vtc.${DOMAIN}"
+check_url "https://vta.${DOMAIN}"
 check_url "https://webvh.${DOMAIN}"
 check_url "https://mediator.${DOMAIN}"
 
 echo ""
 echo -e "${GREEN}Setup complete.${NC}"
 echo -e "  Sites:"
-echo -e "    - https://vta-c.${DOMAIN}    → localhost:8100"
-echo -e "    - https://vta-p.${DOMAIN}    → localhost:8101"
+echo -e "    - https://vtc.${DOMAIN}      → localhost:8200"
+echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
 echo -e "    - https://webvh.${DOMAIN}    → localhost:8534"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
 echo ""
