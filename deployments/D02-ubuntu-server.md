@@ -129,7 +129,7 @@ git checkout feat/runtime-services-P6
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
-cargo install --path vtc-service --no-default-features --features "setup,config-secret"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret,did-methods"
 cargo install --path cnm-cli --no-default-features --features "config-session"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```

@@ -9,6 +9,7 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
+| 0.7.0 | 0.15.5 | 0.7.0 |
 | 0.6.0 | 0.15.4 | 0.7.0 |
 | 0.6.0 | 0.15.3 | 0.7.0 |
 
