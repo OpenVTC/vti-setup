@@ -9,8 +9,8 @@
 
 | VTA Version | Mediator Version | Webvh-daemon Version |
 | --- | --- | --- |
-| 0.6.0 | 0.15.4 | 0.7.1 |
-| 0.6.0 | 0.15.3 | 0.7.1 |
+| 0.6.0 | 0.15.4 | 0.7.0 |
+| 0.6.0 | 0.15.3 | 0.7.0 |
 
 ## Overview
 
@@ -21,7 +21,7 @@ This guide replaces all interactive TUI prompts from [S07 (Interactive)](./S07-o
 | Personal VTA | `vta setup` | `vta setup --from vta-setup.toml` |
 | PNM connection | `pnm setup` (wizard) | `pnm setup --name <name>` → `pnm setup continue` |
 | Mediator | `mediator-setup` (TUI) | `mediator-setup --from recipe.toml` (two phases) |
-| WebVH Daemon | `webvh-daemon setup` (offline wizard) | `webvh-daemon setup --from recipe.toml` → *(VTA admin)* → `webvh-daemon setup --from recipe.toml` |
+| WebVH Daemon | `did-hosting-daemon setup` (offline wizard) | `did-hosting-daemon setup --from recipe.toml` → *(VTA admin)* → `did-hosting-daemon setup --from recipe.toml` |
 
 ## Prerequisites
 
@@ -49,8 +49,8 @@ The following values will be collected during setup. Save each one as prompted �
 Create the directory and open the setup file:
 
 ```bash
-mkdir ~/vta-p
-vim ~/vta-p/vta-setup.toml
+mkdir ~/vta
+vim ~/vta/vta-setup.toml
 ```
 
 > **Vim:** `i` to insert → paste content → `Esc` → `:wq` to save and quit
@@ -61,7 +61,7 @@ Paste the following content. Replace **all four** `yourdomain.com` occurrences (
 config_path = "config.toml"
 data_dir    = "data/vta"
 vta_name    = "personal-vta"
-public_url  = "https://vta-p.yourdomain.com"
+public_url  = "https://vta.yourdomain.com"
 
 [services]
 rest    = true
@@ -69,7 +69,7 @@ didcomm = true
 
 [server]
 host = "0.0.0.0"
-port = 8101
+port = 8100
 
 [log]
 level  = "info"
@@ -86,7 +86,7 @@ webvh_url = "https://webvh.yourdomain.com/mediator"
 
 [vta_did]
 kind               = "create_webvh"
-url                = "https://webvh.yourdomain.com/vta-p"
+url                = "https://webvh.yourdomain.com/vta"
 portable           = true
 pre_rotation_count = 1
 ```
@@ -94,7 +94,7 @@ pre_rotation_count = 1
 Run the setup:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta setup --from vta-setup.toml
 ```
 
@@ -104,7 +104,7 @@ The command prints the created DIDs and writes DID log files under `data/vta/did
 >
 > From the summary printed at the end:
 >
-> - **1a — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta-p`)
+> - **1a — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta`)
 > - **1b — Mediator DID** — the `Mediator:` line (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
 
 ### Step 2: Set up Mediator
@@ -165,7 +165,7 @@ This writes `./bootstrap-request.json` and prints the VTA-side command to run.
 Switch to the VTA directory and run the reprovision command:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta contexts reprovision \
   --id mediator \
   --recipient ~/mediator/bootstrap-request.json \
@@ -228,7 +228,7 @@ mediator-setup --from mediator-recipe.toml \
   This key is already stored in the configured secret backend — copy it to an
   offline store now and clear your terminal scrollback if you care about confidentiality.
   Private key (multibase): z3u2...
-  VTA DID: did:webvh:...:webvh.yourdomain.com:vta-p   Context: mediator
+  VTA DID: did:webvh:...:webvh.yourdomain.com:vta   Context: mediator
   ✔ Secrets: conf/secrets.json
   ✔ Setup artefacts removed — the mediator has everything it needs in the configured secret backend.
 
@@ -327,7 +327,7 @@ The command generates `bootstrap-request.json`, stores the bootstrap seed in the
     2. Ask them to seal the response and communicate the SHA-256 digest OOB.
     3. Edit your recipe (config.toml): set vta_mode = "offline-complete",
        [vta].bundle_path, [vta].expect_digest.
-    4. Re-run phase 2: webvh-daemon setup --from <recipe>
+    4. Re-run phase 2: did-hosting-daemon setup --from <recipe>
 ```
 
 > The `client_did` line is printed for verification only — it is already embedded in `bootstrap-request.json`. Nothing to save here.
@@ -335,7 +335,7 @@ The command generates `bootstrap-request.json`, stores the bootstrap seed in the
 **Phase 2 (VTA admin)** — seal the bundle:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta bootstrap provision-integration \
   --request ~/webvh/bootstrap-request.json \
   --out ~/webvh/bundle.armor \
@@ -372,13 +372,13 @@ Then run the same command:
 
 ```bash
 cd ~/webvh
-webvh-daemon setup --from webvh-recipe.toml
+did-hosting-daemon setup --from webvh-recipe.toml
 ```
 
 The command writes `config.toml` and prints:
 
 ```text
-  [setup-recipe] service       = webvh-daemon
+  [setup-recipe] service       = did-hosting-daemon
   [setup-recipe] vta_mode      = offline-complete
   [setup-recipe] config_path   = config.toml
   [setup-recipe] public_url    = https://webvh.yourdomain.com
@@ -393,7 +393,7 @@ The command writes `config.toml` and prints:
 
   [setup-recipe] setup complete
 
-  Next: webvh-daemon --config config.toml
+  Next: did-hosting-daemon --config config.toml
 ```
 
 > **⚠️ SAVE THESE** (3b, 3c)
@@ -415,16 +415,16 @@ Generate an enrollment token using the Admin DID from 3a:
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (3b)>
+did-hosting-daemon invite --role admin --did <Admin DID (3b)>
 ```
 
 Start the WebVH daemon:
 
 ```bash
-nohup webvh-daemon > log.txt 2>&1 &
+nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
-Visit the Enrollment URL printed by `webvh-daemon invite` in a browser, then save a passkey when prompted.
+Visit the Enrollment URL printed by `did-hosting-daemon invite` in a browser, then save a passkey when prompted.
 
 > The enrollment URL is **single-use**. If you missed it or the passkey prompt failed, see [Enrollment URL is single-use](#enrollment-url-is-single-use).
 
@@ -435,13 +435,13 @@ Go to `https://webvh.yourdomain.com/dids`.
 Click **+ New DID** (top right), enter `mediator`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
 
 ```bash
-cat ~/vta-p/data/vta/did-logs/mediator-did.jsonl
+cat ~/vta/data/vta/did-logs/mediator-did.jsonl
 ```
 
-Click **+ New DID** again, enter `vta-p`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+Click **+ New DID** again, enter `vta`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
 
 ```bash
-cat ~/vta-p/data/vta/did-logs/VTA-did.jsonl
+cat ~/vta/data/vta/did-logs/VTA-did.jsonl
 ```
 
 Start the mediator:
@@ -479,7 +479,7 @@ Next: set `admin_did = "did:key:z6Mk..."` in the VTA setup.toml, boot the VTA,
 > **Note:** The `Next:` line suggests setting `admin_did` in the setup TOML — ignore this. We register the DID with `vta import-did` instead.
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta import-did --role admin --label pnm-bootstrap --did <Admin DID (4a)>
 ```
 
@@ -490,8 +490,8 @@ Contexts: unrestricted
 Label: pnm-bootstrap
 
 --- Connection info (share with DID owner) ---
-Community VTA DID: did:webvh:...:webvh.yourdomain.com:vta-p
-Community VTA URL: https://vta-p.yourdomain.com
+Community VTA DID: did:webvh:...:webvh.yourdomain.com:vta
+Community VTA URL: https://vta.yourdomain.com
 ```
 
 ```bash
@@ -499,7 +499,7 @@ pnm setup continue personal-vta --vta-did <Personal VTA DID (1a)>
 ```
 
 ```text
-Bound VTA DID for 'personal-vta': did:webvh:...:webvh.yourdomain.com:vta-p
+Bound VTA DID for 'personal-vta': did:webvh:...:webvh.yourdomain.com:vta
 Ask the VTA admin to grant admin access:
   vta import-did --did did:key:z6Mk... --role admin
 {"slug":"personal-vta","admin_did":"did:key:z6Mk...","state":"complete"}
@@ -510,7 +510,7 @@ Ask the VTA admin to grant admin access:
 With PNM bound, start the VTA:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 nohup vta > log.txt 2>&1 &
 ```
 
@@ -525,7 +525,7 @@ https://webvh.yourdomain.com
 Run a health check from the PNM directory:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 pnm health
 ```
 
@@ -533,25 +533,25 @@ pnm health
 
 ### Enrollment URL is single-use
 
-The enrollment URL generated by `webvh-daemon invite` can only be used once. If you missed saving it, let it expire, or the browser visit failed, you need to regenerate it:
+The enrollment URL generated by `did-hosting-daemon invite` can only be used once. If you missed saving it, let it expire, or the browser visit failed, you need to regenerate it:
 
 **1.** Stop the running daemon:
 
 ```bash
-kill -9 $(pgrep -f webvh-daemon)
+kill -9 $(pgrep -f did-hosting-daemon)
 ```
 
 **2.** Regenerate the enrollment token:
 
 ```bash
 cd ~/webvh
-webvh-daemon invite --role admin --did <Admin DID (3b)>
+did-hosting-daemon invite --role admin --did <Admin DID (3b)>
 ```
 
 **3.** Restart the daemon:
 
 ```bash
-nohup webvh-daemon > log.txt 2>&1 &
+nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
