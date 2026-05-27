@@ -22,8 +22,8 @@ The following values will be collected during setup. Save each one as prompted â
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Mediator DID | Step 4 |
-| 1c | Personal VTA DID | Step 2, Step 3 |
+| 1b | Personal VTA DID | Step 2, Step 3 |
+| 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
 | 4a | WebVH Admin DID | Step 4 |
@@ -126,8 +126,8 @@ Setup complete!
 >
 > From the summary above:
 >
-> - **Mediator DID** (1b): the `Mediator DID:` line
-> - **Personal VTA DID** (1c): the `VTA DID:` line
+> - **Personal VTA DID** (1b): the `VTA DID:` line
+> - **Mediator DID** (1c): the `Mediator DID:` line
 
 ### Step 2: Connect PNM to VTA
 
@@ -142,7 +142,7 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter a name for this VTA |
-| VTA DID: | Paste the **Personal VTA DID** from 1c |
+| VTA DID: | Paste the **Personal VTA DID** from 1b |
 
 PNM will output a `vta import-did` command. Note it down â€” it contains a generated temp DID unique to this session:
 
@@ -340,7 +340,7 @@ When prompted:
 | --- | --- |
 | Public URL: | `https://webvh.yourdomain.com` |
 | Context ID [webvh]: | Press **Enter** (use default) |
-| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1b) |
+| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
 
 The wizard prompts for additional configuration:
 
