@@ -103,10 +103,13 @@ Wait for DNS propagation before proceeding:
 dig +short vta-c.yourdomain.com
 ```
 
-## Next: Run a scenario
+## Next: set up VTI
 
-Once DNS has propagated, proceed to the scenario file for your setup type:
+With the cluster provisioned and DNS propagated, pick how you want to drive the VTI setup:
 
-| Scenario | Link |
+| How you want to drive it | Guide |
 | --- | --- |
-| Self-Managed · DIDComm · Interactive | [S11](../scenarios/S11-self-managed-didcomm-interactive.md) |
+| Step through the wizards interactively | [Interactive setup](interactive-setup.md) |
+| Drive from TOML recipes / CLI flags | [Automated setup](automated-setup.md) |
+
+> Note: the setup guides were verified on [Ubuntu Server](ubuntu-server.md). Adapting them to Kubernetes is straightforward — `vta`, `mediator`, and `did-hosting-daemon` all run as standard containers — but the exact manifests are not yet documented here.

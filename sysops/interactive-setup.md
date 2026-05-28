@@ -1,9 +1,10 @@
-# S07 · Offline VTA · DIDComm · Interactive
+# Interactive VTI Setup
 
-**Setup Type:** Offline VTA — VTA unreachable at setup time\
-**Transport:** DIDComm\
-**Mode:** Interactive\
-**Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
+Stand up the full VTI stack — VTA, Mediator, and WebVH Daemon — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
+
+If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setup](automated-setup.md) — it produces the same end state.
+
+**Tested on:** [Ubuntu Server](ubuntu-server.md)
 
 **Verified with:**
 
@@ -16,14 +17,14 @@
 
 ## Prerequisites
 
-Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing.
+Complete the [Ubuntu Server](ubuntu-server.md) deployment before continuing.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Personal VTA DID | Step 2, Step 3 |
+| 1a | VTA mnemonic phrase | Recovery |
+| 1b | VTA DID | Step 2, Step 3 |
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
@@ -34,9 +35,9 @@ The following values will be collected during setup. Save each one as prompted �
 
 ## Steps
 
-### Step 1: Set up Personal VTA
+### Step 1: Set up VTA
 
-Create a directory for the personal VTA:
+Create a directory for the VTA:
 
 ```bash
 cd ~
@@ -55,7 +56,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Prompt | Action |
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
-| VTA name (leave empty to skip): | Enter your personal VTA name |
+| VTA name (leave empty to skip): | Enter a name for this VTA |
 | Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
 | Server host: | Press **Enter** (default: `0.0.0.0`) |
 | Server port: | Press **Enter** (default: `8100`) |
@@ -127,7 +128,7 @@ Setup complete!
 >
 > From the summary above:
 >
-> - **Personal VTA DID** (1b): the `VTA DID:` line
+> - **VTA DID** (1b): the `VTA DID:` line
 > - **Mediator DID** (1c): the `Mediator DID:` line
 
 ### Step 2: Connect PNM to VTA
@@ -143,7 +144,7 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter a name for this VTA |
-| VTA DID: | Paste the **Personal VTA DID** from 1b |
+| VTA DID: | Paste the **VTA DID** from 1b |
 
 PNM will output a `vta import-did` command. Note it down — it contains a generated temp DID unique to this session:
 

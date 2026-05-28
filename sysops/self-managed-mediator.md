@@ -1,8 +1,7 @@
-# S06 · Offline VTA · REST · Non-interactive
+# Self-Managed Mediator
 
-**Setup Type:** Offline VTA — VTA unreachable at setup time\
-**Transport:** REST\
-**Mode:** Non-interactive
+**Description:** Stand up a DIDComm Mediator that manages its own keys, independent of any VTA.
+**Tested on:** _To be documented._
 
 ## Prerequisites
 

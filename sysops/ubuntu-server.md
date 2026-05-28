@@ -183,13 +183,11 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 | `https://webvh.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
-## Next: Run a scenario
+## Next: set up VTI
 
-Once services are installed, proceed to the scenario file for your setup type:
+With the host provisioned, pick how you want to drive the VTI setup:
 
-| Scenario | Link |
+| How you want to drive it | Guide |
 | --- | --- |
-| Online VTA · REST · Interactive | [S01](../scenarios/S01-online-vta-rest-interactive.md) |
-| Offline VTA · REST · Interactive | [S05](../scenarios/S05-offline-vta-rest-interactive.md) |
-| Offline VTA · DIDComm · Interactive | [S07](../scenarios/S07-offline-vta-didcomm-interactive.md) |
-| Offline VTA · DIDComm · Non-interactive | [S08](../scenarios/S08-offline-vta-didcomm-noninteractive.md) |
+| Step through the wizards interactively | [Interactive setup](interactive-setup.md) |
+| Drive from TOML recipes / CLI flags | [Automated setup](automated-setup.md) |

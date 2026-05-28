@@ -1,4 +1,4 @@
-# T02 · OpenVTC TUI Setup
+# OpenVTC TUI Setup
 
 **Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting membership DIDs (M-DIDs), managing community contexts, and exchanging credentials.  
 **Tested on:** Arch Linux desktop
@@ -11,18 +11,18 @@
 
 ## Prerequisites
 
-Complete [T01 — Self-Managed Personal VTA](/tutorials/T01-self-managed-personal-vta.md) first. This tutorial connects the OpenVTC TUI to the Personal VTA you set up.
+Complete [Personal VTA](personal-vta.md) first. This tutorial connects the OpenVTC TUI to the Personal VTA you set up.
 
 You also need:
 
-- Access to your **PNM** session from [T01](/tutorials/T01-self-managed-personal-vta.md) — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
-- A WebVH host for your persona DID. You can reuse the `webvh-host.com` placeholder from T01 (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised WebVH server.
+- Access to your **PNM** session from the [Personal VTA](personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
+- A WebVH host for your persona DID. You can reuse the `webvh-host.com` placeholder from the Personal VTA tutorial (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised WebVH server.
 
 The following values will be collected during setup. Save each one as prompted.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1b | Personal VTA DID (from T01) | Step 2 |
+| 1b | Personal VTA DID (from the Personal VTA tutorial) | Step 2 |
 | 2a | OpenVTC unlock passphrase | Each TUI launch |
 | 2b | OpenVTC persona DID (P-DID) | Presentation to others |
 
@@ -112,7 +112,7 @@ Paste the **Personal VTA DID** from 1b, then press **Enter**.
 
 OpenVTC mints an ephemeral admin `did:key` for this session and displays it along with a ready-to-copy `pnm contexts create` command.
 
-Press **F2** to copy the command, then switch to your PNM session from T01 and run it:
+Press **F2** to copy the command, then switch to your PNM session from the Personal VTA tutorial and run it:
 
 ```bash
 pnm contexts create --id openvtc --name "OpenVTC" \
@@ -191,7 +191,7 @@ Enter the address of your DID on the web (e.g., `https://webvh-host.com/your-per
 
 The wizard now displays the constructed DID — copy it.
 
-Next, upload the DID to your web host (see [step 2 in T01](/tutorials/T01-self-managed-personal-vta.md#step-2-publish-personal-vta-did) for details).
+Next, upload the DID to your web host (see [Step 2 of the Personal VTA tutorial](personal-vta.md#step-2-publish-personal-vta-did) for details).
 
 Sanity-check from another machine:
 
@@ -215,7 +215,7 @@ After exiting the dashboard, relaunch the TUI any time with `openvtc`.
 
 From the main menu, open the **VTA Service** panel. It should show:
 
-- **VTA URL** matching your Personal VTA from T01 (e.g. `https://vta-p.yourdomain.com`)
+- **VTA URL** matching your Personal VTA (e.g. `https://vta-p.yourdomain.com`)
 - **VTA DID** matching 1b
 - **Persona DID** matching 2b
 - **Mediator DID** matching the mediator your VTA advertises

@@ -1,9 +1,8 @@
-# S08 · Offline VTA · DIDComm · Non-interactive
+# Automated VTI Setup
 
-**Setup Type:** Offline VTA — VTA unreachable at setup time\
-**Transport:** DIDComm\
-**Mode:** Non-interactive\
-**Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
+Stand up the full VTI stack — VTA, Mediator, and WebVH Daemon — driven from TOML recipes and CLI flags instead of interactive wizards. Same offline sealed-bundle flow as [Interactive setup](interactive-setup.md); only the input method changes.
+
+**Tested on:** [Ubuntu Server](ubuntu-server.md)
 
 **Verified with:**
 
@@ -15,24 +14,24 @@
 
 ## Overview
 
-This guide replaces all interactive TUI prompts from [S07 (Interactive)](./S07-offline-vta-didcomm-interactive.md) with TOML files and CLI flags. The offline sealed-bundle bootstrap flow is the same — only the input method changes.
+This guide replaces the interactive TUI prompts of [Interactive setup](interactive-setup.md) with TOML recipes and CLI flags. The offline sealed-bundle bootstrap flow itself is unchanged — read [Interactive setup](interactive-setup.md) first if you want to see what each step is doing under the hood.
 
-| Component | Interactive command | Non-interactive equivalent |
+| Component | Interactive command | Automated equivalent |
 | --- | --- | --- |
-| Personal VTA | `vta setup` | `vta setup --from vta-setup.toml` |
+| VTA | `vta setup` | `vta setup --from vta-setup.toml` |
 | PNM connection | `pnm setup` (wizard) | `pnm setup --name <name>` → `pnm setup continue` |
 | Mediator | `mediator-setup` (TUI) | `mediator-setup --from recipe.toml` (two phases) |
 | WebVH Daemon | `did-hosting-daemon setup` (offline wizard) | `did-hosting-daemon setup --from recipe.toml` → *(VTA admin)* → `did-hosting-daemon setup --from recipe.toml` |
 
 ## Prerequisites
 
-Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing.
+Complete the [Ubuntu Server](ubuntu-server.md) deployment before continuing.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1a | Personal VTA DID | Step 4 |
+| 1a | VTA DID | Step 4 |
 | 1b | Mediator DID | Step 3 |
 | 2a | SHA-256 digest (mediator bundle) | Step 2 |
 | 2b | Mediator Admin DID | Later |
@@ -45,7 +44,7 @@ The following values will be collected during setup. Save each one as prompted �
 
 ## Steps
 
-### Step 1: Set up Personal VTA
+### Step 1: Set up VTA
 
 Create the directory and open the setup file:
 
@@ -105,7 +104,7 @@ The command prints the created DIDs and writes DID log files under `data/vta/did
 >
 > From the summary printed at the end:
 >
-> - **1a — Personal VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta`)
+> - **1a — VTA DID** — the `VTA DID:` line (e.g. `did:webvh:...:webvh.yourdomain.com:vta`)
 > - **1b — Mediator DID** — the `Mediator:` line (e.g. `did:webvh:...:webvh.yourdomain.com:mediator`)
 
 ### Step 2: Set up Mediator
@@ -496,7 +495,7 @@ Community VTA URL: https://vta.yourdomain.com
 ```
 
 ```bash
-pnm setup continue personal-vta --vta-did <Personal VTA DID (1a)>
+pnm setup continue personal-vta --vta-did <VTA DID (1a)>
 ```
 
 ```text
