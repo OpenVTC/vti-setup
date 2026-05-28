@@ -9,8 +9,8 @@ The steps below should work on any Kubernetes cluster as long as it has an Nginx
 | Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
 | DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
-| Community VTA | 8100 | `vta-c.yourdomain.com` | `https://dids.yourdomain.com/vta-c` |
-| Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://dids.yourdomain.com/vta-p` |
+| Verifiable Trust Community | 8100 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
+| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
@@ -80,8 +80,8 @@ The `READY` column should show `True`.
 Save these URLs somewhere (Notion, plain text file) as you will reuse them throughout the setup. Replace `yourdomain.com` with your actual domain:
 
 ```text
-https://vta-c.yourdomain.com
-https://vta-p.yourdomain.com
+https://vtc.yourdomain.com
+https://vta.yourdomain.com
 https://dids.yourdomain.com
 https://mediator.yourdomain.com
 ```
@@ -90,8 +90,8 @@ Get your cluster's ingress IP, then create the following DNS **A records**:
 
 | Type | Name | Content (IPv4) | Notes |
 | --- | --- | --- | --- |
-| A | `vta-c` | `<INGRESS_IP>` | DNS only |
-| A | `vta-p` | `<INGRESS_IP>` | DNS only |
+| A | `vtc` | `<INGRESS_IP>` | DNS only |
+| A | `vta` | `<INGRESS_IP>` | DNS only |
 | A | `dids` | `<INGRESS_IP>` | DNS only |
 | A | `mediator` | `<INGRESS_IP>` | DNS only |
 
@@ -100,7 +100,7 @@ Get your cluster's ingress IP, then create the following DNS **A records**:
 Wait for DNS propagation before proceeding:
 
 ```bash
-dig +short vta-c.yourdomain.com
+dig +short vtc.yourdomain.com
 ```
 
 ## Next: set up VTI

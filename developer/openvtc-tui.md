@@ -5,9 +5,9 @@
 
 **Verified with:**
 
-| OpenVTC Version | VTA Version | Mediator Version | DID Daemon Version |
+| OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- | --- |
-| 0.2.0 | 0.6.0 | 0.15.3 | 0.7.1 |
+| 0.2.0 | 0.6.0 | 0.15.3 | 0.7.0 |
 
 ## Prerequisites
 
@@ -215,7 +215,7 @@ After exiting the dashboard, relaunch the TUI any time with `openvtc`.
 
 From the main menu, open the **VTA Service** panel. It should show:
 
-- **VTA URL** matching your Personal VTA (e.g. `https://vta-p.yourdomain.com`)
+- **VTA URL** matching your Personal VTA (e.g. `https://vta.yourdomain.com`)
 - **VTA DID** matching 1b
 - **Persona DID** matching 2b
 - **Mediator DID** matching the mediator your VTA advertises

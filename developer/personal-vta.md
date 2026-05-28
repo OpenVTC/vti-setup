@@ -5,9 +5,9 @@
 
 **Verified with:**
 
-| VTA Version | Mediator Version | DID Daemon Version |
+| VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.6.0 | 0.15.3 | 0.7.1 |
+| 0.6.0 | 0.15.3 | 0.7.0 |
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ You also need the **Community Mediator DID** before starting — obtain it from 
 
 This tutorial uses two host placeholders. Replace them with your real domains:
 
-- **`yourdomain.com`** — a host **you control**, where your Personal VTA's REST API runs (e.g. `https://vta-p.yourdomain.com`).
+- **`yourdomain.com`** — a host **you control**, where your Personal VTA's REST API runs (e.g. `https://vta.yourdomain.com`).
 - **`did-host.com`** — a host serving `did:webvh` content over HTTPS. The same placeholder stands in for two distinct hosts in the examples: the **community mediator's** DID host (operated by whoever runs the mediator) and the host where **you** will publish your own VTA's DID (your choice — see Step 2). These may or may not be the same domain; if you control both, you can use the same one throughout.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
@@ -36,13 +36,13 @@ Create a directory for the personal VTA:
 
 ```bash
 cd ~
-mkdir vta-p
+mkdir vta
 ```
 
 Run the setup wizard:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta setup
 ```
 
@@ -54,8 +54,8 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | VTA name (leave empty to skip): | Enter your personal VTA name |
 | Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
 | Server host: | Press **Enter** (default: `0.0.0.0`) |
-| Server port: | **8101** (do not use default) |
-| VTA REST URL [http://localhost:8101]: | `https://vta-p.yourdomain.com` |
+| Server port: | Press **Enter** (default: `8100`) |
+| VTA REST URL [http://localhost:8101]: | `https://vta.yourdomain.com` |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
 | Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
@@ -101,10 +101,10 @@ Setup complete!
   Seed stored in configured backend
   Seed backend: config file (hex-encoded in config.toml)
   VTA Name: <your VTA name>
-  VTA REST URL: https://vta-p.yourdomain.com
+  VTA REST URL: https://vta.yourdomain.com
   VTA DID: did:webvh:...:did-host.com:your-did-path
   Services: REST, DIDComm
-  Server: 0.0.0.0:8101
+  Server: 0.0.0.0:8100
   Mediator DID: did:webvh:...:did-host.com:mediator
   Contexts: vta (m/26'/2'/0')
 ```
@@ -119,17 +119,17 @@ Setup complete!
 
 For other parties (mediators, peers, verifiers) to resolve your `did:webvh` DID, the **DID log** generated in Step 1 must be served at a public HTTPS URL. The URL is not a free choice — the `did:webvh` resolver derives it directly from the DID identifier, so the path you publish under must match the **VTA DID URL** you entered during `vta setup` (e.g. `https://did-host.com/your-did-path`). The resolver will fetch `https://did-host.com/your-did-path/did.jsonl`.
 
-The wizard wrote your DID log to `~/vta-p/VTA-did.jsonl`. View it with:
+The wizard wrote your DID log to `~/vta/VTA-did.jsonl`. View it with:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 cat VTA-did.jsonl
 ```
 
 You need to publish that file (renamed to `did.jsonl`) at the matching URL. Stage it for upload by copying it under the chosen name:
 
 ```bash
-cp ~/vta-p/VTA-did.jsonl did.jsonl
+cp ~/vta/VTA-did.jsonl did.jsonl
 ```
 
 You do **not** need to run a DID Daemon for this tutorial — any plain static-file host will work.
@@ -183,10 +183,10 @@ PNM will output a `vta import-did` command. Note it down — it contains a gener
 vta import-did --did did:key:z6Mk... --role admin
 ```
 
-Run that command in the `~/vta-p` directory on the machine where you installed the VTA:
+Run that command in the `~/vta` directory on the machine where you installed the VTA:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 vta import-did --did did:key:z6Mk... --role admin
 ```
 
@@ -199,13 +199,13 @@ Contexts: unrestricted
 
 --- Connection info (share with DID owner) ---
 Community VTA DID: did:webvh:...:did-host.com:your-did-path
-Community VTA URL: https://vta-p.yourdomain.com
+Community VTA URL: https://vta.yourdomain.com
 ```
 
 Now start up the VTA:
 
 ```bash
-cd ~/vta-p
+cd ~/vta
 nohup vta > log.txt 2>&1 &
 ```
 
@@ -214,7 +214,7 @@ nohup vta > log.txt 2>&1 &
 Confirm the VTA is responding:
 
 ```bash
-curl -sSf https://vta-p.yourdomain.com/health
+curl -sSf https://vta.yourdomain.com/health
 ```
 
 It should return: `{"status":"ok"}`
