@@ -1,6 +1,6 @@
 # Interactive VTI Setup
 
-Stand up the full VTI stack — VTA, Mediator, and WebVH Daemon — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
+Stand up the full VTI stack — VTA, Mediator, and DID Hosting Daemon — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
 If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setup](automated-setup.md) — it produces the same end state.
 
