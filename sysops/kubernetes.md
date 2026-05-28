@@ -6,9 +6,9 @@ The steps below should work on any Kubernetes cluster as long as it has an Nginx
 
 ## Service Configuration
 
-| Service | Default Port | DNS Record | WebVH Path |
+| Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
+| DID Hosting Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
 | Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
 | Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |

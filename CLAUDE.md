@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A documentation-only repository — no build system, no tests, no application code. Every page is a Markdown guide describing how to set up or use the VTI stack (VTA + WebVH + DIDComm Mediator).
+A documentation-only repository — no build system, no tests, no application code. Every page is a Markdown guide describing how to set up or use the VTI stack (VTA + DID Host + DIDComm Mediator).
 
 ## Layout
 
@@ -12,7 +12,7 @@ Organised by **persona** — who's reading — not by topic.
 
 | Folder | Reader | Contents |
 | --- | --- | --- |
-| `developer/` | Code-writing dev using OpenVTC | Personal VTA, OpenVTC TUI, joining a community |
+| `developer/` | Individual using OpenVTC to take part in VTCs | Personal VTA, OpenVTC TUI, joining a community |
 | `community-manager/` | VTC operator | Bootstrap a VTC, policy authoring, ACL/registry management (mostly future) |
 | `sysops/` | VTI infra operator | Host deployments (Ubuntu / Kubernetes / local-dev / AWS-EC2), interactive + automated VTI setup, self-managed component variants |
 

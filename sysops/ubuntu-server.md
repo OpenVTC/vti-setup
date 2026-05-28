@@ -4,9 +4,9 @@ This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx a
 
 ## Service Configuration
 
-| Service | Default Port | DNS Record | WebVH Path |
+| Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
+| DID Hosting Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
 | Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://webvh.yourdomain.com/vtc` |
 | Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://webvh.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
@@ -155,7 +155,7 @@ cargo install --path affinidi-messaging-mediator --no-default-features --feature
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
 
-#### WebVH Service
+#### DID Hosting Service
 
 ```bash
 cd ~/affinidi

@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-- **A target community.** You need its public WebVH URL, the address of its **public/join mediator**, and the DID of its **VTC service**.
+- **A target community.** You need its public DID Hosting URL, the address of its **public/join mediator**, and the DID of its **VTC service**.
 - **At least two existing members** who know you and are willing to issue VRCs to your M-DID. Under current initial-days policy this is the floor — there is no path to membership without it. The two issuers must be distinct members.
 - **A host for your Personal VTA.** Pick a deployment from [`sysops/`](../sysops/). **`local-dev` is dev/testing only — use `ubuntu-server`, `kubernetes`, or `aws-ec2` for any Personal VTA you intend to keep using.**
 
@@ -45,7 +45,7 @@ You'll receive one of three outcomes: `Approved` (a sealed VMC + role VEC bundle
 
 After an `Approved` outcome you should be able to:
 
-- Resolve your M-DID via the community's WebVH host.
+- Resolve your M-DID via the community's DID host.
 - Present your VMC against the community's status list and see it as not-revoked.
 - See your M-DID listed as `Active` in the community's trust registry.
 - Receive a DIDComm message addressed to your M-DID via the **members-only mediator** (not just the public/join one).

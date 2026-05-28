@@ -2,7 +2,7 @@
 
 You operate a Verifiable Trust Community (VTC). You stand up the community VTA, author and ship the join/role policies that decide who gets in and what they can do, manage the ACL and trust registry, and review the requests automation can't decide on its own.
 
-You're not [the developer](../developer/) using the community. And you're not [sysops](../sysops/) — they put VTA, Mediator, and WebVH on the wire; you sit on top of that, owning community lifecycle and identity decisions.
+You're not [the developer](../developer/) using the community. And you're not [sysops](../sysops/) — they put VTA, Mediator, and DID Host on the wire; you sit on top of that, owning community lifecycle and identity decisions.
 
 ## Your path
 
@@ -12,5 +12,5 @@ Future tutorials will cover authoring `join.rego` policies, role-credential issu
 
 ## Prerequisites you'll need before you start
 
-- A running [VTI deployment](../sysops/) — your community VTA needs a host, a mediator to talk on, and a WebVH host to publish DIDs.
+- A running [VTI deployment](../sysops/) — your community VTA needs a host, a mediator to talk on, and a DID host to publish DIDs.
 - A clear policy stance on who gets in. The current OpenVTC initial-days default is "two existing members vouch via VRCs" — see [Joining a Community](../developer/joining-a-community.md) for what that looks like from the applicant's side. You can change the rule, but you should know what you're changing from.

@@ -1,6 +1,6 @@
-# Self-Managed WebVH Host
+# Self-Managed DID Host
 
-**Description:** Stand up a WebVH daemon that manages its own keys and hosts `did:webvh` DID documents, independent of any VTA.
+**Description:** Stand up a DID Daemon that manages its own keys and hosts `did:webvh` DID documents, independent of any VTA.
 **Tested on:** _To be documented._
 
 ## Prerequisites

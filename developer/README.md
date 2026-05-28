@@ -1,6 +1,6 @@
 # Developer
 
-You write code on top of OpenVTC. You'll use the OpenVTC CLI/TUI day-to-day, and you need your own Personal VTA — the trust anchor that holds your keys and mints the DIDs you present to communities.
+You use OpenVTC to take part in one or more VTCs. You'll run a Personal VTA that holds your keys, drive it from the OpenVTC CLI/TUI, and present credentials when communities ask for them.
 
 You do **not** run the community's infrastructure. That's [sysops](../sysops/). You don't bootstrap or administer a community — that's a [community manager](../community-manager/).
 

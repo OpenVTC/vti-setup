@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Nginx HTTPS Proxy Setup Script
-# Usage: curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]
-# Example: curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com
-# Example: curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com admin@example.com
+# Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]
+# Example: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com
+# Example: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com admin@example.com
 # Domain is required. Email is optional (used for Let's Encrypt expiry notifications).
 # This script sets up Nginx reverse proxy configurations for VTA services.
 
@@ -16,7 +16,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 usage() {
-  echo "Usage: curl -sSL https://raw.githubusercontent.com/ic3software/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]"
+  echo "Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]"
   echo "Example: ... | bash -s -- example.com"
   echo "Example: ... | bash -s -- example.com admin@example.com"
   echo ""

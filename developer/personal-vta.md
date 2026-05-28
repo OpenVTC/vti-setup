@@ -5,7 +5,7 @@
 
 **Verified with:**
 
-| VTA Version | Mediator Version | Webvh-daemon Version |
+| VTA Version | Mediator Version | DID Daemon Version |
 | --- | --- | --- |
 | 0.6.0 | 0.15.3 | 0.7.1 |
 
@@ -18,7 +18,7 @@ You also need the **Community Mediator DID** before starting — obtain it from 
 This tutorial uses two host placeholders. Replace them with your real domains:
 
 - **`yourdomain.com`** — a host **you control**, where your Personal VTA's REST API runs (e.g. `https://vta-p.yourdomain.com`).
-- **`webvh-host.com`** — a host serving `did:webvh` content over HTTPS. The same placeholder stands in for two distinct hosts in the examples: the **community mediator's** webvh host (operated by whoever runs the mediator) and the host where **you** will publish your own VTA's DID (your choice — see Step 2). These may or may not be the same domain; if you control both, you can use the same one throughout.
+- **`did-host.com`** — a host serving `did:webvh` content over HTTPS. The same placeholder stands in for two distinct hosts in the examples: the **community mediator's** DID host (operated by whoever runs the mediator) and the host where **you** will publish your own VTA's DID (your choice — see Step 2). These may or may not be the same domain; if you control both, you can use the same one throughout.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
@@ -78,7 +78,7 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | Prompt | Action |
 | --- | --- |
 | DIDComm messaging: | Choose **Use an existing mediator DID** |
-| Mediator DID: | Paste the **Community Mediator DID** from 0a (e.g. `did:webvh:...:webvh-host.com:mediator`) |
+| Mediator DID: | Paste the **Community Mediator DID** from 0a (e.g. `did:webvh:...:did-host.com:mediator`) |
 | Mediator hostname for vsock-bridged TEE deployments: | Press **Enter** (skip) |
 
 **VTA DID:**
@@ -86,7 +86,7 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | Prompt | Action |
 | --- | --- |
 | VTA DID: | Choose **Create a new `did:webvh` DID** |
-| VTA DID URL: | `https://webvh-host.com/your-did-path` |
+| VTA DID URL: | `https://did-host.com/your-did-path` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
@@ -102,10 +102,10 @@ Setup complete!
   Seed backend: config file (hex-encoded in config.toml)
   VTA Name: <your VTA name>
   VTA REST URL: https://vta-p.yourdomain.com
-  VTA DID: did:webvh:...:webvh-host.com:your-did-path
+  VTA DID: did:webvh:...:did-host.com:your-did-path
   Services: REST, DIDComm
   Server: 0.0.0.0:8101
-  Mediator DID: did:webvh:...:webvh-host.com:mediator
+  Mediator DID: did:webvh:...:did-host.com:mediator
   Contexts: vta (m/26'/2'/0')
 ```
 
@@ -117,7 +117,7 @@ Setup complete!
 
 ### Step 2: Publish Personal VTA DID
 
-For other parties (mediators, peers, verifiers) to resolve your `did:webvh` DID, the **DID log** generated in Step 1 must be served at a public HTTPS URL. The URL is not a free choice — the `did:webvh` resolver derives it directly from the DID identifier, so the path you publish under must match the **VTA DID URL** you entered during `vta setup` (e.g. `https://webvh-host.com/your-did-path`). The resolver will fetch `https://webvh-host.com/your-did-path/did.jsonl`.
+For other parties (mediators, peers, verifiers) to resolve your `did:webvh` DID, the **DID log** generated in Step 1 must be served at a public HTTPS URL. The URL is not a free choice — the `did:webvh` resolver derives it directly from the DID identifier, so the path you publish under must match the **VTA DID URL** you entered during `vta setup` (e.g. `https://did-host.com/your-did-path`). The resolver will fetch `https://did-host.com/your-did-path/did.jsonl`.
 
 The wizard wrote your DID log to `~/vta-p/VTA-did.jsonl`. View it with:
 
@@ -132,7 +132,7 @@ You need to publish that file (renamed to `did.jsonl`) at the matching URL. Stag
 cp ~/vta-p/VTA-did.jsonl did.jsonl
 ```
 
-You do **not** need to run a webvh-daemon for this tutorial — any plain static-file host will work.
+You do **not** need to run a DID Daemon for this tutorial — any plain static-file host will work.
 
 Common hosting options:
 
@@ -152,7 +152,7 @@ Technical considerations:
 Once the file is reachable, sanity-check it from another machine:
 
 ```bash
-curl -sSf https://webvh-host.com/your-did-path/did.jsonl | head -n 1
+curl -sSf https://did-host.com/your-did-path/did.jsonl | head -n 1
 ```
 
 You should see the first line of the DID log returned over HTTPS.
@@ -198,7 +198,7 @@ Role: admin
 Contexts: unrestricted
 
 --- Connection info (share with DID owner) ---
-Community VTA DID: did:webvh:...:webvh-host.com:your-did-path
+Community VTA DID: did:webvh:...:did-host.com:your-did-path
 Community VTA URL: https://vta-p.yourdomain.com
 ```
 

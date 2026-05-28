@@ -5,7 +5,7 @@
 
 **Verified with:**
 
-| OpenVTC Version | VTA Version | Mediator Version | Webvh-daemon Version |
+| OpenVTC Version | VTA Version | Mediator Version | DID Daemon Version |
 | --- | --- | --- | --- |
 | 0.2.0 | 0.6.0 | 0.15.3 | 0.7.1 |
 
@@ -16,7 +16,7 @@ Complete [Personal VTA](personal-vta.md) first. This tutorial connects the OpenV
 You also need:
 
 - Access to your **PNM** session from the [Personal VTA](personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
-- A WebVH host for your persona DID. You can reuse the `webvh-host.com` placeholder from the Personal VTA tutorial (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised WebVH server.
+- A DID host for your persona DID. You can reuse the `did-host.com` placeholder from the Personal VTA tutorial (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised DID hosting server.
 
 The following values will be collected during setup. Save each one as prompted.
 
@@ -92,7 +92,7 @@ openvtc setup
 > - Default profile (no `-p`): `config.json`
 > - Named profile (`-p alice`): `config-alice.json`
 > - Secured config (BIP32 seed, ESK) lives in the OS keyring under service `openvtc`, account = the profile name.
-> - `did.jsonl` (local working copy) is **not** suffixed by profile, so running the wizard under a new profile overwrites it. The authoritative copy is the one you published on the WebVH host.
+> - `did.jsonl` (local working copy) is **not** suffixed by profile, so running the wizard under a new profile overwrites it. The authoritative copy is the one you published on the DID host.
 >
 > There is no `openvtc profiles list` or `openvtc profiles delete` command. Inspect with `ls ~/.config/openvtc/`; remove a single profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` and clear the corresponding keyring entries.
 
@@ -129,13 +129,13 @@ The wizard then auto-bootstraps:
 - The VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out.
 - The wizard opens a REST or DIDComm session against the VTA, depending on what the VTA advertises in its DID document.
 
-If the VTA advertises any WebVH hosting servers, the wizard offers to host your persona DID on one of them. Otherwise it skips ahead and prompts for a WebVH URL near the end of the wizard.
+If the VTA advertises any DID hosting servers, the wizard offers to host your persona DID on one of them. Otherwise it skips ahead and prompts for a DID Hosting URL near the end of the wizard.
 
 Press **Enter** to continue.
 
 ##### 2.2.4 Creating keys
 
-The wizard then creates keys for the persona via the VTA along with WebVH update keys.
+The wizard then creates keys for the persona via the VTA along with DID update keys.
 
 Press **Enter** to continue.
 
@@ -181,11 +181,11 @@ Type in your name and press **Enter** to continue.
 
 ###### 2.4.3.1 Create a new DID
 
-Press **Enter** (Create a new WebVH DID) to continue.
+Press **Enter** (Create a new `did:webvh` DID) to continue.
 
 ###### 2.4.3.2 Enter persona DID URL
 
-Enter the address of your DID on the web (e.g., `https://webvh-host.com/your-persona`), and press **Enter** to continue.
+Enter the address of your DID on the web (e.g., `https://did-host.com/your-persona`), and press **Enter** to continue.
 
 ###### 2.4.3.3 Upload DID document
 
@@ -196,7 +196,7 @@ Next, upload the DID to your web host (see [Step 2 of the Personal VTA tutorial]
 Sanity-check from another machine:
 
 ```bash
-curl -sSf https://webvh-host.com/your-persona/did.jsonl | head -n 1
+curl -sSf https://did-host.com/your-persona/did.jsonl | head -n 1
 ```
 
 Press **Enter** to continue.
