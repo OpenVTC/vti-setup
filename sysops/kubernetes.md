@@ -8,9 +8,9 @@ The steps below should work on any Kubernetes cluster as long as it has an Nginx
 
 | Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| DID Hosting Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
-| Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
-| Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
+| DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
+| Community VTA | 8100 | `vta-c.yourdomain.com` | `https://dids.yourdomain.com/vta-c` |
+| Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://dids.yourdomain.com/vta-p` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
@@ -82,7 +82,7 @@ Save these URLs somewhere (Notion, plain text file) as you will reuse them throu
 ```text
 https://vta-c.yourdomain.com
 https://vta-p.yourdomain.com
-https://webvh.yourdomain.com
+https://dids.yourdomain.com
 https://mediator.yourdomain.com
 ```
 
@@ -92,7 +92,7 @@ Get your cluster's ingress IP, then create the following DNS **A records**:
 | --- | --- | --- | --- |
 | A | `vta-c` | `<INGRESS_IP>` | DNS only |
 | A | `vta-p` | `<INGRESS_IP>` | DNS only |
-| A | `webvh` | `<INGRESS_IP>` | DNS only |
+| A | `dids` | `<INGRESS_IP>` | DNS only |
 | A | `mediator` | `<INGRESS_IP>` | DNS only |
 
 > **Cloudflare users:** You can use a single wildcard **`*`** A record pointing to `<INGRESS_IP>` instead of four separate records. Either way, set records to **DNS only** (grey cloud, proxy disabled) — cert-manager's HTTP-01 challenge requires direct access to port 80.

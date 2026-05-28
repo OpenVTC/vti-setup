@@ -6,9 +6,9 @@ This guide covers deploying the VTI stack on an Ubuntu 26.04 server with Nginx a
 
 | Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| DID Hosting Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
-| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://webvh.yourdomain.com/vtc` |
-| Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://webvh.yourdomain.com/vta` |
+| DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
+| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
+| Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
@@ -32,7 +32,7 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 | --- | --- | --- | --- |
 | A | `vtc` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `vta` | `<SERVER_PUBLIC_IP>` | DNS only |
-| A | `webvh` | `<SERVER_PUBLIC_IP>` | DNS only |
+| A | `dids` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `mediator` | `<SERVER_PUBLIC_IP>` | DNS only |
 
 > **Cloudflare users:** Set these records to **DNS only** (grey cloud, proxy disabled). The setup script uses Let's Encrypt for SSL, which requires direct access to port 80.
@@ -180,7 +180,7 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 | --- | --- |
 | `https://vtc.yourdomain.com` | `localhost:8200` |
 | `https://vta.yourdomain.com` | `localhost:8100` |
-| `https://webvh.yourdomain.com` | `localhost:8534` |
+| `https://dids.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
 ## Next: set up VTI
