@@ -1,6 +1,6 @@
 # Deployment: Ubuntu Server
 
-This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx as a reverse proxy and Let's Encrypt SSL certificates.
+This guide covers deploying the VTI stack on an Ubuntu 26.04 server with Nginx as a reverse proxy and Let's Encrypt SSL certificates.
 
 ## Service Configuration
 
@@ -15,14 +15,14 @@ This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx a
 
 | Requirement | Details |
 | --- | --- |
-| Registered domain + DNS access | We recommend [Cloudflare](https://www.cloudflare.com) for DNS management. |
-| VPS or cloud account | We recommend [Hetzner](https://www.hetzner.com). Create an Ubuntu 24.04 instance. |
+| Registered domain + DNS access | We use [Cloudflare](https://www.cloudflare.com) for DNS management. |
+| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance. |
 | SSH key pair | Used to connect to the server. |
 | `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `sudo apt install curl` |
 
-## Step 1: Create Ubuntu 24.04 Server
+## Step 1: Create Ubuntu 26.04 Server
 
-Create a new Ubuntu 24.04 server. Once created, note its **public IP address** — you will need it for DNS configuration in the next step.
+Create a new Ubuntu 26.04 server. Once created, note its **public IP address** — you will need it for DNS configuration in the next step.
 
 ## Step 2: Configure DNS Records
 
@@ -129,7 +129,7 @@ git checkout feat/runtime-services-P6
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
-cargo install --path vtc-service --no-default-features --features "setup,config-secret,did-methods"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret"
 cargo install --path cnm-cli --no-default-features --features "config-session"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```
@@ -171,7 +171,7 @@ git checkout release/0.6.0
 
 ```bash
 cd webvh-ui && npm install && npm run build:web && cd ..
-cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui"
+cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui,did-methods"
 ```
 
 ## Resulting URL Map

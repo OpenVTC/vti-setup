@@ -28,25 +28,20 @@ The following values will be collected during setup. Save each one as prompted �
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
-| 4a | WebVH Admin DID | Step 4 |
-| 4b | WebVH Admin private key | Step 4 |
-| 4c | SHA-256 digest (WebVH bundle) | Step 4 |
-| 4d | WebVH Daemon DID | Later |
+| 4a | DID Host Admin DID | Step 4 |
+| 4b | DID Host Admin private key | Step 4 |
+| 4c | SHA-256 digest (DID Host bundle) | Step 4 |
+| 4d | DID Host Daemon DID | Later |
 
 ## Steps
 
 ### Step 1: Set up VTA
 
-Create a directory for the VTA:
+Create a directory for the VTA and run the setup wizard:
 
 ```bash
 cd ~
 mkdir vta
-```
-
-Run the setup wizard:
-
-```bash
 cd ~/vta
 vta setup
 ```
@@ -198,7 +193,7 @@ Ship this bootstrap request to your VTA admin out-of-band.
 Hotkeys:  [c] copy JSON   [v] copy vta cmd   [p] copy pnm-cli cmd
 ```
 
-Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` command.
+**Open a new terminal window** to the server.
 
 **→ VTA session** — mediator-setup automatically generates the JSON; move it to the VTA directory:
 
@@ -241,6 +236,8 @@ Move the bundle to the mediator directory:
 ```bash
 mv ~/vta/bundle.armor ~/mediator/
 ```
+
+**Switch back** to the in process Mediator Setup window.
 
 **→ Mediator session** — press **Enter** to continue. When prompted:
 
@@ -312,7 +309,7 @@ Press **Enter** to continue to Protocol.
 
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
 
-### Step 4: Set up WebVH Daemon
+### Step 4: Set up DID Hosting Daemon
 
 ```bash
 cd ~
@@ -342,6 +339,7 @@ When prompted:
 | --- | --- |
 | Public URL: | `https://webvh.yourdomain.com` |
 | Context ID [webvh]: | Press **Enter** (use default) |
+| Configure a DIDComm mediator [Y/n]: | Press **Enter** → **Y** |
 | Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
 
 The wizard prompts for additional configuration:
@@ -488,7 +486,7 @@ The command outputs an **Enrollment URL**, for example:
 https://webvh.yourdomain.com/enroll?token=...
 ```
 
-Start the WebVH daemon:
+Start the DID hosting daemon:
 
 ```bash
 cd ~/webvh
@@ -537,7 +535,7 @@ nohup vta > log.txt 2>&1 &
 
 ## Verification
 
-Visit the WebVH admin panel and confirm you can log in:
+Visit the DID Hosting Manager admin panel and confirm you can log in:
 
 ```text
 https://webvh.yourdomain.com
