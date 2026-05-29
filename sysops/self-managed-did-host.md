@@ -1,8 +1,7 @@
-# S06 · Offline VTA · REST · Non-interactive
+# Self-Managed DID Host
 
-**Setup Type:** Offline VTA — VTA unreachable at setup time\
-**Transport:** REST\
-**Mode:** Non-interactive
+**Description:** Stand up a DID Daemon that manages its own keys and hosts `did:webvh` DID documents, independent of any VTA.
+**Tested on:** _To be documented._
 
 ## Prerequisites
 

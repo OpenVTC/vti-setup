@@ -1,46 +1,34 @@
-# VTI Setup Guide
+# VTI Setup
 
-A collection of setup paths for the stack: VTA, WebVH, and the DIDComm Mediator.
+> **⚠️ Demo / testing only — do not use in production.**
+>
+> These guides set up the VTI stack for **experimentation and learning**. System hardening, security reviews, key-management posture, and other operational best practices have **not** been done — the goal is to get you playing with the software, not to host real identities or anything that matters. Robust, production-grade deployment guidance will be added in a future revision.
 
-- [Verifiable Trust Infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure)
-- [WebVH](https://github.com/affinidi/affinidi-webvh-service)
-- [Mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator)
+Setup guides for the **Verifiable Trust Infrastructure** stack — VTA, DID Host, and the DIDComm Mediator — and for the things people do on top of it.
 
-The goal is to document every realistic combination of setup type, transport,
-mode, and deployment environment so that anyone — from a first-time developer to
-an ops team deploying to production — can find a tested, reproducible path.
+The repo is organised by **who you are**, not by which service you're touching. Pick your role and follow the path.
 
 ---
 
-## Quick Start
+## Pick your role
 
-Get up and running in two steps: pick a deployment environment, then pick a
-scenario.
+### [Developer](developer/)
 
-### Step 1 — Choose a deployment environment
+You use OpenVTC to take part in one or more VTCs. You'll run a Personal VTA for your keys, drive it from the OpenVTC CLI/TUI, and join communities to present and collect credentials.
 
-Set up your target infrastructure first. Each guide covers provisioning, DNS,
-and service installation.
+→ [`developer/`](developer/) · stand up a Personal VTA, install the TUI, join your first community.
 
-| Environment   | Guide                                                   | Best for                            |
-| ------------- | ------------------------------------------------------- | ----------------------------------- |
-| Local Dev     | [D01 — Local Dev](deployments/D01-local-dev.md)         | Development and testing on a laptop |
-| Ubuntu Server | [D02 — Ubuntu Server](deployments/D02-ubuntu-server.md) | Single-server staging or production |
-| Kubernetes    | [D03 — Kubernetes](deployments/D03-kubernetes.md)       | Scalable production clusters        |
-| AWS EC2 / VPS | [D04 — AWS EC2](deployments/D04-AWS-ec2.md)             | Cloud-hosted virtual machines       |
+### [Community Manager](community-manager/)
 
-### Step 2 — Choose a scenario
+You operate a VTC: bootstrap the community, set join and role policies, manage the ACL, review what automation can't decide.
 
-Once your environment is running, pick the combination of setup type, transport,
-and mode that fits your use case. Not sure which to pick? See
-[The Four Dimensions](#the-four-dimensions) for a decision flowchart.
+→ [`community-manager/`](community-manager/) · bootstrap a VTC, ship policies, run the community.
 
-|                  |                       **REST**                        |                         **REST**                         |                       **DIDComm**                        |                         **DIDComm**                         |
-| ---------------- | :---------------------------------------------------: | :------------------------------------------------------: | :------------------------------------------------------: | :---------------------------------------------------------: |
-|                  |                      Interactive                      |                     Non-interactive                      |                       Interactive                        |                       Non-interactive                       |
-| **Online VTA**   |  [S01](scenarios/S01-online-vta-rest-interactive.md)  |  [S02](scenarios/S02-online-vta-rest-noninteractive.md)  |  [S03](scenarios/S03-online-vta-didcomm-interactive.md)  |  [S04](scenarios/S04-online-vta-didcomm-noninteractive.md)  |
-| **Offline VTA**  | [S05](scenarios/S05-offline-vta-rest-interactive.md)  | [S06](scenarios/S06-offline-vta-rest-noninteractive.md)  | [S07](scenarios/S07-offline-vta-didcomm-interactive.md)  | [S08](scenarios/S08-offline-vta-didcomm-noninteractive.md)  |
-| **Self-Managed** | [S09](scenarios/S09-self-managed-rest-interactive.md) | [S10](scenarios/S10-self-managed-rest-noninteractive.md) | [S11](scenarios/S11-self-managed-didcomm-interactive.md) | [S12](scenarios/S12-self-managed-didcomm-noninteractive.md) |
+### [Sysops](sysops/)
+
+You run the VTI services so the other two can do their jobs. Provision the host, stand up VTA + Mediator + DID Hosting Daemon.
+
+→ [`sysops/`](sysops/) · pick a deployment, then pick interactive or automated VTI setup.
 
 ---
 
@@ -50,7 +38,7 @@ and mode that fits your use case. Not sure which to pick? See
 graph TB
     subgraph VTI["Verifiable Trust Infrastructure (VTI)"]
         VTA["VTA Service\n(master key store, DIDs, ACL)"]
-        WebVH["WebVH Service\n(did:webvh hosting)"]
+        DIDHost["DID Hosting Service\n(did:webvh hosting)"]
         MED["DIDComm Mediator\n(message relay)"]
     end
 
@@ -59,78 +47,21 @@ graph TB
 
     CLI -->|"REST / DIDComm"| VTA
     APP -->|"REST / DIDComm"| VTA
-    VTA -->|"provisions context + keys"| WebVH
+    VTA -->|"provisions context + keys"| DIDHost
     VTA -->|"provisions context + keys"| MED
-    MED -->|"resolves DIDs via"| WebVH
+    MED -->|"resolves DIDs via"| DIDHost
     APP -->|"sends / receives messages"| MED
 ```
 
-| Component    | Repo                                                                                                                                                         | Role                                                            |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| **VTA**      | [OpenVTC/verifiable-trust-infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure)                                                        | Master key store — manages BIP-39 seed, DIDs, contexts, and ACL |
-| **WebVH**    | [affinidi/affinidi-webvh-service](https://github.com/affinidi/affinidi-webvh-service)                                                                        | Hosts `did:webvh` DID documents publicly                        |
-| **Mediator** | [affinidi/affinidi-tdk-rs · affinidi-messaging-mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator) | DIDComm v2 relay and message routing                            |
-
----
-
-## The Four Dimensions
-
-Every setup path is defined by four independent choices:
-
-```mermaid
-mindmap
-  root((VTI Setup))
-    Setup Type
-      Online VTA
-      Offline VTA
-      Self-Managed
-    Transport
-      REST
-      DIDComm
-    Mode
-      Interactive
-      Non-interactive
-    Deployment
-      Local Dev
-      Ubuntu Server
-      Kubernetes
-      EC2 / VPS
-```
-
-| #   | Dimension      | Options                                          | Notes                                              |
-| --- | -------------- | ------------------------------------------------ | -------------------------------------------------- |
-| 1   | **Setup Type** | Online VTA · Offline VTA · Self-Managed          | How Mediator and WebVH interact with the VTA       |
-| 2   | **Transport**  | REST · DIDComm                                   | Protocol used to talk to the VTA                   |
-| 3   | **Mode**       | Interactive · Non-interactive                    | Human in the loop vs fully scripted                |
-| 4   | **Deployment** | Local Dev · Ubuntu Server · Kubernetes · EC2/VPS | Runtime environment — affects keyring availability |
-
-### Setup Type explained
-
-```mermaid
-flowchart TD
-    Q1{"Is the VTA\nreachable?"}
-    Q2{"Do you have a VTA\nbut it is not reachable\nat setup time?"}
-    ONLINE["① Online VTA\nVTA is running and reachable.\nServices connect to it directly\nfor key issuance and DID management."]
-    OFFLINE["② Offline VTA\nVTA exists but is unreachable\n(air-gapped or bootstrapping).\nVTA wizard runs offline;\nservices import pre-generated bundles."]
-    SELF["③ Self-Managed\nNo VTA involved.\nMediator and WebVH operate\nindependently and manage\ntheir own keys."]
-
-    Q1 -->|Yes| ONLINE
-    Q1 -->|No| Q2
-    Q2 -->|Yes| OFFLINE
-    Q2 -->|No| SELF
-```
+| Component | Repo | Role |
+| --- | --- | --- |
+| **VTA** | [OpenVTC/verifiable-trust-infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure) | Master key store — manages BIP-39 seed, DIDs, contexts, and ACL |
+| **DID Host** | [affinidi/affinidi-webvh-service](https://github.com/affinidi/affinidi-webvh-service) | Hosts `did:webvh` DID documents publicly |
+| **Mediator** | [affinidi/affinidi-tdk-rs · affinidi-messaging-mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator) | DIDComm v2 relay and message routing |
+| **OpenVTC** | [OpenVTC/openvtc](https://github.com/OpenVTC/openvtc) | CLI/TUI for joining and participating in VTCs |
 
 ---
 
 ## Contributing
 
-Each scenario file follows a common template:
-
-1. **Prerequisites** — what must be in place before you start
-2. **Environment** — which deployment this was tested on
-3. **Steps** — numbered, reproducible commands
-4. **Verification** — how to confirm it worked
-5. **Known issues** — edge cases encountered during testing
-
-If you have tested a path, please open a PR filling in the corresponding
-scenario file and deployment notes.
+If you've followed a path and have notes, fixes, or a new tested combination to add, open a PR against the relevant persona folder. Stub pages (marked _Not yet written_) are tracked roadmap, not abandoned drafts — please fill one in if you've done the work.

@@ -1,13 +1,14 @@
-# S07 · Offline VTA · DIDComm · Interactive
+# Interactive VTI Setup
 
-**Setup Type:** Offline VTA — VTA unreachable at setup time\
-**Transport:** DIDComm\
-**Mode:** Interactive\
-**Tested on:** [Ubuntu Server](../deployments/D02-ubuntu-server.md)
+Stand up the full VTI stack — VTA, Mediator, and DID Hosting Daemon — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
+
+If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setup](automated-setup.md) — it produces the same end state.
+
+**Tested on:** [Ubuntu Server](ubuntu-server.md)
 
 **Verified with:**
 
-| VTA Version | Mediator Version | Webvh-daemon Version |
+| VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
 | 0.7.0 | 0.15.5 | 0.7.0 |
 | 0.7.0 | 0.15.4 | 0.7.0 |
@@ -16,36 +17,31 @@
 
 ## Prerequisites
 
-Complete [D02 — Ubuntu Server](../deployments/D02-ubuntu-server.md) before continuing.
+Complete the [Ubuntu Server](ubuntu-server.md) deployment before continuing.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1a | Personal VTA mnemonic phrase | Recovery |
-| 1b | Personal VTA DID | Step 2, Step 3 |
+| 1a | VTA mnemonic phrase | Recovery |
+| 1b | VTA DID | Step 2, Step 3 |
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
-| 4a | WebVH Admin DID | Step 4 |
-| 4b | WebVH Admin private key | Step 4 |
-| 4c | SHA-256 digest (WebVH bundle) | Step 4 |
-| 4d | WebVH Daemon DID | Later |
+| 4a | DID Host Admin DID | Step 4 |
+| 4b | DID Host Admin private key | Step 4 |
+| 4c | SHA-256 digest (DID Host bundle) | Step 4 |
+| 4d | DID Host Daemon DID | Later |
 
 ## Steps
 
-### Step 1: Set up Personal VTA
+### Step 1: Set up VTA
 
-Create a directory for the personal VTA:
+Create a directory for the VTA and run the setup wizard:
 
 ```bash
 cd ~
 mkdir vta
-```
-
-Run the setup wizard:
-
-```bash
 cd ~/vta
 vta setup
 ```
@@ -55,7 +51,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Prompt | Action |
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
-| VTA name (leave empty to skip): | Enter your personal VTA name |
+| VTA name (leave empty to skip): | Enter a name for this VTA |
 | Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
 | Server host: | Press **Enter** (default: `0.0.0.0`) |
 | Server port: | Press **Enter** (default: `8100`) |
@@ -87,7 +83,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
 | Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
 | Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
-| mediator DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/mediator` |
+| mediator DID URL [http://localhost:8000/]: | `https://dids.yourdomain.com/mediator` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
@@ -99,7 +95,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Prompt | Action |
 | --- | --- |
 | VTA DID: | Choose **Create a new did:webvh DID** |
-| VTA DID URL [http://localhost:8000/]: | `https://webvh.yourdomain.com/vta` |
+| VTA DID URL [http://localhost:8000/]: | `https://dids.yourdomain.com/vta` |
 | Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
@@ -115,10 +111,10 @@ Setup complete!
   Seed backend: config file (hex-encoded in config.toml)
   VTA Name: <your VTA name>
   VTA REST URL: https://vta.yourdomain.com
-  VTA DID: did:webvh:...:webvh.yourdomain.com:vta
+  VTA DID: did:webvh:...:dids.yourdomain.com:vta
   Services: REST, DIDComm
   Server: 0.0.0.0:8100
-  Mediator DID: did:webvh:...:webvh.yourdomain.com:mediator
+  Mediator DID: did:webvh:...:dids.yourdomain.com:mediator
   Mediator URL: https://mediator.yourdomain.com/mediator/v1
   Contexts: vta (m/26'/2'/0')
 ```
@@ -127,7 +123,7 @@ Setup complete!
 >
 > From the summary above:
 >
-> - **Personal VTA DID** (1b): the `VTA DID:` line
+> - **VTA DID** (1b): the `VTA DID:` line
 > - **Mediator DID** (1c): the `Mediator DID:` line
 
 ### Step 2: Connect PNM to VTA
@@ -143,7 +139,7 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter a name for this VTA |
-| VTA DID: | Paste the **Personal VTA DID** from 1b |
+| VTA DID: | Paste the **VTA DID** from 1b |
 
 PNM will output a `vta import-did` command. Note it down — it contains a generated temp DID unique to this session:
 
@@ -197,7 +193,7 @@ Ship this bootstrap request to your VTA admin out-of-band.
 Hotkeys:  [c] copy JSON   [v] copy vta cmd   [p] copy pnm-cli cmd
 ```
 
-Press **c** to copy the bootstrap request JSON and **v** to copy the `vta` command.
+**Open a new terminal window** to the server.
 
 **→ VTA session** — mediator-setup automatically generates the JSON; move it to the VTA directory:
 
@@ -221,7 +217,7 @@ The command outputs the bundle details:
 
   Context:   mediator (DIDComm Messaging Mediator)
   Admin DID: did:key:z6Mk...
-  DID:       did:webvh:...:webvh.yourdomain.com:mediator
+  DID:       did:webvh:...:dids.yourdomain.com:mediator
   Recipient: mediator/conf/mediator.toml
 
 Armored bundle written to bundle.armor
@@ -241,6 +237,8 @@ Move the bundle to the mediator directory:
 mv ~/vta/bundle.armor ~/mediator/
 ```
 
+**Switch back** to the in process Mediator Setup window.
+
 **→ Mediator session** — press **Enter** to continue. When prompted:
 
 | Prompt | Action |
@@ -254,13 +252,13 @@ The wizard completes the VTA integration and displays:
 Bundle opened successfully — sealed handoff complete.
 
   Mediator DID  [m]
-    did:webvh:...:webvh.yourdomain.com:mediator
+    did:webvh:...:dids.yourdomain.com:mediator
 
   Admin DID  [a]
     did:key:z6Mk...
 
   VTA DID  [v]
-    did:webvh:...:webvh.yourdomain.com:vta
+    did:webvh:...:dids.yourdomain.com:vta
 
   ── Bundle contents ─────────────────────────────────────────
   Keys:          3 signing + 1 key-agreement
@@ -311,12 +309,12 @@ Press **Enter** to continue to Protocol.
 
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
 
-### Step 4: Set up WebVH Daemon
+### Step 4: Set up DID Hosting Daemon
 
 ```bash
 cd ~
-mkdir webvh
-cd webvh
+mkdir dids
+cd dids
 did-hosting-daemon setup
 ```
 
@@ -339,8 +337,9 @@ When prompted:
 
 | Prompt | Action |
 | --- | --- |
-| Public URL: | `https://webvh.yourdomain.com` |
+| Public URL: | `https://dids.yourdomain.com` |
 | Context ID [webvh]: | Press **Enter** (use default) |
+| Configure a DIDComm mediator [Y/n]: | Press **Enter** → **Y** |
 | Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
 
 The wizard prompts for additional configuration:
@@ -379,7 +378,7 @@ The wizard completes phase 1 and prints:
 Move the bootstrap request to the VTA directory and create the WebVH context:
 
 ```bash
-mv ~/webvh/bootstrap-request.json ~/vta/
+mv ~/dids/bootstrap-request.json ~/vta/
 cd ~/vta
 ```
 
@@ -403,7 +402,7 @@ Integration provisioned — sealed bundle written to bundle.armor
   Bundle-Id:       <id>
   Client DID:      did:key:z6Mk...
   Admin DID:       did:key:z6Mk... (== client)
-  Integration DID: did:webvh:...:webvh.yourdomain.com
+  Integration DID: did:webvh:...:dids.yourdomain.com
   Template:        did-hosting-control (did-hosting-control)
   Secrets:         1
   Outputs:         1
@@ -414,17 +413,17 @@ Integration provisioned — sealed bundle written to bundle.armor
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next command.
 
-Move the bundle to the webvh directory:
+Move the bundle to the dids directory:
 
 ```bash
-mv ~/vta/bundle.armor ~/webvh/
-cd ~/webvh
+mv ~/vta/bundle.armor ~/dids/
+cd ~/dids
 ```
 
 Complete offline setup (phase 2):
 
 ```bash
-cd ~/webvh
+cd ~/dids
 did-hosting-daemon setup
 ```
 
@@ -433,7 +432,7 @@ When prompted:
 | Prompt | Action |
 | --- | --- |
 | How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
-| ASCII-armored sealed bundle path: | `/root/webvh/bundle.armor` |
+| ASCII-armored sealed bundle path: | `/root/dids/bundle.armor` |
 | Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4c |
 | Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
 
@@ -444,8 +443,8 @@ DID Hosting Daemon — Offline Setup (step 2/2)
 ========================================
 
   Sealed response opened.
-  DID:          did:webvh:...:webvh.yourdomain.com
-  VTA DID:      did:webvh:...:webvh.yourdomain.com:vta
+  DID:          did:webvh:...:dids.yourdomain.com
+  VTA DID:      did:webvh:...:dids.yourdomain.com:vta
   VTA URL:      https://vta.yourdomain.com
 
   Generated JWT signing key.
@@ -454,14 +453,14 @@ DID Hosting Daemon — Offline Setup (step 2/2)
 
   Importing daemon DID into store at path '.well-known'...
   Daemon DID imported!
-  DID:  did:webvh:...:webvh.yourdomain.com
+  DID:  did:webvh:...:dids.yourdomain.com
   SCID: <scid>
   server_did updated in config.toml
   Admin ACL entry added for did:key:z6Mk...
 
   Setup complete!
 
-  Daemon DID: did:webvh:...:webvh.yourdomain.com
+  Daemon DID: did:webvh:...:dids.yourdomain.com
 
   Start the daemon:
     did-hosting-daemon --config config.toml
@@ -469,12 +468,12 @@ DID Hosting Daemon — Offline Setup (step 2/2)
 
 > **⚠️ SAVE THIS** (4d)
 >
-> Save the **Daemon DID** (4d) (the `Daemon DID:` line, e.g. `did:webvh:...:webvh.yourdomain.com`)
+> Save the **Daemon DID** (4d) (the `Daemon DID:` line, e.g. `did:webvh:...:dids.yourdomain.com`)
 
 Generate an enrollment token using the **Admin DID** from 4a:
 
 ```bash
-cd ~/webvh
+cd ~/dids
 ```
 
 ```bash
@@ -484,13 +483,13 @@ did-hosting-daemon invite --role admin --did <Admin DID (4a)>
 The command outputs an **Enrollment URL**, for example:
 
 ```text
-https://webvh.yourdomain.com/enroll?token=...
+https://dids.yourdomain.com/enroll?token=...
 ```
 
-Start the WebVH daemon:
+Start the DID hosting daemon:
 
 ```bash
-cd ~/webvh
+cd ~/dids
 nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
@@ -500,7 +499,7 @@ Visit the Enrollment URL in a browser, then save a passkey when prompted.
 
 **Upload DID logs:**
 
-Go to `https://webvh.yourdomain.com/dids`.
+Go to `https://dids.yourdomain.com/dids`.
 
 Click **+ New DID** (top right), enter `mediator`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
 
@@ -536,10 +535,10 @@ nohup vta > log.txt 2>&1 &
 
 ## Verification
 
-Visit the WebVH admin panel and confirm you can log in:
+Visit the DID Hosting Manager admin panel and confirm you can log in:
 
 ```text
-https://webvh.yourdomain.com
+https://dids.yourdomain.com
 ```
 
 Run a health check from the PNM directory:
@@ -564,7 +563,7 @@ kill -9 $(pgrep -f did-hosting-daemon)
 **2.** Regenerate the enrollment token:
 
 ```bash
-cd ~/webvh
+cd ~/dids
 did-hosting-daemon invite --role admin --did <Admin DID (4a)>
 ```
 

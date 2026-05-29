@@ -1,4 +1,4 @@
-# T03 · Bootstrap Community VTA
+# Bootstrap a VTC
 
 **Description:** Bootstrap a Community VTA — the shared trust anchor for a VTC. Performed once, by the community owner, to bring the community into existence.
 **Tested on:** _To be documented._

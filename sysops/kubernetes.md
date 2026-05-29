@@ -6,11 +6,11 @@ The steps below should work on any Kubernetes cluster as long as it has an Nginx
 
 ## Service Configuration
 
-| Service | Default Port | DNS Record | WebVH Path |
+| Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
-| Community VTA | 8100 | `vta-c.yourdomain.com` | `https://webvh.yourdomain.com/vta-c` |
-| Personal Community VTA | 8100 | `vta-p.yourdomain.com` | `https://webvh.yourdomain.com/vta-p` |
+| DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
+| Verifiable Trust Community | 8100 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
+| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
@@ -80,9 +80,9 @@ The `READY` column should show `True`.
 Save these URLs somewhere (Notion, plain text file) as you will reuse them throughout the setup. Replace `yourdomain.com` with your actual domain:
 
 ```text
-https://vta-c.yourdomain.com
-https://vta-p.yourdomain.com
-https://webvh.yourdomain.com
+https://vtc.yourdomain.com
+https://vta.yourdomain.com
+https://dids.yourdomain.com
 https://mediator.yourdomain.com
 ```
 
@@ -90,9 +90,9 @@ Get your cluster's ingress IP, then create the following DNS **A records**:
 
 | Type | Name | Content (IPv4) | Notes |
 | --- | --- | --- | --- |
-| A | `vta-c` | `<INGRESS_IP>` | DNS only |
-| A | `vta-p` | `<INGRESS_IP>` | DNS only |
-| A | `webvh` | `<INGRESS_IP>` | DNS only |
+| A | `vtc` | `<INGRESS_IP>` | DNS only |
+| A | `vta` | `<INGRESS_IP>` | DNS only |
+| A | `dids` | `<INGRESS_IP>` | DNS only |
 | A | `mediator` | `<INGRESS_IP>` | DNS only |
 
 > **Cloudflare users:** You can use a single wildcard **`*`** A record pointing to `<INGRESS_IP>` instead of four separate records. Either way, set records to **DNS only** (grey cloud, proxy disabled) — cert-manager's HTTP-01 challenge requires direct access to port 80.
@@ -100,13 +100,16 @@ Get your cluster's ingress IP, then create the following DNS **A records**:
 Wait for DNS propagation before proceeding:
 
 ```bash
-dig +short vta-c.yourdomain.com
+dig +short vtc.yourdomain.com
 ```
 
-## Next: Run a scenario
+## Next: set up VTI
 
-Once DNS has propagated, proceed to the scenario file for your setup type:
+With the cluster provisioned and DNS propagated, pick how you want to drive the VTI setup:
 
-| Scenario | Link |
+| How you want to drive it | Guide |
 | --- | --- |
-| Self-Managed · DIDComm · Interactive | [S11](../scenarios/S11-self-managed-didcomm-interactive.md) |
+| Step through the wizards interactively | [Interactive setup](interactive-setup.md) |
+| Drive from TOML recipes / CLI flags | [Automated setup](automated-setup.md) |
+
+> Note: the setup guides were verified on [Ubuntu Server](ubuntu-server.md). Adapting them to Kubernetes is straightforward — `vta`, `mediator`, and `did-hosting-daemon` all run as standard containers — but the exact manifests are not yet documented here.

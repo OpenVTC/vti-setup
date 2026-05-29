@@ -4,7 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A documentation-only repository — no build system, no tests, no application code. Every file in `scenarios/` and `deployments/` is a Markdown guide describing how to set up the VTI stack (VTA + WebVH + DIDComm Mediator).
+A documentation-only repository — no build system, no tests, no application code. Every page is a Markdown guide describing how to set up or use the VTI stack (VTA + DID Host + DIDComm Mediator).
+
+## Layout
+
+Organised by **persona** — who's reading — not by topic.
+
+| Folder | Reader | Contents |
+| --- | --- | --- |
+| `developer/` | Individual using OpenVTC to take part in VTCs | Personal VTA, OpenVTC TUI, joining a community |
+| `community-manager/` | VTC operator | Bootstrap a VTC, policy authoring, ACL/registry management (mostly future) |
+| `sysops/` | VTI infra operator | Host deployments (Ubuntu / Kubernetes / local-dev / AWS-EC2), interactive + automated VTI setup, self-managed component variants |
+
+Each folder has a `README.md` that is the persona's entry point — a one-page index of the journey, with links into the per-topic pages.
+
+Some files are stubs (`_To be documented._` or `_Not yet written._`). Those are intentional placeholders for tracked roadmap, not abandoned drafts.
 
 ## Linting
 
@@ -14,36 +28,9 @@ markdownlint-cli2 "**/*.md"
 
 `.markdownlint.json` disables MD013 (line length). Do not manually wrap long lines — leave prose as single lines and let the editor handle soft-wrapping.
 
-## Document structure
-
-### Scenarios (`scenarios/`)
-
-12 files named `S{NN}-{setup-type}-{transport}-{mode}.md`. Each follows this exact template:
-
-```markdown
-## Prerequisites
-## Steps
-## Verification
-## Known Issues / Edge Cases
-## Deployment Notes
-```
-
-The 12 scenarios come from: **3 setup types** × **2 transports** × **2 modes**:
-
-| Setup Type | Transport | Mode |
-| --- | --- | --- |
-| online-vta | rest | interactive |
-| offline-vta | didcomm | noninteractive |
-| self-managed | | |
-
-### Deployments (`deployments/`)
-
-4 files named `D{NN}-{environment}.md` (local-dev, ubuntu-server, kubernetes, AWS-ec2). Deployment is a cross-cutting concern — any scenario can run on any deployment.
-
 ## Key concepts
 
-- **Online VTA**: VTA is running and reachable; services connect to it directly.
-- **Offline VTA**: VTA exists but is unreachable at setup time; services import pre-generated bundles.
-- **Self-Managed**: No VTA; Mediator and WebVH manage their own keys independently.
-- **Interactive**: Human in the loop.
-- **Non-interactive**: Fully scripted / automated.
+- **VTA** — Verifiable Trust Agent; the master key store. A **Personal VTA** is one a developer runs for themselves; an **infrastructure VTA** is the trust anchor at the centre of a VTI deployment.
+- **VTC** — Verifiable Trust Community; the social/policy layer that sits on top of a VTI.
+- **Offline VTA setup** — the VTA is unreachable at setup time (air-gapped, or just bootstrapping). Mediator and WebVH import pre-generated sealed bundles. This is the flow both `sysops/interactive-setup.md` and `sysops/automated-setup.md` describe.
+- **Interactive vs automated** — same end state, two operator styles. Interactive walks each tool's TUI; automated drives the same flow from TOML recipes and CLI flags.

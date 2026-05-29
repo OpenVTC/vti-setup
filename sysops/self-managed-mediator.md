@@ -1,8 +1,7 @@
-# S10 · Self-Managed · REST · Non-interactive
+# Self-Managed Mediator
 
-**Setup Type:** Self-Managed — you operate the VTA yourself\
-**Transport:** REST\
-**Mode:** Non-interactive
+**Description:** Stand up a DIDComm Mediator that manages its own keys, independent of any VTA.
+**Tested on:** _To be documented._
 
 ## Prerequisites
 

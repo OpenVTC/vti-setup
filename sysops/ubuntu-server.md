@@ -1,28 +1,28 @@
 # Deployment: Ubuntu Server
 
-This guide covers deploying the VTI stack on an Ubuntu 24.04 server with Nginx as a reverse proxy and Let's Encrypt SSL certificates.
+This guide covers deploying the VTI stack on an Ubuntu 26.04 server with Nginx as a reverse proxy and Let's Encrypt SSL certificates.
 
 ## Service Configuration
 
-| Service | Default Port | DNS Record | WebVH Path |
+| Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| WebVH Service | 8534 | `webvh.yourdomain.com` | `https://webvh.yourdomain.com` |
-| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://webvh.yourdomain.com/vtc` |
-| Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://webvh.yourdomain.com/vta` |
+| DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
+| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
+| Verifiable Trust Agent for personal use | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | — |
 
 ## Prerequisites
 
 | Requirement | Details |
 | --- | --- |
-| Registered domain + DNS access | We recommend [Cloudflare](https://www.cloudflare.com) for DNS management. |
-| VPS or cloud account | We recommend [Hetzner](https://www.hetzner.com). Create an Ubuntu 24.04 instance. |
+| Registered domain + DNS access | We use [Cloudflare](https://www.cloudflare.com) for DNS management. |
+| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance. |
 | SSH key pair | Used to connect to the server. |
 | `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `sudo apt install curl` |
 
-## Step 1: Create Ubuntu 24.04 Server
+## Step 1: Create Ubuntu 26.04 Server
 
-Create a new Ubuntu 24.04 server. Once created, note its **public IP address** — you will need it for DNS configuration in the next step.
+Create a new Ubuntu 26.04 server. Once created, note its **public IP address** — you will need it for DNS configuration in the next step.
 
 ## Step 2: Configure DNS Records
 
@@ -32,7 +32,7 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 | --- | --- | --- | --- |
 | A | `vtc` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `vta` | `<SERVER_PUBLIC_IP>` | DNS only |
-| A | `webvh` | `<SERVER_PUBLIC_IP>` | DNS only |
+| A | `dids` | `<SERVER_PUBLIC_IP>` | DNS only |
 | A | `mediator` | `<SERVER_PUBLIC_IP>` | DNS only |
 
 > **Cloudflare users:** Set these records to **DNS only** (grey cloud, proxy disabled). The setup script uses Let's Encrypt for SSL, which requires direct access to port 80.
@@ -129,7 +129,7 @@ git checkout feat/runtime-services-P6
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
-cargo install --path vtc-service --no-default-features --features "setup,config-secret,did-methods"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret"
 cargo install --path cnm-cli --no-default-features --features "config-session"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```
@@ -155,7 +155,7 @@ cargo install --path affinidi-messaging-mediator --no-default-features --feature
 cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 ```
 
-#### WebVH Service
+#### DID Hosting Service
 
 ```bash
 cd ~/affinidi
@@ -171,7 +171,7 @@ git checkout release/0.6.0
 
 ```bash
 cd webvh-ui && npm install && npm run build:web && cd ..
-cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui"
+cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui,did-methods"
 ```
 
 ## Resulting URL Map
@@ -180,16 +180,14 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 | --- | --- |
 | `https://vtc.yourdomain.com` | `localhost:8200` |
 | `https://vta.yourdomain.com` | `localhost:8100` |
-| `https://webvh.yourdomain.com` | `localhost:8534` |
+| `https://dids.yourdomain.com` | `localhost:8534` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
 
-## Next: Run a scenario
+## Next: set up VTI
 
-Once services are installed, proceed to the scenario file for your setup type:
+With the host provisioned, pick how you want to drive the VTI setup:
 
-| Scenario | Link |
+| How you want to drive it | Guide |
 | --- | --- |
-| Online VTA · REST · Interactive | [S01](../scenarios/S01-online-vta-rest-interactive.md) |
-| Offline VTA · REST · Interactive | [S05](../scenarios/S05-offline-vta-rest-interactive.md) |
-| Offline VTA · DIDComm · Interactive | [S07](../scenarios/S07-offline-vta-didcomm-interactive.md) |
-| Offline VTA · DIDComm · Non-interactive | [S08](../scenarios/S08-offline-vta-didcomm-noninteractive.md) |
+| Step through the wizards interactively | [Interactive setup](interactive-setup.md) |
+| Drive from TOML recipes / CLI flags | [Automated setup](automated-setup.md) |
