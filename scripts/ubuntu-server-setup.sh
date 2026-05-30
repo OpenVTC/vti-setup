@@ -156,10 +156,10 @@ server {
 EOF
 )
 
-WEBVH_CONFIG=$(cat <<EOF
+DIDS_CONFIG=$(cat <<EOF
 server {
     listen 80;
-    server_name webvh.${DOMAIN};
+    server_name dids.${DOMAIN};
 
     location / {
         proxy_pass http://127.0.0.1:8534;
@@ -205,8 +205,8 @@ sudo tee /etc/nginx/sites-available/vta.conf > /dev/null <<EOF
 ${VTA_CONFIG}
 EOF
 
-sudo tee /etc/nginx/sites-available/webvh.conf > /dev/null <<EOF
-${WEBVH_CONFIG}
+sudo tee /etc/nginx/sites-available/dids.conf > /dev/null <<EOF
+${DIDS_CONFIG}
 EOF
 
 sudo tee /etc/nginx/sites-available/mediator.conf > /dev/null <<EOF
@@ -216,7 +216,7 @@ EOF
 echo -e "${YELLOW}Enabling sites...${NC}"
 sudo ln -sf /etc/nginx/sites-available/vtc.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/webvh.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/dids.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/mediator.conf /etc/nginx/sites-enabled/
 
 echo -e "${YELLOW}Testing Nginx configuration...${NC}"
@@ -236,23 +236,23 @@ echo -e "${GREEN}>>> Step 9/10: Obtain SSL certificates (Certbot) <<<${NC}"
 
 if [ -n "$EMAIL" ]; then
   if sudo certbot --nginx \
-    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
+    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "dids.${DOMAIN}" -d "mediator.${DOMAIN}" \
     --email "$EMAIL" --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --email $EMAIL --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN} --email $EMAIL --agree-tos"
   fi
 else
   if sudo certbot --nginx \
-    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "webvh.${DOMAIN}" -d "mediator.${DOMAIN}" \
+    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "dids.${DOMAIN}" -d "mediator.${DOMAIN}" \
     --register-unsafely-without-email --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d webvh.${DOMAIN} -d mediator.${DOMAIN} --register-unsafely-without-email --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN} --register-unsafely-without-email --agree-tos"
   fi
 fi
 
@@ -276,7 +276,7 @@ check_url() {
 
 check_url "https://vtc.${DOMAIN}"
 check_url "https://vta.${DOMAIN}"
-check_url "https://webvh.${DOMAIN}"
+check_url "https://dids.${DOMAIN}"
 check_url "https://mediator.${DOMAIN}"
 
 echo ""
@@ -284,7 +284,7 @@ echo -e "${GREEN}Setup complete.${NC}"
 echo -e "  Sites:"
 echo -e "    - https://vtc.${DOMAIN}      → localhost:8200"
 echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
-echo -e "    - https://webvh.${DOMAIN}    → localhost:8534"
+echo -e "    - https://dids.${DOMAIN}     → localhost:8534"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
 echo ""
 echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"
