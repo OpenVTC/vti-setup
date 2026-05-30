@@ -338,6 +338,7 @@ When prompted:
 | Prompt | Action |
 | --- | --- |
 | Public URL: | `https://dids.yourdomain.com` |
+| DID path on the server [.well-known]: | Press **Enter** (use default) |
 | Context ID [webvh]: | Press **Enter** (use default) |
 | Configure a DIDComm mediator [Y/n]: | Press **Enter** → **Y** |
 | Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
