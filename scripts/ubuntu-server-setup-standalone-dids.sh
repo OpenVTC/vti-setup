@@ -229,6 +229,22 @@ server {
 EOF
 )
 
+CONTROL_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name control.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8532;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
 sudo tee /etc/nginx/sites-available/vtc.conf > /dev/null <<EOF
 ${VTC_CONFIG}
 EOF
@@ -249,6 +265,10 @@ sudo tee /etc/nginx/sites-available/witness.conf > /dev/null <<EOF
 ${WITNESS_CONFIG}
 EOF
 
+sudo tee /etc/nginx/sites-available/control.conf > /dev/null <<EOF
+${CONTROL_CONFIG}
+EOF
+
 sudo tee /etc/nginx/sites-available/watcher.conf > /dev/null <<EOF
 ${WATCHER_CONFIG}
 EOF
@@ -259,6 +279,7 @@ sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/mediator.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/dids.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/witness.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/control.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/watcher.conf /etc/nginx/sites-enabled/
 
 echo -e "${YELLOW}Testing Nginx configuration...${NC}"
@@ -279,24 +300,24 @@ echo -e "${GREEN}>>> Step 9/10: Obtain SSL certificates (Certbot) <<<${NC}"
 if [ -n "$EMAIL" ]; then
   if sudo certbot --nginx \
     -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "mediator.${DOMAIN}" \
-    -d "dids.${DOMAIN}" -d "witness.${DOMAIN}" -d "watcher.${DOMAIN}" \
+    -d "dids.${DOMAIN}" -d "witness.${DOMAIN}" -d "control.${DOMAIN}" -d "watcher.${DOMAIN}" \
     --email "$EMAIL" --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d mediator.${DOMAIN} -d did.${DOMAIN} -d witness.${DOMAIN} -d watcher.${DOMAIN} --email $EMAIL --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d mediator.${DOMAIN} -d dids.${DOMAIN} -d witness.${DOMAIN} -d control.${DOMAIN} -d watcher.${DOMAIN} --email $EMAIL --agree-tos"
   fi
 else
   if sudo certbot --nginx \
     -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "mediator.${DOMAIN}" \
-    -d "dids.${DOMAIN}" -d "witness.${DOMAIN}" -d "watcher.${DOMAIN}" \
+    -d "dids.${DOMAIN}" -d "witness.${DOMAIN}" -d "control.${DOMAIN}" -d "watcher.${DOMAIN}" \
     --register-unsafely-without-email --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d mediator.${DOMAIN} -d did.${DOMAIN} -d witness.${DOMAIN} -d watcher.${DOMAIN} --register-unsafely-without-email --agree-tos"
+    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d mediator.${DOMAIN} -d dids.${DOMAIN} -d witness.${DOMAIN} -d control.${DOMAIN} -d watcher.${DOMAIN} --register-unsafely-without-email --agree-tos"
   fi
 fi
 
@@ -323,6 +344,7 @@ check_url "https://vta.${DOMAIN}"
 check_url "https://mediator.${DOMAIN}"
 check_url "https://dids.${DOMAIN}"
 check_url "https://witness.${DOMAIN}"
+check_url "https://control.${DOMAIN}"
 check_url "https://watcher.${DOMAIN}"
 
 echo ""
@@ -333,6 +355,7 @@ echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
 echo -e "    - https://dids.${DOMAIN}      → localhost:8530"
 echo -e "    - https://witness.${DOMAIN}  → localhost:8531"
+echo -e "    - https://control.${DOMAIN}  → localhost:8532"
 echo -e "    - https://watcher.${DOMAIN}  → localhost:8533"
 echo ""
 echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"
