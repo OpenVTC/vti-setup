@@ -10,10 +10,7 @@ If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setu
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.7.0 | 0.15.5 | 0.7.0 |
-| 0.7.0 | 0.15.4 | 0.7.0 |
-| 0.6.0 | 0.15.2 | 0.6.0 |
-| 0.5.1 | 0.15.1 | 0.6.0 |
+| 0.8.0 | 0.15.6 | 0.7.0 |
 
 ## Prerequisites
 
@@ -291,6 +288,7 @@ Press **Enter** to continue to Protocol.
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
 | Network access posture: | Press **Enter** (default: **Open network**) |
+| CORS policy: | Choose **Allow any origin** |
 
 **Database:**
 
@@ -340,7 +338,6 @@ When prompted:
 | Public URL: | `https://dids.yourdomain.com` |
 | DID path on the server [.well-known]: | Press **Enter** (use default) |
 | Context ID [webvh]: | Press **Enter** (use default) |
-| Configure a DIDComm mediator [Y/n]: | Press **Enter** → **Y** |
 | Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
 
 The wizard prompts for additional configuration:
