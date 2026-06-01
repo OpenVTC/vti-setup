@@ -25,10 +25,11 @@ The following values will be collected during setup. Save each one as prompted �
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
-| 4a | DID Host Admin DID | Step 4 |
-| 4b | DID Host Admin private key | Step 4 |
-| 4c | SHA-256 digest (DID Host bundle) | Step 4 |
-| 4d | DID Host Daemon DID | Later |
+| 4a | Control Admin DID | Step 4 |
+| 4b | Control Admin private key | Step 4 |
+| 4c | Consumer DID | Step 4 |
+| 4d | SHA-256 digest (Control bundle) | Step 4 |
+| 4e | Control DID | Later |
 
 ## Steps
 
@@ -55,7 +56,6 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
-| Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory: | Press **Enter** (default: `data/vta`) |
 
@@ -288,6 +288,7 @@ Press **Enter** to continue to Protocol.
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
 | Network access posture: | Press **Enter** (default: **Open network**) |
+| Cross-origin requests: | Press **Enter** (default: **Deny all cross-origin**) |
 
 **Database:**
 
@@ -308,7 +309,146 @@ The wizard shows a **Summary — Review Configuration** screen. Press **Enter** 
 
 ### Step 4: Set up DID Hosting (Standalone Mode)
 
-> _To be documented._
+#### Step 4.1: Set up DID Hosting Control
+
+```bash
+cd ~
+mkdir control
+cd ~/control
+did-hosting-control setup
+```
+
+**Offline bootstrap (phase 1):**
+
+| Prompt | Action |
+| --- | --- |
+| How will the control plane reach its VTA?: | Choose **Offline — start a new sealed-bundle bootstrap (phase 1)** |
+| Bootstrap request file path [bootstrap-request.json]: | Press **Enter** (use default) |
+| Pending state file path [setup-offline-state.toml]: | Press **Enter** (use default) |
+| Config file output path [config.toml]: | Press **Enter** (use default) |
+| DID hosting URL (e.g. https://did.example.com): | `https://dids.yourdomain.com` |
+| DID path on the server: | `services/control` |
+| VTA context ID: | `control` |
+| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
+| DID log output file (written in step 2) [control-did.jsonl]: | Press **Enter** (use default) |
+| Public URL: | `https://control.yourdomain.com` |
+| Listen host: | Press **Enter** (default: `0.0.0.0`) |
+| Listen port: | Press **Enter** (default: `8532`) |
+| Log level: | Press **Enter** (default: `info`) |
+| Log format: | Press **Enter** (default: `text`) |
+| Data directory [data/did-hosting-control]: | Press **Enter** (use default) |
+| Continue with plaintext secrets storage?: | **yes** |
+| Admin ACL entry: | Choose **Generate a new did:key identity for the operator** |
+
+The wizard prints:
+
+```text
+  Generated admin did:key: did:key:z6Mk...
+  Private key (save this now — will not be re-shown): z3u2...
+
+  Offline setup step 1/2 complete.
+
+  Request file:   bootstrap-request.json
+  State file:     setup-offline-state.toml
+  Bootstrap seed: stored in the configured secrets backend
+
+  Consumer DID:   did:key:z6Mk...
+  Nonce:          <nonce>
+```
+
+> **⚠️ SAVE THESE** (4a, 4b, 4c)
+>
+> - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
+> - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
+> - Save the **Consumer DID** (4c) (the `Consumer DID:` line)
+
+Move the bootstrap request to the VTA directory and create the control context:
+
+```bash
+mv ~/control/bootstrap-request.json ~/vta/
+cd ~/vta
+```
+
+```bash
+vta contexts create --id control --admin-did <Consumer DID (4c)> --admin-expires 1h
+```
+
+Seal the bundle:
+
+```bash
+vta bootstrap provision-integration \
+  --request bootstrap-request.json \
+  --out bundle.armor
+```
+
+The command outputs the bundle details:
+
+```text
+Integration provisioned — sealed bundle written to bundle.armor
+
+  Bundle-Id:       <id>
+  Client DID:      did:key:z6Mk...
+  Admin DID:       did:key:z6Mk... (== client)
+  Integration DID: did:webvh:...:dids.yourdomain.com
+  Template:        did-hosting-control (did-hosting-control)
+  Secrets:         1
+  Outputs:         1
+  SHA-256 digest:  <hex>
+```
+
+> **⚠️ SAVE THIS** (4d)
+>
+> Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next step.
+
+Move the bundle to the control directory:
+
+```bash
+mv ~/vta/bundle.armor ~/control/
+```
+
+Complete offline setup (phase 2):
+
+```bash
+cd ~/control
+did-hosting-control setup
+```
+
+| Prompt | Action |
+| --- | --- |
+| How will the control plane reach its VTA?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
+| ASCII-armored sealed bundle path: | `/root/control/bundle.armor` |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4d) |
+| Pending state file path (from phase 1) [setup-offline-state.toml]: | Press **Enter** (use default) |
+
+The wizard prints the completed setup:
+
+```text
+  Sealed response opened.
+  DID:          did:webvh:...:dids.yourdomain.com
+  VTA DID:      did:webvh:...:dids.yourdomain.com:vta
+  VTA URL:      https://vta.yourdomain.com
+
+  DID log entry written to control-did.jsonl
+  Generated JWT signing key.
+  Configuration written to config.toml
+  Secrets stored.
+  Admin ACL entry added for did:key:z6Mk...
+
+  Setup complete!
+
+  Control DID: did:webvh:...:dids.yourdomain.com
+
+  Next steps:
+    1. Set up did-hosting-server (if not already done)
+    2. Import this DID on the server:
+       did-hosting-server bootstrap-did --path services/control --did-log control-did.jsonl
+    3. Start the control plane:
+       did-hosting-control --config config.toml
+```
+
+> **⚠️ SAVE THIS** (4e)
+>
+> Save the **Control DID** (4e) (the `Control DID:` line)
 
 ## Verification
 
