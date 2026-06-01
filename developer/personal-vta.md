@@ -1,7 +1,7 @@
 # Personal VTA
 
 **Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.  
-**Tested on:** [Ubuntu Server](../sysops/ubuntu-server.md)
+**Tested on:** [Ubuntu Server](../sysop/ubuntu-server.md)
 
 **Verified with:**
 
@@ -11,7 +11,7 @@
 
 ## Prerequisites
 
-Complete the [Ubuntu Server](../sysops/ubuntu-server.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
+Complete the [Ubuntu Server](../sysop/ubuntu-server.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
 
 You also need the **Community Mediator DID** before starting — obtain it from the operator of the mediator you intend to use. You will paste it in Step 1.
 

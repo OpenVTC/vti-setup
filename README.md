@@ -24,11 +24,11 @@ You operate a VTC: bootstrap the community, set join and role policies, manage t
 
 → [`community-manager/`](community-manager/) · bootstrap a VTC, ship policies, run the community.
 
-### [Sysops](sysops/)
+### [Sysop](sysop/)
 
 You run the VTI services so the other two can do their jobs. Provision the host, stand up VTA + Mediator + DID Hosting Daemon.
 
-→ [`sysops/`](sysops/) · pick a deployment, then pick interactive or automated VTI setup.
+→ [`sysop/`](sysop/) · pick a deployment, then pick interactive or automated VTI setup.
 
 ---
 

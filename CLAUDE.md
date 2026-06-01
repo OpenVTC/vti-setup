@@ -14,7 +14,7 @@ Organised by **persona** — who's reading — not by topic.
 | --- | --- | --- |
 | `developer/` | Individual using OpenVTC to take part in VTCs | Personal VTA, OpenVTC TUI, joining a community |
 | `community-manager/` | VTC operator | Bootstrap a VTC, policy authoring, ACL/registry management (mostly future) |
-| `sysops/` | VTI infra operator | Host deployments (Ubuntu / Kubernetes / local-dev / AWS-EC2), interactive + automated VTI setup, self-managed component variants |
+| `sysop/` | VTI infra operator | Host deployments (Ubuntu / Kubernetes / local-dev / AWS-EC2), interactive + automated VTI setup, self-managed component variants |
 
 Each folder has a `README.md` that is the persona's entry point — a one-page index of the journey, with links into the per-topic pages.
 
@@ -32,5 +32,5 @@ markdownlint-cli2 "**/*.md"
 
 - **VTA** — Verifiable Trust Agent; the master key store. A **Personal VTA** is one a developer runs for themselves; an **infrastructure VTA** is the trust anchor at the centre of a VTI deployment.
 - **VTC** — Verifiable Trust Community; the social/policy layer that sits on top of a VTI.
-- **Offline VTA setup** — the VTA is unreachable at setup time (air-gapped, or just bootstrapping). Mediator and WebVH import pre-generated sealed bundles. This is the flow both `sysops/interactive-setup.md` and `sysops/automated-setup.md` describe.
+- **Offline VTA setup** — the VTA is unreachable at setup time (air-gapped, or just bootstrapping). Mediator and WebVH import pre-generated sealed bundles. This is the flow both `sysop/interactive-setup.md` and `sysop/automated-setup.md` describe.
 - **Interactive vs automated** — same end state, two operator styles. Interactive walks each tool's TUI; automated drives the same flow from TOML recipes and CLI flags.
