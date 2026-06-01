@@ -1,6 +1,6 @@
 # Interactive VTI Setup
 
-Stand up the full VTI stack — VTA, Mediator, and DID Hosting Daemon — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
+Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
 If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setup](automated-setup.md) — it produces the same end state.
 
@@ -21,7 +21,7 @@ The following values will be collected during setup. Save each one as prompted �
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | VTA mnemonic phrase | Recovery |
-| 1b | VTA DID | Step 2, Step 3 |
+| 1b | VTA DID | Steps 2, 3 & 5 |
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
@@ -29,6 +29,8 @@ The following values will be collected during setup. Save each one as prompted �
 | 4b | DID Host Admin private key | Step 4 |
 | 4c | SHA-256 digest (DID Host bundle) | Step 4 |
 | 4d | DID Host Daemon DID | Later |
+| 5a | VTC DID | |
+| 5b | Admin DID | |
 
 ## Steps
 
@@ -572,6 +574,73 @@ nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
+
+### Step 5: Set up VTC
+
+Create a directory for the VTA and run the setup wizard:
+
+```bash
+cd ~
+mkdir vtc
+cd ~/vtc
+vta setup
+```
+
+When prompted, use the values below. Replace `yourdomain.com` with your actual domain.
+
+| Prompt | Action |
+| --- | --- |
+| Config file path [config.toml]: | Press **Enter** (use default) |
+| VTC base URL: | `https://vtc.yourdomain.com` |
+| VTA DID: | Paste the **VTA DID** from 1b |
+| Context name at the VTA for this community [default]: | Press **Enter** (use default) |
+| DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
+
+The wizard completes the VTC setup and displays:
+
+```text
+── Operator action required ──
+
+Authorize this ephemeral DID at the VTA before continuing:
+
+  DID:      did:key:z6Mk...
+  Context:  default
+
+Run on a machine with PNM admin access to the VTA (did:webvh:QmTR...:dids.example.com:vta):
+
+  pnm contexts create --id default --name "VTC" \
+  --admin-did did:key:z6Mk... --admin-expires 1h
+```
+
+In another terminal, run that command:
+
+```bash
+pnm contexts create --id default --name "VTC" \
+  --admin-did did:key:z6Mk... --admin-expires 1h
+```
+
+| Prompt | Action |
+| --- | --- |
+| Has the ACL grant been created at the VTA? [y/N] | Press **y** |
+
+**Seed storage backend:**
+
+- Choose: **Config file (hex-encoded seed in config.toml)**
+
+> **⚠️ SAVE THESE** (5a, 5b)
+>
+> - Save the **VTC DID** (5a)
+> - Save the **Admin DID** (5b)
+
+Open the **Install URL** in a browser and paste the **Claim code** in the input box on the browser page.
+
+You are then prompted to save a passkey, so go ahead and save it.
+
+Ignore the **Claim Admin Passkey** screen for now. This is currently not used.
+
+Navigate to `https://vtc.yourdomain.com/admin` and sign in with your new passkey.
+
+You now have access to the VTC Admin Dashboard and can set up access for the community manager(s) of the VTC.
 
 ## Deployment Notes
 
