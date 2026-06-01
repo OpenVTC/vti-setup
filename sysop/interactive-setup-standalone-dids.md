@@ -21,15 +21,16 @@ The following values will be collected during setup. Save each one as prompted �
 | ID | What to Save | Used In |
 | --- | --- | --- |
 | 1a | VTA mnemonic phrase | Recovery |
-| 1b | VTA DID | Step 2, Step 3 |
-| 1c | Mediator DID | Step 4 |
+| 1b | VTA DID | Step 2 |
+| 1c | Mediator DID | Step 4.1, Step 4.2 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 3b | Admin DID | Later |
-| 4a | Control Admin DID | Step 4 |
-| 4b | Control Admin private key | Step 4 |
-| 4c | Consumer DID | Step 4 |
-| 4d | SHA-256 digest (Control bundle) | Step 4 |
-| 4e | Control DID | Later |
+| 4a | Control Admin DID | Step 4.3 |
+| 4b | Control Admin private key | Later |
+| 4c | SHA-256 digest (Control bundle) | Step 4.1 |
+| 4d | Control DID | Step 4.2 |
+| 4e | SHA-256 digest (server bundle) | Step 4.2 |
+| 4f | Server DID | Step 4.3 |
 
 ## Steps
 
@@ -356,11 +357,10 @@ The wizard prints:
   Nonce:          <nonce>
 ```
 
-> **⚠️ SAVE THESE** (4a, 4b, 4c)
+> **⚠️ SAVE THESE** (4a, 4b)
 >
 > - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
 > - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
-> - Save the **Consumer DID** (4c) (the `Consumer DID:` line)
 
 Move the bootstrap request to the VTA directory and create the control context:
 
@@ -370,7 +370,7 @@ cd ~/vta
 ```
 
 ```bash
-vta contexts create --id control --admin-did <Consumer DID (4c)> --admin-expires 1h
+vta contexts create --id control --admin-did <Consumer DID> --admin-expires 1h
 ```
 
 Seal the bundle:
@@ -396,7 +396,7 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THIS** (4d)
+> **⚠️ SAVE THIS** (4c)
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next step.
 
@@ -417,7 +417,7 @@ did-hosting-control setup
 | --- | --- |
 | How will the control plane reach its VTA?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
 | ASCII-armored sealed bundle path: | `/root/control/bundle.armor` |
-| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4d) |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4c) |
 | Pending state file path (from phase 1) [setup-offline-state.toml]: | Press **Enter** (use default) |
 
 The wizard prints the completed setup:
@@ -446,9 +446,191 @@ The wizard prints the completed setup:
        did-hosting-control --config config.toml
 ```
 
+> **⚠️ SAVE THIS** (4d)
+>
+> Save the **Control DID** (4d) (the `Control DID:` line)
+
+#### Step 4.2: Set up DID Hosting Server
+
+```bash
+cd ~
+mkdir server
+cd ~/server
+did-hosting-server setup
+```
+
+**Offline bootstrap (phase 1):**
+
+| Prompt | Action |
+| --- | --- |
+| How will the server reach its VTA?: | Choose **Offline — start a new sealed-bundle bootstrap (phase 1)** |
+| Bootstrap request file path [bootstrap-request.json]: | Press **Enter** (use default) |
+| Pending state file path [setup-offline-state.toml]: | Press **Enter** (use default) |
+| Configuration file path [config.toml]: | Press **Enter** (use default) |
+| Server URL (e.g. https://server1.example.com): | `https://dids.yourdomain.com` |
+| VTA context ID: | `server` |
+| Mediator DID (leave empty to skip) []: | Paste the **Mediator DID** (1c) |
+| Control plane DID (leave empty to set later) []: | Paste the **Control DID** (4d) |
+| Listen host: | Press **Enter** (default: `0.0.0.0`) |
+| Listen port: | Press **Enter** (default: `8530`) |
+| Log level: | Press **Enter** (default: `info`) |
+| Log format: | Press **Enter** (default: `text`) |
+| Data directory [data/did-hosting-server]: | Press **Enter** (use default) |
+| Continue with plaintext secrets storage?: | **yes** |
+
+The wizard prints:
+
+```text
+  Offline setup step 1/2 complete.
+
+  Request file:   bootstrap-request.json
+  State file:     setup-offline-state.toml
+  Bootstrap seed: stored in the configured secrets backend
+
+  Consumer DID:   did:key:z6Mk...
+  Nonce:          <nonce>
+```
+
+Move the bootstrap request to the VTA directory and create the server context:
+
+```bash
+mv ~/server/bootstrap-request.json ~/vta/
+cd ~/vta
+```
+
+```bash
+vta contexts create --id server --admin-did <Consumer DID> --admin-expires 1h
+```
+
+Seal the bundle:
+
+```bash
+vta bootstrap provision-integration \
+  --request bootstrap-request.json \
+  --out bundle.armor
+```
+
+The command outputs the bundle details:
+
+```text
+Integration provisioned — sealed bundle written to bundle.armor
+
+  Bundle-Id:       <id>
+  Client DID:      did:key:z6Mk...
+  Admin DID:       did:key:z6Mk... (== client)
+  Integration DID: did:webvh:...:dids.yourdomain.com
+  Template:        did-hosting-daemon (did-hosting-daemon)
+  Secrets:         1
+  Outputs:         1
+  SHA-256 digest:  <hex>
+```
+
 > **⚠️ SAVE THIS** (4e)
 >
-> Save the **Control DID** (4e) (the `Control DID:` line)
+> Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next step.
+
+Move the bundle to the server directory:
+
+```bash
+mv ~/vta/bundle.armor ~/server/
+```
+
+Complete offline setup (phase 2):
+
+```bash
+cd ~/server
+did-hosting-server setup
+```
+
+> **Note:** Run this command from `~/server`. Running it from any other directory will cause a "No such file or directory" error because the wizard looks for `setup-offline-state.toml` in the current directory.
+
+| Prompt | Action |
+| --- | --- |
+| How will the server reach its VTA?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
+| ASCII-armored sealed bundle path: | `/root/server/bundle.armor` |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4e) |
+| Pending state file path (from phase 1) [setup-offline-state.toml]: | Press **Enter** (use default) |
+
+The wizard prints the completed setup:
+
+```text
+  Sealed response opened.
+  DID:          did:webvh:...:dids.yourdomain.com
+  VTA DID:      did:webvh:...:dids.yourdomain.com:vta
+  VTA URL:      https://vta.yourdomain.com
+
+  Generated JWT signing key.
+  Configuration written to config.toml
+  Secrets stored in secret store.
+
+  Importing server DID into store at path '.well-known'...
+  Server DID imported!
+  DID:  did:webvh:...:dids.yourdomain.com
+  SCID: <scid>
+  server_did updated in config.toml
+
+  Setup complete!
+
+  Server DID: did:webvh:...:dids.yourdomain.com
+
+  Next steps:
+    1. Add this server's DID to the control plane ACL:
+       did-hosting-control add-acl --did did:webvh:...:dids.yourdomain.com --role service
+    2. Start the server:
+       did-hosting-server --config config.toml
+```
+
+> **⚠️ SAVE THIS** (4f)
+>
+> Save the **Server DID** (4f) (the `Server DID:` line)
+
+#### Step 4.3: Wire Control and Server Together
+
+Import the control DID log into the server store:
+
+```bash
+mv ~/control/control-did.jsonl ~/server/
+cd ~/server
+did-hosting-server bootstrap-did --path services/control --did-log control-did.jsonl
+```
+
+Add the server DID to the control plane ACL:
+
+```bash
+cd ~/control
+did-hosting-control add-acl --did <Server DID (4f)> --role service
+```
+
+Create an enrollment invite for the admin DID so it can authenticate to the control plane over DIDComm:
+
+```bash
+did-hosting-control invite --role admin --did <Admin DID (4a)>
+```
+
+The command outputs an enrollment URL:
+
+```text
+  Enrollment invite created!
+
+  DID:     did:key:z6Mk...
+  Role:    admin
+  Expires: in 24h (epoch ...)
+
+  Enrollment URL:
+  https://control.yourdomain.com/enroll?token=...
+```
+
+#### Step 4.4: Start DID Hosting Services
+
+```bash
+cd ~/control
+nohup did-hosting-control > log.txt 2>&1 &
+```
+
+```bash
+cd ~/server
+nohup did-hosting-server > log.txt 2>&1 &
+```
 
 ## Verification
 
