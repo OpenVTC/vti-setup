@@ -596,7 +596,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Context name at the VTA for this community [default]: | Press **Enter** (use default) |
 | DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
 
-The wizard completes the VTC setup and displays:
+The wizard pauses and displays:
 
 ```text
 ── Operator action required ──
@@ -619,6 +619,8 @@ pnm contexts create --id default --name "VTC" \
   --admin-did did:key:z6Mk... --admin-expires 1h
 ```
 
+Then switch back to the terminal running the wizard:
+
 | Prompt | Action |
 | --- | --- |
 | Has the ACL grant been created at the VTA? [y/N] | Press **y** |
@@ -626,6 +628,38 @@ pnm contexts create --id default --name "VTC" \
 **Seed storage backend:**
 
 - Choose: **Config file (hex-encoded seed in config.toml)**
+
+The wizard completes and displays:
+
+```text
+✅ VTC setup complete.
+
+VTC DID:       did:webvh:QmR2...:vtc.example.com
+Admin DID:     did:key:z6Mk...
+Config:        config.toml
+Data dir:      data
+
+Admin key (save this — needed for CLI access):
+{
+  "did": "did:key:z6Mkm...",
+  "signing_key": {
+    "key_id": "did:key:z6Mk...",
+    "public_key_multibase": "z6Mk...",
+    "private_key_multibase": "z3u2..."
+  },
+  "ka_key": {
+    "key_id": "did:key:z6Mkm...",
+    "public_key_multibase": "z6LS...",
+    "private_key_multibase": "z3we..."
+  }
+}
+
+Install URL (one-shot, 15 min TTL):
+  https://vtc.example.com/admin/install?token=eyJ0...
+
+Claim code (required at claim time):
+  NDKH...
+```
 
 > **⚠️ SAVE THESE** (5a, 5b)
 >
