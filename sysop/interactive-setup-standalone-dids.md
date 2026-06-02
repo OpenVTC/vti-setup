@@ -620,7 +620,17 @@ The command outputs an enrollment URL:
   https://control.yourdomain.com/enroll?token=...
 ```
 
-#### Step 4.4: Start DID Hosting Services
+#### Step 4.4: Load VTA and Mediator DIDs
+
+Import the DID logs generated during VTA setup so the hosting server can resolve them:
+
+```bash
+cd ~/server
+did-hosting-server load-did --path mediator --did-log ~/vta/mediator-did.jsonl
+did-hosting-server load-did --path vta --did-log ~/vta/VTA-did.jsonl
+```
+
+#### Step 4.5: Start DID Hosting Services
 
 ```bash
 cd ~/control
@@ -631,6 +641,10 @@ nohup did-hosting-control > log.txt 2>&1 &
 cd ~/server
 nohup did-hosting-server > log.txt 2>&1 &
 ```
+
+#### Step 4.6: Register Admin Passkey
+
+Visit the **Enrollment URL** from Step 4.3 in a browser (`https://control.yourdomain.com/enroll?token=...`), then save a passkey when prompted.
 
 ## Verification
 
