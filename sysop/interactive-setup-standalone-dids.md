@@ -637,7 +637,16 @@ did-hosting-server load-did --path mediator --did-log ~/vta/mediator-did.jsonl
 did-hosting-server load-did --path vta --did-log ~/vta/VTA-did.jsonl
 ```
 
-#### Step 4.5: Start DID Hosting Services
+#### Step 4.5: Dump Server DID
+
+Before starting the hosting services, export the server's DID log — you will need it to register the server's root DID in the control plane.
+
+```bash
+cd ~/server
+did-hosting-server dump-did --path server > server-did.jsonl
+```
+
+#### Step 4.6: Start DID Hosting Services
 
 ```bash
 cd ~/control
@@ -649,7 +658,7 @@ cd ~/server
 nohup did-hosting-server > log.txt 2>&1 &
 ```
 
-#### Step 4.6: Register Admin Passkey
+#### Step 4.7: Register Admin Passkey
 
 Visit the **Enrollment URL** from Step 4.3 in a browser (`https://control.yourdomain.com/enroll?token=...`), then save a passkey when prompted.
 
@@ -677,9 +686,19 @@ nohup vta > log.txt 2>&1 &
 
 The DID Hosting Control startup overwrites the server's DID store, so the mediator and VTA DID logs must be re-uploaded after the control plane is running.
 
+**Register server domain and root DID:**
+
+In a browser, go to the DID Hosting Control UI at `https://control.yourdomain.com/domains` and add the server's domain (e.g., `dids.yourdomain.com`).
+
 **Upload DID logs:**
 
 Go to `https://control.yourdomain.com/dids`.
+
+Click **+ Create Root DID**. When .well-known appears in the list, click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/server/server-did.jsonl
+```
 
 Click **+ New DID** (top right), enter `mediator`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
 
