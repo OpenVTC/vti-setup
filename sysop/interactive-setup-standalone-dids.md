@@ -27,10 +27,12 @@ The following values will be collected during setup. Save each one as prompted �
 | 3b | Admin DID | Later |
 | 4a | Control Admin DID | Step 4.3 |
 | 4b | Control Admin private key | Later |
-| 4c | SHA-256 digest (Control bundle) | Step 4.1 |
-| 4d | Control DID | Step 4.2 |
-| 4e | SHA-256 digest (server bundle) | Step 4.2 |
-| 4f | Server DID | Step 4.3 |
+| 4c | Consumer DID (control context) | Step 4.1 |
+| 4d | SHA-256 digest (Control bundle) | Step 4.1 |
+| 4e | Control DID | Step 4.2 |
+| 4f | Consumer DID (server context) | Step 4.2 |
+| 4g | SHA-256 digest (server bundle) | Step 4.2 |
+| 4h | Server DID | Step 4.3 |
 
 ## Steps
 
@@ -357,10 +359,11 @@ The wizard prints:
   Nonce:          <nonce>
 ```
 
-> **⚠️ SAVE THESE** (4a, 4b)
+> **⚠️ SAVE THESE** (4a, 4b, 4c)
 >
 > - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
 > - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
+> - Save the **Consumer DID** (4c) (the `Consumer DID:` line)
 
 Move the bootstrap request to the VTA directory and create the control context:
 
@@ -370,7 +373,7 @@ cd ~/vta
 ```
 
 ```bash
-vta contexts create --id control --admin-did <Consumer DID> --admin-expires 1h
+vta contexts create --id control --admin-expires 1h --admin-did <Consumer DID (4c)>
 ```
 
 Seal the bundle:
@@ -396,7 +399,7 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THIS** (4c)
+> **⚠️ SAVE THIS** (4d)
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next step.
 
@@ -417,7 +420,7 @@ did-hosting-control setup
 | --- | --- |
 | How will the control plane reach its VTA?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
 | ASCII-armored sealed bundle path: | `/root/control/bundle.armor` |
-| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4c) |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4d) |
 | Pending state file path (from phase 1) [setup-offline-state.toml]: | Press **Enter** (use default) |
 
 The wizard prints the completed setup:
@@ -446,9 +449,9 @@ The wizard prints the completed setup:
        did-hosting-control --config config.toml
 ```
 
-> **⚠️ SAVE THIS** (4d)
+> **⚠️ SAVE THIS** (4e)
 >
-> Save the **Control DID** (4d) (the `Control DID:` line)
+> Save the **Control DID** (4e) (the `Control DID:` line)
 
 #### Step 4.2: Set up DID Hosting Server
 
@@ -470,7 +473,7 @@ did-hosting-server setup
 | Server URL (e.g. https://server1.example.com): | `https://dids.yourdomain.com` |
 | VTA context ID: | `server` |
 | Mediator DID (leave empty to skip) []: | Paste the **Mediator DID** (1c) |
-| Control plane DID (leave empty to set later) []: | Paste the **Control DID** (4d) |
+| Control plane DID (leave empty to set later) []: | Paste the **Control DID** (4e) |
 | Listen host: | Press **Enter** (default: `0.0.0.0`) |
 | Listen port: | Press **Enter** (default: `8530`) |
 | Log level: | Press **Enter** (default: `info`) |
@@ -491,6 +494,10 @@ The wizard prints:
   Nonce:          <nonce>
 ```
 
+> **⚠️ SAVE THIS** (4f)
+>
+> Save the **Consumer DID** (4f) (the `Consumer DID:` line)
+
 Move the bootstrap request to the VTA directory and create the server context:
 
 ```bash
@@ -499,7 +506,7 @@ cd ~/vta
 ```
 
 ```bash
-vta contexts create --id server --admin-did <Consumer DID> --admin-expires 1h
+vta contexts create --id server --admin-expires 1h --admin-did <Consumer DID (4f)>
 ```
 
 Seal the bundle:
@@ -525,7 +532,7 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THIS** (4e)
+> **⚠️ SAVE THIS** (4g)
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next step.
 
@@ -548,7 +555,7 @@ did-hosting-server setup
 | --- | --- |
 | How will the server reach its VTA?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
 | ASCII-armored sealed bundle path: | `/root/server/bundle.armor` |
-| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4e) |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** (4g) |
 | Pending state file path (from phase 1) [setup-offline-state.toml]: | Press **Enter** (use default) |
 
 The wizard prints the completed setup:
@@ -598,7 +605,7 @@ Add the server DID to the control plane ACL:
 
 ```bash
 cd ~/control
-did-hosting-control add-acl --role service --did <Server DID (4f)>
+did-hosting-control add-acl --role service --did <Server DID (4h)>
 ```
 
 Create an enrollment invite for the admin DID so it can authenticate to the control plane over DIDComm:
