@@ -10,7 +10,7 @@ If you're looking for the standard integrated DID Hosting Daemon setup, see [Int
 
 | VTA Version | Mediator Version | DID Hosting Version |
 | --- | --- | --- |
-| 0.7.0 | 0.15.5 | 0.7.0 |
+| 0.8.1 | 0.15.12 | 0.7.0 |
 
 ## Prerequisites
 
@@ -598,7 +598,7 @@ Add the server DID to the control plane ACL:
 
 ```bash
 cd ~/control
-did-hosting-control add-acl --did <Server DID (4f)> --role service
+did-hosting-control add-acl --role service --did <Server DID (4f)>
 ```
 
 Create an enrollment invite for the admin DID so it can authenticate to the control plane over DIDComm:
@@ -645,6 +645,52 @@ nohup did-hosting-server > log.txt 2>&1 &
 #### Step 4.6: Register Admin Passkey
 
 Visit the **Enrollment URL** from Step 4.3 in a browser (`https://control.yourdomain.com/enroll?token=...`), then save a passkey when prompted.
+
+### Step 5: Upload DID Logs and Start Services
+
+**Start the mediator:**
+
+> If you configured a passphrase for the key storage backend, set it before starting:
+>
+> ```bash
+> export MEDIATOR_FILE_BACKEND_PASSPHRASE='your-passphrase'
+> ```
+
+```bash
+cd ~/mediator
+nohup mediator > log.txt 2>&1 &
+```
+
+Wait one minute for the mediator to fully initialize, then start the VTA:
+
+```bash
+cd ~/vta
+nohup vta > log.txt 2>&1 &
+```
+
+The DID Hosting Control startup overwrites the server's DID store, so the mediator and VTA DID logs must be re-uploaded after the control plane is running.
+
+**Upload DID logs:**
+
+Go to `https://control.yourdomain.com/dids`.
+
+Click **+ New DID** (top right), enter `mediator`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/vta/mediator-did.jsonl
+```
+
+Click **+ New DID** again, enter `vta`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/vta/VTA-did.jsonl
+```
+
+Click **+ New DID** again, enter `services/control`, then click the generated DID. In the **Upload DID Log** section, paste the output of:
+
+```bash
+cat ~/server/control-did.jsonl
+```
 
 ## Verification
 
