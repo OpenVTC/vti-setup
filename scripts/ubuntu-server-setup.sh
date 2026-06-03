@@ -159,54 +159,6 @@ else
   DIDS_PORT=8534
 fi
 
-VTC_CONFIG=$(cat <<EOF
-server {
-    listen 80;
-    server_name vtc.${DOMAIN};
-
-    location / {
-        proxy_pass http://127.0.0.1:8200;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Host \$host;
-    }
-}
-EOF
-)
-
-VTA_CONFIG=$(cat <<EOF
-server {
-    listen 80;
-    server_name vta.${DOMAIN};
-
-    location / {
-        proxy_pass http://127.0.0.1:8100;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Host \$host;
-    }
-}
-EOF
-)
-
-DIDS_CONFIG=$(cat <<EOF
-server {
-    listen 80;
-    server_name dids.${DOMAIN};
-
-    location / {
-        proxy_pass http://127.0.0.1:${DIDS_PORT};
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Host \$host;
-    }
-}
-EOF
-)
-
 MEDIATOR_CONFIG=$(cat <<EOF
 server {
     listen 80;
@@ -232,27 +184,75 @@ server {
 EOF
 )
 
-sudo tee /etc/nginx/sites-available/vtc.conf > /dev/null <<EOF
-${VTC_CONFIG}
+VTA_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name vta.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8100;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+VTC_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name vtc.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8200;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+DIDS_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name dids.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:${DIDS_PORT};
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+sudo tee /etc/nginx/sites-available/mediator.conf > /dev/null <<EOF
+${MEDIATOR_CONFIG}
 EOF
 
 sudo tee /etc/nginx/sites-available/vta.conf > /dev/null <<EOF
 ${VTA_CONFIG}
 EOF
 
+sudo tee /etc/nginx/sites-available/vtc.conf > /dev/null <<EOF
+${VTC_CONFIG}
+EOF
+
 sudo tee /etc/nginx/sites-available/dids.conf > /dev/null <<EOF
 ${DIDS_CONFIG}
 EOF
 
-sudo tee /etc/nginx/sites-available/mediator.conf > /dev/null <<EOF
-${MEDIATOR_CONFIG}
-EOF
-
 echo -e "${YELLOW}Enabling sites...${NC}"
-sudo ln -sf /etc/nginx/sites-available/vtc.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
-sudo ln -sf /etc/nginx/sites-available/dids.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/mediator.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/vtc.conf /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/dids.conf /etc/nginx/sites-enabled/
 
 if $STANDALONE; then
   WITNESS_CONFIG=$(cat <<EOF
@@ -376,10 +376,10 @@ check_url() {
   fi
 }
 
-check_url "https://vtc.${DOMAIN}"
-check_url "https://vta.${DOMAIN}"
-check_url "https://dids.${DOMAIN}"
 check_url "https://mediator.${DOMAIN}"
+check_url "https://vta.${DOMAIN}"
+check_url "https://vtc.${DOMAIN}"
+check_url "https://dids.${DOMAIN}"
 if $STANDALONE; then
   check_url "https://witness.${DOMAIN}"
   check_url "https://control.${DOMAIN}"
@@ -389,10 +389,10 @@ fi
 echo ""
 echo -e "${GREEN}Setup complete.${NC}"
 echo -e "  Sites:"
-echo -e "    - https://vtc.${DOMAIN}      → localhost:8200"
-echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
-echo -e "    - https://dids.${DOMAIN}     → localhost:${DIDS_PORT}"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
+echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
+echo -e "    - https://vtc.${DOMAIN}      → localhost:8200"
+echo -e "    - https://dids.${DOMAIN}     → localhost:${DIDS_PORT}"
 if $STANDALONE; then
   echo -e "    - https://witness.${DOMAIN} → localhost:8531"
   echo -e "    - https://control.${DOMAIN} → localhost:8532"
