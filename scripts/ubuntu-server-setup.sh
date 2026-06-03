@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # Nginx HTTPS Proxy Setup Script
-# Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]
-# Example: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com
-# Example: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- example.com admin@example.com
+# Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--standalone] <domain> [email]
+# Example: ... | bash -s -- example.com
+# Example: ... | bash -s -- example.com admin@example.com
+# Example: ... | bash -s -- --standalone example.com
+# Example: ... | bash -s -- --standalone example.com admin@example.com
 # Domain is required. Email is optional (used for Let's Encrypt expiry notifications).
-# This script sets up Nginx reverse proxy configurations for VTA services.
+# --standalone sets up separate DID Hosting control, witness, and watcher services on separate ports.
+# This script sets up Nginx reverse proxy configurations for VTI services.
 
 set -e
 
@@ -16,16 +19,37 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 usage() {
-  echo "Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]"
+  echo "Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--standalone] <domain> [email]"
   echo "Example: ... | bash -s -- example.com"
   echo "Example: ... | bash -s -- example.com admin@example.com"
+  echo "Example: ... | bash -s -- --standalone example.com"
+  echo "Example: ... | bash -s -- --standalone example.com admin@example.com"
   echo ""
   echo "Domain is required. Email is optional (used for Let's Encrypt certificate expiry notifications)."
+  echo "--standalone: configure DID Hosting in standalone mode (separate control, witness, and watcher services)."
   exit 1
 }
 
-DOMAIN="${1:-}"
-EMAIL="${2:-}"
+DOMAIN=""
+EMAIL=""
+STANDALONE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --standalone)
+      STANDALONE=true
+      shift
+      ;;
+    *)
+      if [ -z "$DOMAIN" ]; then
+        DOMAIN="$1"
+      elif [ -z "$EMAIL" ]; then
+        EMAIL="$1"
+      fi
+      shift
+      ;;
+  esac
+done
 
 if [ -z "$DOMAIN" ]; then
   echo -e "${RED}Error: domain is required.${NC}"
@@ -38,6 +62,11 @@ if [ -n "$EMAIL" ]; then
   echo -e "${GREEN}Email: $EMAIL${NC}"
 else
   echo -e "${YELLOW}Email: (not provided — certbot will register without email)${NC}"
+fi
+if $STANDALONE; then
+  echo -e "${GREEN}Mode: standalone DID Hosting${NC}"
+else
+  echo -e "${GREEN}Mode: standard${NC}"
 fi
 echo ""
 
@@ -124,6 +153,12 @@ echo -e "${GREEN}>>> Step 8/10: Create Nginx configs and enable sites <<<${NC}"
 # -----------------------------------------------------------------------------
 echo -e "${YELLOW}Creating Nginx configuration files...${NC}"
 
+if $STANDALONE; then
+  DIDS_PORT=8530
+else
+  DIDS_PORT=8534
+fi
+
 VTC_CONFIG=$(cat <<EOF
 server {
     listen 80;
@@ -162,7 +197,7 @@ server {
     server_name dids.${DOMAIN};
 
     location / {
-        proxy_pass http://127.0.0.1:8534;
+        proxy_pass http://127.0.0.1:${DIDS_PORT};
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -219,6 +254,72 @@ sudo ln -sf /etc/nginx/sites-available/vta.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/dids.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/mediator.conf /etc/nginx/sites-enabled/
 
+if $STANDALONE; then
+  WITNESS_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name witness.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8531;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+  CONTROL_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name control.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8532;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+  WATCHER_CONFIG=$(cat <<EOF
+server {
+    listen 80;
+    server_name watcher.${DOMAIN};
+
+    location / {
+        proxy_pass http://127.0.0.1:8533;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+}
+EOF
+)
+
+  sudo tee /etc/nginx/sites-available/witness.conf > /dev/null <<EOF
+${WITNESS_CONFIG}
+EOF
+
+  sudo tee /etc/nginx/sites-available/control.conf > /dev/null <<EOF
+${CONTROL_CONFIG}
+EOF
+
+  sudo tee /etc/nginx/sites-available/watcher.conf > /dev/null <<EOF
+${WATCHER_CONFIG}
+EOF
+
+  sudo ln -sf /etc/nginx/sites-available/witness.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/control.conf /etc/nginx/sites-enabled/
+  sudo ln -sf /etc/nginx/sites-available/watcher.conf /etc/nginx/sites-enabled/
+fi
+
 echo -e "${YELLOW}Testing Nginx configuration...${NC}"
 if sudo nginx -t; then
   echo -e "${GREEN}Nginx config test passed.${NC}"
@@ -234,25 +335,26 @@ sudo systemctl reload nginx || sudo service nginx reload
 echo -e "${GREEN}>>> Step 9/10: Obtain SSL certificates (Certbot) <<<${NC}"
 # -----------------------------------------------------------------------------
 
+CERTBOT_DOMAINS="-d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN}"
+if $STANDALONE; then
+  CERTBOT_DOMAINS="$CERTBOT_DOMAINS -d witness.${DOMAIN} -d control.${DOMAIN} -d watcher.${DOMAIN}"
+fi
+
 if [ -n "$EMAIL" ]; then
-  if sudo certbot --nginx \
-    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "dids.${DOMAIN}" -d "mediator.${DOMAIN}" \
-    --email "$EMAIL" --agree-tos --non-interactive; then
+  if sudo certbot --nginx $CERTBOT_DOMAINS --email "$EMAIL" --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN} --email $EMAIL --agree-tos"
+    echo "  sudo certbot --nginx $CERTBOT_DOMAINS --email $EMAIL --agree-tos"
   fi
 else
-  if sudo certbot --nginx \
-    -d "vtc.${DOMAIN}" -d "vta.${DOMAIN}" -d "dids.${DOMAIN}" -d "mediator.${DOMAIN}" \
-    --register-unsafely-without-email --agree-tos --non-interactive; then
+  if sudo certbot --nginx $CERTBOT_DOMAINS --register-unsafely-without-email --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx -d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN} --register-unsafely-without-email --agree-tos"
+    echo "  sudo certbot --nginx $CERTBOT_DOMAINS --register-unsafely-without-email --agree-tos"
   fi
 fi
 
@@ -278,14 +380,24 @@ check_url "https://vtc.${DOMAIN}"
 check_url "https://vta.${DOMAIN}"
 check_url "https://dids.${DOMAIN}"
 check_url "https://mediator.${DOMAIN}"
+if $STANDALONE; then
+  check_url "https://witness.${DOMAIN}"
+  check_url "https://control.${DOMAIN}"
+  check_url "https://watcher.${DOMAIN}"
+fi
 
 echo ""
 echo -e "${GREEN}Setup complete.${NC}"
 echo -e "  Sites:"
 echo -e "    - https://vtc.${DOMAIN}      → localhost:8200"
 echo -e "    - https://vta.${DOMAIN}      → localhost:8100"
-echo -e "    - https://dids.${DOMAIN}     → localhost:8534"
+echo -e "    - https://dids.${DOMAIN}     → localhost:${DIDS_PORT}"
 echo -e "    - https://mediator.${DOMAIN} → localhost:7037"
+if $STANDALONE; then
+  echo -e "    - https://witness.${DOMAIN} → localhost:8531"
+  echo -e "    - https://control.${DOMAIN} → localhost:8532"
+  echo -e "    - https://watcher.${DOMAIN} → localhost:8533"
+fi
 echo ""
 echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"
 echo -e "${YELLOW}To use 'cargo' in your current shell, run:${NC}"

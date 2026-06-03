@@ -27,10 +27,3 @@ Same end state, two operator styles — pick one.
 | Drive from TOML recipes and CLI flags | [Automated setup](automated-setup.md) |
 
 Both use the **offline sealed-bundle bootstrap** flow over DIDComm — the same flow you'd use to set up a VTI where the VTA is air-gapped from Mediator and DID Host, even when they happen to share a host.
-
-To deploy with standalone WebVH (DID Hosting Control, Server, Witness, and Watcher as separate services), use these guides instead:
-
-| How you want to drive it | Guide |
-| --- | --- |
-| Step through each tool's wizard interactively | [Interactive setup (standalone)](interactive-setup-standalone-dids.md) |
-| Drive from TOML recipes and CLI flags | [Automated setup (standalone)](automated-setup-standalone-dids.md) _(To be documented.)_ |
