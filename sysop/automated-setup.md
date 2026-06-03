@@ -8,9 +8,7 @@ Stand up the full VTI stack — VTA, Mediator, and DID Hosting Daemon — driven
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.7.0 | 0.15.5 | 0.7.0 |
-| 0.6.0 | 0.15.4 | 0.7.0 |
-| 0.6.0 | 0.15.3 | 0.7.0 |
+| 0.8.1 | 0.15.12 | 0.7.0 |
 
 ## Overview
 
@@ -246,6 +244,8 @@ mediator-setup --from mediator-recipe.toml \
 > Copy the **Admin private key** (the `Private key (multibase):` line, e.g. `z3u2…`) to an offline store and clear your terminal scrollback.
 
 ### Step 3: Set up DID Hosting Daemon
+
+> **Standalone deployment:** For a split control + server deployment, see [DID Hosting: Standalone Setup (Automated)](did-hosting-standalone-automated.md) instead of this step.
 
 ```bash
 mkdir ~/dids

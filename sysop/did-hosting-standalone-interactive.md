@@ -306,25 +306,6 @@ cd ~/control
 did-hosting-control add-acl --role service --did <Server DID (4h)>
 ```
 
-Create an enrollment invite for the admin DID:
-
-```bash
-did-hosting-control invite --role admin --did <Admin DID (4a)>
-```
-
-The command outputs an enrollment URL:
-
-```text
-  Enrollment invite created!
-
-  DID:     did:key:z6Mk...
-  Role:    admin
-  Expires: in 24h (epoch ...)
-
-  Enrollment URL:
-  https://control.yourdomain.com/enroll?token=...
-```
-
 ## Step 4.4: Load VTA and Mediator DIDs
 
 Import the DID logs generated during VTA setup so the hosting server can resolve them:
@@ -341,26 +322,10 @@ Export the server's DID log before starting the hosting services — you will ne
 
 ```bash
 cd ~/server
-did-hosting-server dump-did --path server > server-did.jsonl
+did-hosting-server dump-did --path .well-known > server-did.jsonl
 ```
 
-## Step 4.6: Start DID Hosting Services
-
-```bash
-cd ~/control
-nohup did-hosting-control > log.txt 2>&1 &
-```
-
-```bash
-cd ~/server
-nohup did-hosting-server > log.txt 2>&1 &
-```
-
-## Step 4.7: Register Admin Passkey
-
-Visit the **Enrollment URL** from Step 4.3 in a browser (`https://control.yourdomain.com/enroll?token=...`), then save a passkey when prompted.
-
-## Step 5: Upload DID Logs and Start Services
+## Step 5: Start Services and Upload DID Logs
 
 **Start the mediator:**
 
@@ -375,12 +340,50 @@ cd ~/mediator
 nohup mediator > log.txt 2>&1 &
 ```
 
-Wait one minute for the mediator to fully initialize, then start the VTA:
+Wait one minute for the mediator to fully initialize.
+
+Generate an enrollment invite for the admin DID before starting the control service:
+
+```bash
+cd ~/control
+did-hosting-control invite --role admin --did <Admin DID (4a)>
+```
+
+The command outputs an enrollment URL:
+
+```text
+  Enrollment invite created!
+
+  DID:     did:key:z6Mk...
+  Role:    admin
+  Expires: in 24h (epoch ...)
+
+  Enrollment URL:
+  https://control.yourdomain.com/enroll?token=...
+```
+
+Then start the DID Hosting services:
+
+```bash
+cd ~/control
+nohup did-hosting-control > log.txt 2>&1 &
+```
+
+```bash
+cd ~/server
+nohup did-hosting-server > log.txt 2>&1 &
+```
+
+Start the VTA:
 
 ```bash
 cd ~/vta
 nohup vta > log.txt 2>&1 &
 ```
+
+**Register Admin Passkey:**
+
+Visit the **Enrollment URL** printed above in a browser (`https://control.yourdomain.com/enroll?token=...`), then save a passkey when prompted.
 
 The DID Hosting Control startup overwrites the server's DID store, so the mediator and VTA DID logs must be re-uploaded after the control plane is running.
 
@@ -392,7 +395,7 @@ In a browser, go to the DID Hosting Control UI at `https://control.yourdomain.co
 
 Go to `https://control.yourdomain.com/dids`.
 
-Click **+ Create Root DID**. When `.well-known` appears in the list, click the generated DID. In the **Upload DID Log** section, paste the output of:
+Click **Create Root DID**. When `.well-known` appears in the list, click the generated DID. In the **Upload DID Log** section, paste the output of:
 
 ```bash
 cat ~/server/server-did.jsonl

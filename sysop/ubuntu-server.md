@@ -240,18 +240,18 @@ cargo install --path webvh-watcher
 
 | URL | Backend |
 | --- | --- |
-| `https://vtc.yourdomain.com` | `localhost:8200` |
-| `https://vta.yourdomain.com` | `localhost:8100` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
+| `https://vta.yourdomain.com` | `localhost:8100` |
+| `https://vtc.yourdomain.com` | `localhost:8200` |
 | `https://dids.yourdomain.com` | `localhost:8534` |
 
 **Standalone DID Hosting:**
 
 | URL | Backend |
 | --- | --- |
-| `https://vtc.yourdomain.com` | `localhost:8200` |
-| `https://vta.yourdomain.com` | `localhost:8100` |
 | `https://mediator.yourdomain.com` | `localhost:7037` |
+| `https://vta.yourdomain.com` | `localhost:8100` |
+| `https://vtc.yourdomain.com` | `localhost:8200` |
 | `https://dids.yourdomain.com` | `localhost:8530` |
 | `https://witness.yourdomain.com` | `localhost:8531` |
 | `https://control.yourdomain.com` | `localhost:8532` |
