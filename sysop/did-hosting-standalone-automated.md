@@ -411,6 +411,13 @@ did-hosting-server dump-did --path .well-known > server-did.jsonl
 
 ## Step 4: Start Services and Upload DID Logs
 
+**Start the DID Hosting server:**
+
+```bash
+cd ~/server
+nohup did-hosting-server > log.txt 2>&1 &
+```
+
 **Start the mediator:**
 
 > If you configured a passphrase for the key storage backend, set it before starting:
@@ -423,8 +430,6 @@ did-hosting-server dump-did --path .well-known > server-did.jsonl
 cd ~/mediator
 nohup mediator > log.txt 2>&1 &
 ```
-
-Wait one minute for the mediator to fully initialize.
 
 Generate an enrollment invite for the admin DID before starting the control service:
 
@@ -446,16 +451,11 @@ The command outputs an enrollment URL:
   https://control.yourdomain.com/enroll?token=...
 ```
 
-Then start the DID Hosting services:
+**Start the DID Hosting control:**
 
 ```bash
 cd ~/control
 nohup did-hosting-control > log.txt 2>&1 &
-```
-
-```bash
-cd ~/server
-nohup did-hosting-server > log.txt 2>&1 &
 ```
 
 **Register Admin Passkey:**
