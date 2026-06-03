@@ -13,18 +13,18 @@ Two DID Hosting modes are available — choose one before you begin:
 
 | Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
-| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | `https://dids.yourdomain.com/mediator` |
+| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
+| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
 | DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
 
 ### Standalone DID Hosting
 
 | Service | Default Port | DNS Record | DID Hosting Path |
 | --- | --- | --- | --- |
-| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
-| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Mediator | 7037 | `mediator.yourdomain.com` | `https://dids.yourdomain.com/mediator` |
+| Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
+| Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
 | DID Hosting Server | 8530 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
 | WebVH Witness | 8531 | `witness.yourdomain.com` | `https://dids.yourdomain.com/services/witness` |
 | WebVH Control | 8532 | `control.yourdomain.com` | `https://dids.yourdomain.com/services/control` |
