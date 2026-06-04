@@ -174,7 +174,7 @@ mediator-setup
 | --- | --- |
 | Where should cryptographic keys be stored?: | Choose **Local file (file://)** |
 | Confirm dev-only warning: | Type `I understand` |
-| Storage file path: | `conf/secrets.json` |
+| Storage file path: | `/home/vti/mediator/conf/secrets.json` |
 | Where should cryptographic keys be stored? (again): | Choose **No encryption (plaintext on disk)** |
 
 **VTA Integration:**
@@ -242,7 +242,7 @@ mv ~/vta/bundle.armor ~/mediator/
 
 | Prompt | Action |
 | --- | --- |
-| Enter a path to bundle.armor, or paste its contents. | `/root/mediator/bundle.armor` |
+| Enter a path to bundle.armor, or paste its contents. | `~/mediator/bundle.armor` |
 | Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** (3a) |
 
 The wizard completes the VTA integration and displays:
@@ -434,7 +434,7 @@ When prompted:
 | Prompt | Action |
 | --- | --- |
 | How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
-| ASCII-armored sealed bundle path: | `/root/dids/bundle.armor` |
+| ASCII-armored sealed bundle path: | `~/dids/bundle.armor` |
 | Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4c |
 | Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
 

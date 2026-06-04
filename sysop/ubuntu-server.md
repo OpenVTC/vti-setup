@@ -64,11 +64,29 @@ If using **standalone DID Hosting**, also add:
 
 > **Cloudflare users:** Set these records to **DNS only** (grey cloud, proxy disabled). The setup script uses Let's Encrypt for SSL, which requires direct access to port 80.
 
-## Step 3: Run the Setup Script
+## Step 3: Bootstrap a Non-Root Operator User
 
-SSH into your server and run the setup script directly.
+SSH into your server as `root` and run the bootstrap script. It creates a `vti` user with sudo, copies your SSH key over, then disables root SSH and password authentication.
 
-**Standard:**
+```bash
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/bootstrap-user.sh | bash
+```
+
+The script will:
+
+1. Create the `vti` user and add it to the `sudo` group
+2. Drop `/etc/sudoers.d/90-vti-nopasswd` so `vti` can sudo without a password (the user has no password set, and SSH password auth is disabled — so this is the standard cloud-VM admin pattern, not a downgrade)
+3. Copy `/root/.ssh/authorized_keys` → `/home/vti/.ssh/authorized_keys`
+4. Drop `/etc/ssh/sshd_config.d/01-vti-hardening.conf` with `PermitRootLogin no` and `PasswordAuthentication no`
+5. Reload `sshd`
+
+**Then disconnect and reconnect as `vti@<host>`.** Subsequent steps run as `vti`.
+
+## Step 4: Run the Setup Script
+
+By default the script runs in **live** mode — it installs only what's needed to host pre-built binaries behind nginx (no compilers, no Docker). Pass `--dev` if this box will build the binaries from source (Option B in Step 5).
+
+**Standard (live):**
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain>
@@ -76,38 +94,33 @@ curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubunt
 curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> <email>
 ```
 
-**Standalone DID Hosting:**
+**Standalone DID Hosting (live):**
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- --standalone <domain>
-# or with email:
 curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- --standalone <domain> <email>
+```
+
+**Dev (installs Rust, Node.js, and the C/C++ build toolchain too):**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- --dev <domain> <email>
 ```
 
 The script will:
 
 1. Update system packages
-2. Install build and runtime dependencies (Git, OpenSSL, etc.)
+2. Install runtime dependencies (`ufw`, `ca-certificates`, `curl`; plus build toolchain in `--dev`)
 3. Configure UFW firewall (allow ports 22, 80, 443)
-4. Install Rust
-5. Install Node.js v22
-6. Install Docker
-7. Install Nginx and Certbot (via snap)
-8. Create Nginx reverse proxy configs (4 services standard; 7 services standalone)
-9. Obtain SSL certificates via Certbot
-10. Verify each HTTPS URL responds
+4. *(--dev only)* Install Rust
+5. *(--dev only)* Install Node.js v22
+6. Install Nginx and Certbot (via snap)
+7. Create Nginx reverse proxy configs (4 services standard; 7 services standalone)
+8. Obtain SSL certificates via Certbot
+9. Verify each HTTPS URL responds
 
 > **Expected result:** `502 Bad Gateway` on the HTTPS URLs is normal at this stage — the backend services are not running yet.
 
-## Step 4: Reload Shell Environment
-
-Rust and Cargo were installed inside the script's subshell. To use `cargo` in your current session, run:
-
-```bash
-source $HOME/.cargo/env
-```
-
-Or simply log out and SSH back in — the environment will be loaded automatically on the next login.
+> **Note:** if you ran with `--dev`, Rust and Cargo were installed in the script's subshell. To use `cargo` in your current session, run `source $HOME/.cargo/env`, or log out and SSH back in.
 
 ## Step 5: Install Services
 
@@ -157,6 +170,8 @@ chmod +x webvh-watcher && sudo mv webvh-watcher /usr/local/bin/
 ```
 
 ### Option B: Build from Source
+
+> **Requires `--dev`:** the build toolchain (Rust, Node.js, gcc/clang/cmake, libssl/libdbus headers) is only installed if you ran Step 4 with `--dev`. Re-run with `--dev` if you skipped it.
 
 #### VTA, CNM, and PNM
 

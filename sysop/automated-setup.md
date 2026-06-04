@@ -233,7 +233,7 @@ mediator-setup --from mediator-recipe.toml \
   ━━━ Summary ━━━
 
   Files created:
-    /root/mediator/conf/mediator.toml  — mediator configuration
+    ~/mediator/conf/mediator.toml  — mediator configuration
     conf/atm-functions.lua  — Redis Lua functions
     conf/mediator-build.toml  — build recipe (reproducible setup)
     conf/secrets.json  — private keys (keep secure!)

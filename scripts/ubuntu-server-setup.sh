@@ -1,12 +1,18 @@
 #!/bin/bash
 
-# Nginx HTTPS Proxy Setup Script
-# Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--standalone] <domain> [email]
+# Nginx HTTPS Proxy Setup Script — stage 2 of VTI server setup.
+#
+# Run as the non-root 'vti' user (created by scripts/bootstrap-user.sh).
+#
+# Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--dev] [--standalone] <domain> [email]
 # Example: ... | bash -s -- example.com
 # Example: ... | bash -s -- example.com admin@example.com
 # Example: ... | bash -s -- --standalone example.com
-# Example: ... | bash -s -- --standalone example.com admin@example.com
+# Example: ... | bash -s -- --dev example.com admin@example.com
+#
 # Domain is required. Email is optional (used for Let's Encrypt expiry notifications).
+# --dev: also install Rust, Node.js, and the C/C++ build toolchain (for building binaries from source).
+#        Default is the lean "live" install — nginx, certbot, ufw only.
 # --standalone sets up separate DID Hosting control, witness, and watcher services on separate ports.
 # This script sets up Nginx reverse proxy configurations for VTI services.
 
@@ -19,13 +25,15 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 usage() {
-  echo "Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--standalone] <domain> [email]"
+  echo "Usage: curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- [--dev] [--standalone] <domain> [email]"
   echo "Example: ... | bash -s -- example.com"
   echo "Example: ... | bash -s -- example.com admin@example.com"
   echo "Example: ... | bash -s -- --standalone example.com"
-  echo "Example: ... | bash -s -- --standalone example.com admin@example.com"
+  echo "Example: ... | bash -s -- --dev example.com admin@example.com"
   echo ""
   echo "Domain is required. Email is optional (used for Let's Encrypt certificate expiry notifications)."
+  echo "--dev: also install Rust, Node.js, and the C/C++ build toolchain (for building binaries from source)."
+  echo "       Default is the lean 'live' install — nginx, certbot, ufw only."
   echo "--standalone: configure DID Hosting in standalone mode (separate control, witness, and watcher services)."
   exit 1
 }
@@ -33,9 +41,14 @@ usage() {
 DOMAIN=""
 EMAIL=""
 STANDALONE=false
+DEV=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --dev)
+      DEV=true
+      shift
+      ;;
     --standalone)
       STANDALONE=true
       shift
@@ -56,12 +69,24 @@ if [ -z "$DOMAIN" ]; then
   usage
 fi
 
+if [ "$EUID" -eq 0 ]; then
+  echo -e "${RED}Error: do not run this script as root.${NC}"
+  echo -e "${RED}Run scripts/bootstrap-user.sh first (as root) to create the 'vti' user,${NC}"
+  echo -e "${RED}then reconnect as vti and re-run this script.${NC}"
+  exit 1
+fi
+
 echo -e "${GREEN}=== VTI Stack Nginx Setup ===${NC}"
 echo -e "${GREEN}Domain: $DOMAIN${NC}"
 if [ -n "$EMAIL" ]; then
   echo -e "${GREEN}Email: $EMAIL${NC}"
 else
   echo -e "${YELLOW}Email: (not provided — certbot will register without email)${NC}"
+fi
+if $DEV; then
+  echo -e "${GREEN}Build: dev (install Rust, Node, build toolchain)${NC}"
+else
+  echo -e "${GREEN}Build: live (no compilers, no build toolchain)${NC}"
 fi
 if $STANDALONE; then
   echo -e "${GREEN}Mode: standalone DID Hosting${NC}"
@@ -70,18 +95,35 @@ else
 fi
 echo ""
 
+# Step counter — total depends on whether --dev was passed.
+if $DEV; then
+  TOTAL_STEPS=9
+else
+  TOTAL_STEPS=7
+fi
+STEP=0
+banner() {
+  STEP=$((STEP + 1))
+  echo ""
+  echo -e "${GREEN}>>> Step ${STEP}/${TOTAL_STEPS}: $1 <<<${NC}"
+}
+
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 1/10: Update system <<<${NC}"
+banner "Update system"
 # -----------------------------------------------------------------------------
 sudo apt update && sudo apt upgrade -y
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 2/10: Install build and runtime dependencies <<<${NC}"
+banner "Install runtime dependencies"
 # -----------------------------------------------------------------------------
-sudo apt -y install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw
+sudo apt -y install ufw ca-certificates curl
+if $DEV; then
+  echo -e "${YELLOW}Installing build toolchain (--dev)...${NC}"
+  sudo apt -y install git build-essential pkg-config libssl-dev clang cmake libdbus-1-dev
+fi
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 3/10: Configure UFW firewall <<<${NC}"
+banner "Configure UFW firewall"
 # -----------------------------------------------------------------------------
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
@@ -91,53 +133,34 @@ sudo ufw allow 443/tcp
 sudo ufw --force enable
 sudo ufw status
 
-# -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 4/10: Install Rust <<<${NC}"
-# -----------------------------------------------------------------------------
-if command -v rustc &>/dev/null; then
-  echo -e "${GREEN}Rust already installed: $(rustc --version)${NC}"
-else
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  source "$HOME/.cargo/env"
+if $DEV; then
+  # ---------------------------------------------------------------------------
+  banner "Install Rust"
+  # ---------------------------------------------------------------------------
+  if command -v rustc &>/dev/null; then
+    echo -e "${GREEN}Rust already installed: $(rustc --version)${NC}"
+  else
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+  fi
+  rustc --version
+  cargo --version
+
+  # ---------------------------------------------------------------------------
+  banner "Install Node.js (v22)"
+  # ---------------------------------------------------------------------------
+  if command -v node &>/dev/null && [ "$(node -v | cut -d. -f1 | tr -d 'v')" -ge 22 ] 2>/dev/null; then
+    echo -e "${GREEN}Node.js already installed: $(node -v)${NC}"
+  else
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+    sudo apt install -y nodejs
+  fi
+  node -v
+  npm -v
 fi
-rustc --version
-cargo --version
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 5/10: Install Node.js (v22) <<<${NC}"
-# -----------------------------------------------------------------------------
-if command -v node &>/dev/null && [ "$(node -v | cut -d. -f1 | tr -d 'v')" -ge 22 ] 2>/dev/null; then
-  echo -e "${GREEN}Node.js already installed: $(node -v)${NC}"
-else
-  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  sudo apt install -y nodejs
-fi
-node -v
-npm -v
-
-# -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 6/10: Install Docker <<<${NC}"
-# -----------------------------------------------------------------------------
-if command -v docker &>/dev/null; then
-  echo -e "${GREEN}Docker already installed: $(docker --version)${NC}"
-else
-  sudo apt-get install -y ca-certificates curl gnupg
-  sudo install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  sudo chmod a+r /etc/apt/keyrings/docker.gpg
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-fi
-sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
-docker --version
-
-# -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 7/10: Install Nginx and Certbot <<<${NC}"
+banner "Install Nginx and Certbot"
 # -----------------------------------------------------------------------------
 sudo apt -y install nginx
 sudo systemctl enable --now nginx
@@ -149,7 +172,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 8/10: Create Nginx configs and enable sites <<<${NC}"
+banner "Create Nginx configs and enable sites"
 # -----------------------------------------------------------------------------
 echo -e "${YELLOW}Creating Nginx configuration files...${NC}"
 
@@ -176,7 +199,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:7037;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -192,7 +215,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8100;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -208,7 +231,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8200;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -224,7 +247,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:${DIDS_PORT};
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -263,7 +286,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8531;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -279,7 +302,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8532;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -295,7 +318,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:8533;
         proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host \$host;
     }
@@ -332,7 +355,7 @@ echo -e "${YELLOW}Reloading Nginx...${NC}"
 sudo systemctl reload nginx || sudo service nginx reload
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 9/10: Obtain SSL certificates (Certbot) <<<${NC}"
+banner "Obtain SSL certificates (Certbot)"
 # -----------------------------------------------------------------------------
 
 CERTBOT_DOMAINS="-d vtc.${DOMAIN} -d vta.${DOMAIN} -d dids.${DOMAIN} -d mediator.${DOMAIN}"
@@ -359,7 +382,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-echo -e "${GREEN}>>> Step 10/10: Verify URLs <<<${NC}"
+banner "Verify URLs"
 # -----------------------------------------------------------------------------
 echo ""
 
@@ -398,8 +421,11 @@ if $STANDALONE; then
   echo -e "    - https://control.${DOMAIN} → localhost:8532"
   echo -e "    - https://watcher.${DOMAIN} → localhost:8533"
 fi
-echo ""
-echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"
-echo -e "${YELLOW}To use 'cargo' in your current shell, run:${NC}"
-echo -e "    source \$HOME/.cargo/env"
-echo -e "${YELLOW}Or start a new login shell (logout and back in).${NC}"
+
+if $DEV; then
+  echo ""
+  echo -e "${YELLOW}NOTE: Rust/Cargo were installed in this script's subshell.${NC}"
+  echo -e "${YELLOW}To use 'cargo' in your current shell, run:${NC}"
+  echo -e "    source \$HOME/.cargo/env"
+  echo -e "${YELLOW}Or start a new login shell (logout and back in).${NC}"
+fi
