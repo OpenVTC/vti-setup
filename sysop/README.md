@@ -17,6 +17,6 @@ Both streams use the **offline sealed-bundle bootstrap** flow over DIDComm — t
 
 | Target | Status |
 | --- | --- |
-| [Kubernetes](kubernetes.md) | Multi-node cluster, ingress + cert-manager. Reference is RKE2 + Rancher on Hetzner. |
-| [Local Dev](local-dev.md) | Local development and testing. _(Not yet written.)_ |
-| [AWS EC2 / VPS](aws-ec2.md) | Cloud-hosted VM for Trusted Execution Environments. _(Not yet written.)_ |
+| [Kubernetes](kubernetes.md) | Multi-node cluster, ingress + cert-manager. Reference is RKE2 + Rancher on Hetzner. _(Work in progress)_ |
+| [Local Dev](local-dev.md) | Local development and testing. _(Not yet written)_ |
+| [AWS EC2 / VPS](aws-ec2.md) | Cloud-hosted VM for Trusted Execution Environments. _(Not yet written)_ |
