@@ -28,6 +28,9 @@ The following values will be collected during setup. Save each one as prompted.
 | 3c | WebVH Admin private key | Offline backup |
 | 3d | DID Hosting Daemon DID | Later |
 | 4a | PNM admin DID | Step 4 |
+| 6a | VTC DID | Later |
+| 6b | VTC Admin DID | Step 6, install-URL regen |
+| 6c | VTC Install URL + Claim code | Step 6 (15-min TTL) |
 
 ## Editing recipes
 
@@ -564,8 +567,6 @@ ps -o user= -p $(pgrep -f /usr/local/bin/vta)                  # → vta-svc
 ps -o user= -p $(pgrep -f /usr/local/bin/did-hosting-daemon)   # → dids-svc
 ```
 
-## Verification
-
 Visit the DID Hosting Daemon admin panel and confirm you can log in:
 
 ```text
@@ -579,6 +580,131 @@ sudo -u vta-svc /usr/local/bin/vta status --config /var/lib/vta-svc/config.toml
 sudo -u vta-svc sh -c 'cd /var/lib/vta-svc && /usr/local/bin/pnm health'
 sudo -u dids-svc /usr/local/bin/did-hosting-daemon health --config /var/lib/dids-svc/config.toml
 ```
+
+## Step 6: Set up VTC (optional)
+
+Sets up a single Verifiable Trust Community on this VTI. **Optional** — needed only if you're hosting at least one VTC. In a separated-roles deployment the community manager runs this; in a single-operator deployment the sysop does.
+
+**Prerequisites:**
+
+- Steps 1–4 complete and Step 5 green (`mediator-svc`, `vta-svc`, `dids-svc` all `active (running)`).
+- PNM bound to the VTA (Step 4) — the wizard pauses for a PNM-driven ACL grant mid-flow.
+- Two SSH sessions open to the box (one for the wizard, one for the ACL grant).
+
+**Why no recipe:** `vtc-service` ships only an interactive `vtc setup` wizard — there's no `--from <recipe>` driver like `mediator-setup`, `vta setup`, or `did-hosting-daemon setup` have. The hardened version is the wizard wrapped in `sudo -u vtc-svc` with `--config` pointed at the right path; the ACL-grant pause makes the wizard inherently operator-gated anyway, so the loss-of-declarativeness is small.
+
+### Phase 1: Start the wizard
+
+In your first SSH session, launch the wizard as `vtc-svc`:
+
+```bash
+sudo -u vtc-svc /usr/local/bin/vtc --config /var/lib/vtc-svc/config.toml setup
+```
+
+When prompted:
+
+| Prompt | Action |
+| --- | --- |
+| Config file path [/var/lib/vtc-svc/config.toml] | Press **Enter** (use `default`) |
+| VTC base URL: | `https://vtc.yourdomain.com` |
+| VTA DID: | Paste the **VTA DID** from 1a |
+| Context name at the VTA for this community [default]: | Press **Enter** (use `default`) |
+| DIDComm messaging: | Press **Enter** (use the VTA's mediator) |
+
+The wizard mints an ephemeral DID and pauses with the ACL-grant instructions:
+
+```text
+── Operator action required ──
+
+Authorize this ephemeral DID at the VTA before continuing:
+
+  DID:      did:key:z6Mk...
+  Context:  default
+
+Run on a machine with PNM admin access to the VTA:
+
+  pnm contexts create --id default --name "VTC" \
+  --admin-did did:key:z6Mk... --admin-expires 1h
+```
+
+Copy the ephemeral `did:key:…` value — you'll need it in Phase 2.
+
+> **Leave this terminal at the wizard prompt.** It's waiting on the ACL grant; do not press `y` yet.
+
+### Phase 2: Grant ACL access at the VTA
+
+Open a **second SSH session** to the box. Run the `pnm contexts create` command from the wizard's instructions — but as `vta-svc`, wrapped in `sh -c 'cd ... && …'` because `pnm` doesn't accept `--config`:
+
+```bash
+sudo -u vta-svc sh -c 'cd /var/lib/vta-svc && /usr/local/bin/pnm contexts create --id default --name "VTC" --admin-did <ephemeral did:key from Phase 1> --admin-expires 1h'
+```
+
+When that returns successfully, the ACL is in place. Return to the first SSH session.
+
+### Phase 3: Finish the wizard
+
+Back at the wizard prompt:
+
+| Prompt | Action |
+| --- | --- |
+| Has the ACL grant been created at the VTA? [y/N]: | Press **y** |
+
+The wizard now authenticates the ephemeral key against the VTA and prompts for the VTC's WebVH hosting target:
+
+| Prompt | Action |
+| --- | --- |
+| DID hosting server: | Choose **Serverless** — the VTC self-hosts its `did.jsonl` at `https://vtc.yourdomain.com/.well-known/did.jsonl`, served by `vtc-svc` itself. (Picking your `dids-svc` server instead is also valid; it puts the VTC DID under `https://dids.yourdomain.com/<path>` and adds a dependency on `dids-svc`.) |
+| Seed storage backend: | Choose **Config file (hex-encoded seed in config.toml)** |
+
+The wizard performs the VTA round-trip, writes config + secrets, and prints a summary:
+
+```text
+✅ VTC setup complete.
+
+VTC DID:       did:webvh:...:vtc.yourdomain.com
+Admin DID:     did:key:z6Mk...
+Config:        /var/lib/vtc-svc/config.toml
+Data dir:      /var/lib/vtc-svc/data
+
+Admin key (save this — needed for CLI access):
+{
+  "did": "did:key:z6Mk...",
+  ...
+}
+
+Install URL (one-shot, 15 min TTL):
+  https://vtc.yourdomain.com/admin/install?token=...
+
+Claim code (required at claim time):
+  ...
+```
+
+> **⚠️ SAVE THESE** (6a, 6b, 6c)
+>
+> - **6a — VTC DID** — the `VTC DID:` line
+> - **6b — VTC Admin DID** — the `Admin DID:` line. Needed if you ever have to regenerate the install URL (see [VTC install URL expired or used](#vtc-install-url-expired-or-used)).
+> - **6c — Install URL + Claim code** — single-use, **15-minute TTL**. You must complete Phase 5 within that window or regenerate.
+
+### Phase 4: Start vtc-svc
+
+```bash
+sudo systemctl enable --now vtc-svc
+sudo systemctl status vtc-svc
+```
+
+The unit's `WorkingDirectory=/var/lib/vtc-svc/` lets the binary find `config.toml` in CWD. Tail logs to confirm startup:
+
+```bash
+sudo journalctl -u vtc-svc -n 50 -f
+```
+
+### Phase 5: Claim the admin passkey
+
+Open the **Install URL** (6c) in a browser, paste the **Claim code** in the input box, and save a passkey when prompted.
+
+> The browser shows a **Claim Admin Passkey** screen immediately after — ignore it. It's not used in the current release.
+
+Navigate to `https://vtc.yourdomain.com/admin` and sign in with the passkey you just enrolled. You're in.
 
 ## Known Issues / Edge Cases
 
@@ -606,6 +732,32 @@ sudo systemctl start dids-svc
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
 
+### VTC install URL expired or used
+
+The install URL printed at the end of Step 6 Phase 3 is single-use with a 15-minute TTL. If you missed it, let it expire, or the browser claim failed, regenerate via `vtc admin invite`. The daemon must be **stopped** first — `vtc admin invite` opens the Fjall store directly and would conflict with a running daemon.
+
+**1.** Stop the daemon:
+
+```bash
+sudo systemctl stop vtc-svc
+```
+
+**2.** Regenerate the install URL using the VTC Admin DID from 6b:
+
+```bash
+sudo -u vtc-svc /usr/local/bin/vtc --config /var/lib/vtc-svc/config.toml admin invite --did <VTC Admin DID (6b)>
+```
+
+The command grants the supplied DID an admin ACL entry if one doesn't exist (idempotent), mints a fresh single-use install URL, and prints both the URL and the new Claim code.
+
+**3.** Restart the daemon:
+
+```bash
+sudo systemctl start vtc-svc
+```
+
+Then visit the new Install URL in a browser and complete the passkey claim.
+
 ## Tips
 
 ### Helpful `.bash_aliases`
@@ -614,16 +766,18 @@ Save a lot of typing with these aliases:
 
 ```bash
 # Check running status of services
-alias st='sudo systemctl status mediator-svc vta-svc dids-svc'
+alias st='sudo systemctl status mediator-svc vta-svc dids-svc vtc-svc'
 # Check health/status of each service. Each binary defaults to looking
 # for config.toml in CWD; pass --config explicitly so the alias works
 # from anywhere.
 alias dh='sudo -u dids-svc /usr/local/bin/did-hosting-daemon health --config /var/lib/dids-svc/config.toml'
-alias vs='sudo -u vta-svc /usr/local/bin/vta status --config /var/lib/vta-svc/config.toml'
+alias vas='sudo -u vta-svc /usr/local/bin/vta status --config /var/lib/vta-svc/config.toml'
+alias vcs="sudo -u vtc-svc sh -c 'cd /var/lib/vtc-svc && /usr/local/bin/vtc status'"
 alias ph="sudo -u vta-svc sh -c 'cd /var/lib/vta-svc && /usr/local/bin/pnm health'"
 # Shortcuts for running commands
 alias p='sudo -u vta-svc /usr/local/bin/pnm'
-alias v='sudo -u vta-svc /usr/local/bin/vta'
+alias va='sudo -u vta-svc /usr/local/bin/vta'
+alias vc='sudo -u vta-svc /usr/local/bin/vtc'
 alias m='sudo -u mediator-svc /usr/local/bin/mediator'
 alias d='sudo -u dids-svc /usr/local/bin/did-hosting-daemon'
 ```
