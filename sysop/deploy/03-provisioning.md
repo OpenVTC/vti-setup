@@ -6,9 +6,9 @@ This guide assumes the **standard** DID Hosting topology (single integrated daem
 
 **Verified with:**
 
-| VTA Version | Mediator Version | DID Hosting Daemon Version |
-| --- | --- | --- |
-| 0.8.2 | 0.15.13 | 0.7.0 |
+| VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
+| --- | --- | --- | --- |
+| 0.8.2 | 0.15.13 | 0.7.0 | 0.8.0 |
 
 ## Prerequisites
 
