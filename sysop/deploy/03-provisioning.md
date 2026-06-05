@@ -572,10 +572,12 @@ Visit the DID Hosting Daemon admin panel and confirm you can log in:
 https://dids.yourdomain.com
 ```
 
-Run a health check as vta-svc:
+Run the per-service health/status checks. Each binary looks for `config.toml` in CWD; `vta` and `did-hosting-daemon` accept `--config <path>`, but `pnm` doesn't — wrap it with `sh -c 'cd ... && ...'` instead:
 
 ```bash
-sudo -u vta-svc /usr/local/bin/pnm health
+sudo -u vta-svc /usr/local/bin/vta status --config /var/lib/vta-svc/config.toml
+sudo -u vta-svc sh -c 'cd /var/lib/vta-svc && /usr/local/bin/pnm health'
+sudo -u dids-svc /usr/local/bin/did-hosting-daemon health --config /var/lib/dids-svc/config.toml
 ```
 
 ## Known Issues / Edge Cases
@@ -603,3 +605,27 @@ sudo systemctl start dids-svc
 ```
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
+
+## Tips
+
+### Helpful `.bash_aliases`
+
+Save a lot of typing with these aliases:
+
+```bash
+# Check running status of services
+alias st='sudo systemctl status mediator-svc vta-svc dids-svc'
+# Check health/status of each service. Each binary defaults to looking
+# for config.toml in CWD; pass --config explicitly so the alias works
+# from anywhere.
+alias dh='sudo -u dids-svc /usr/local/bin/did-hosting-daemon health --config /var/lib/dids-svc/config.toml'
+alias vs='sudo -u vta-svc /usr/local/bin/vta status --config /var/lib/vta-svc/config.toml'
+alias ph="sudo -u vta-svc sh -c 'cd /var/lib/vta-svc && /usr/local/bin/pnm health'"
+# Shortcuts for running commands
+alias p='sudo -u vta-svc /usr/local/bin/pnm'
+alias v='sudo -u vta-svc /usr/local/bin/vta'
+alias m='sudo -u mediator-svc /usr/local/bin/mediator'
+alias d='sudo -u dids-svc /usr/local/bin/did-hosting-daemon'
+```
+
+Instead of `sudo -u vta-svc /usr/local/bin/pnm vta list` just type `p vta list`.
