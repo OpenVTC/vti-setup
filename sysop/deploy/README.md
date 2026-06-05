@@ -1,6 +1,6 @@
 # Deploy Stream
 
-Stand up the VTI stack as a hardened production deployment. Two-stage server setup (root bootstraps a `vti` operator user; `vti` then provisions the stack). Each service runs as its own dedicated system user (`vta-svc`, `mediator-svc`, `dids-svc`, `vtc-svc`, plus standalone variants) with no shell and no sudo. Processes are supervised by systemd with sandboxing. Provisioning is automated from TOML recipes — no interactive wizards. Cross-service file handoffs go through a shared `vti-exchange` group.
+Stand up the VTI stack as a hardened production deployment. Two-stage server setup (root bootstraps a `vti` operator user; `vti` then provisions the stack). Each service runs as its own dedicated system user (`vta-svc`, `mediator-svc`, `dids-svc`, `vtc-svc`, plus standalone `dids` variants) with no shell and no sudo. Processes are supervised by systemd with sandboxing. Provisioning is automated from TOML recipes — no interactive wizards. Cross-service file handoffs go through a shared `vti-exchange` group.
 
 ## Security model in one paragraph
 

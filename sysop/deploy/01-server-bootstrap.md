@@ -59,4 +59,4 @@ ssh root@<server>   # Permission denied
 
 ## Next
 
-Configure DNS, then run the deploy setup: [02 — Server setup](02-server-setup.md).
+Run the deploy setup: [02 — Server setup](02-server-setup.md).

@@ -149,7 +149,7 @@ ls -ld /var/lib/vti-exchange                # 2770 vti:vti-exchange
 systemctl list-unit-files | grep -- '-svc'
 
 # nginx vhosts use $scheme (X-Forwarded-Proto correctness)
-sudo grep -r 'X-Forwarded-Proto' /etc/nginx/sites-enabled/
+sudo grep -R 'X-Forwarded-Proto' /etc/nginx/sites-enabled/
 
 # Negative test — service users cannot escalate or read each other's data
 sudo -u mediator-svc -- sudo -n true        # → fails: not in sudoers
