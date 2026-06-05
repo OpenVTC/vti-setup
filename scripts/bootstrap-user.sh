@@ -7,7 +7,7 @@
 # Creates a non-root operator user ('vti'), copies its SSH key from root, and
 # hardens sshd so root login and password authentication are disabled. After
 # this script finishes, you must reconnect as 'vti' before running stage 2
-# (scripts/ubuntu-server-setup.sh).
+# (scripts/setup-deploy.sh).
 #
 # Usage:
 #   curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/bootstrap-user.sh | bash
@@ -99,5 +99,5 @@ echo -e "${YELLOW}Next steps:${NC}"
 echo "  1. Disconnect from this SSH session."
 echo "  2. Reconnect as '${USERNAME}@<host>' using your existing SSH key."
 echo "  3. Run stage 2:"
-echo "       curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/ubuntu-server-setup.sh | bash -s -- <domain> [email]"
+echo "       curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-deploy.sh | bash -s -- <domain> [email]"
 echo "     Add --dev if this box will build the binaries from source."

@@ -13,7 +13,7 @@ Create the non-root `vti` operator user and lock down sshd. Run this once, as ro
 
 ## Step 1: Create Ubuntu 26.04 server
 
-Create a new Ubuntu 26.04 server. Note its **public IP address** — you will need it for DNS configuration in [02 — Server setup](02-server-setup.md).
+Create a new Ubuntu 26.04 server and ensure you select at least one SSH key to include in `/root/.ssh/authorized_keys`. Note its **public IP address** — you will need it for DNS configuration in [02 — Server setup](02-server-setup.md).
 
 ## Step 2: Run the bootstrap script
 
@@ -46,9 +46,9 @@ Your existing SSH key works because the bootstrap script copied it to `/home/vti
 ## Verification
 
 ```bash
-id vti                                              # vti is in the 'sudo' group
-sudo -n true                                        # passwordless sudo works
-sshd -T | grep -E 'permitrootlogin|passwordauthentication'  # both no
+id vti                                                           # vti is in the 'sudo' group
+sudo -n true                                                     # passwordless sudo works
+sudo sshd -T | grep -E 'permitrootlogin|passwordauthentication'  # both no
 ```
 
 From your local machine, confirm root SSH is refused:
