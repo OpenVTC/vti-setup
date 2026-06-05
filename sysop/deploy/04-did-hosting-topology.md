@@ -122,13 +122,14 @@ The command prints:
 Create the control context at the VTA:
 
 ```bash
-sudo -u vta-svc /usr/local/bin/vta contexts create --id control --admin-expires 1h --admin-did <client_did (3a)>
+sudo -u vta-svc /usr/local/bin/vta contexts create --config /var/lib/vta-svc/config.toml --id control --admin-expires 1h --admin-did <client_did (3a)>
 ```
 
 Seal the bundle as vta-svc:
 
 ```bash
 sudo -u vta-svc /usr/local/bin/vta bootstrap provision-integration \
+  --config /var/lib/vta-svc/config.toml \
   --request /var/lib/vti-exchange/control-bootstrap-request.json \
   --out /var/lib/vti-exchange/control-bundle.armor
 ```
@@ -242,13 +243,14 @@ sudo -u dids-svc /usr/local/bin/did-hosting-server setup --from /var/lib/dids-sv
 Create the server context at the VTA:
 
 ```bash
-sudo -u vta-svc /usr/local/bin/vta contexts create --id server --admin-expires 1h --admin-did <client_did (3f)>
+sudo -u vta-svc /usr/local/bin/vta contexts create --config /var/lib/vta-svc/config.toml --id server --admin-expires 1h --admin-did <client_did (3f)>
 ```
 
 Seal the bundle as vta-svc:
 
 ```bash
 sudo -u vta-svc /usr/local/bin/vta bootstrap provision-integration \
+  --config /var/lib/vta-svc/config.toml \
   --request /var/lib/vti-exchange/server-bootstrap-request.json \
   --out /var/lib/vti-exchange/server-bundle.armor
 ```

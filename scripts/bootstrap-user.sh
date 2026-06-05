@@ -46,6 +46,10 @@ else
   adduser --disabled-password --gecos "" "$USERNAME"
 fi
 usermod -aG sudo "$USERNAME"
+# systemd-journal lets `vti` read service journals from per-service users
+# (mediator-svc, dids-svc, etc.) without sudo — `journalctl -u <svc>` would
+# otherwise silently filter those entries out.
+usermod -aG systemd-journal "$USERNAME"
 
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 2/5: Grant passwordless sudo to '${USERNAME}' <<<${NC}"

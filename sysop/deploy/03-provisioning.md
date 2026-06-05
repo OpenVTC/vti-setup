@@ -133,7 +133,7 @@ vta_mode  = "sealed-export"
 context = "mediator"
 
 [secrets]
-storage = "file:///var/lib/mediator-svc/conf/secrets.json"
+storage = "file:///var/lib/mediator-svc/conf/mediator-secrets.json"
 
 [security]
 ssl          = "none"
@@ -155,15 +155,18 @@ listen_address = "0.0.0.0:7037"
 
 > **Why `file:///` with three slashes:** the `file://` URL form parses per RFC 3986 as authority + path. `file://conf/secrets.json` is **authority=`conf`, path=`/secrets.json`** — silently writes to the filesystem root. Three slashes (`file:///<absolute path>`) means **empty authority, absolute path** — what you want. Always use the three-slash form.
 >
+> **Why the filename is `mediator-secrets.json`, not `secrets.json`:** the wizard has a stale code path (`generators/secrets.rs::write_secrets_file`, invoked from `config_writer.rs` whenever `[secrets].storage` is a `file://` URL) that always writes a legacy `affinidi_secrets_resolver`-format array to `<config_dir>/secrets.json` — clobbering the unified-backend file if it has the same name. Using a different filename keeps the unified backend (envelope format, what the mediator binary actually reads) intact. The legacy `secrets.json` is still produced as dead-weight; ignore it (and don't grant it group read).
+>
 > **Backend consistency across phases:** Phase 1 persists the ephemeral HPKE seed into the configured secret backend; Phase 2 reads it back to unseal the bundle. Both phases must point at the same `[secrets].storage` URL — switching backends mid-handoff strands the seed and Phase 2 fails to open the bundle.
 
-**Phase 1** — generate the bootstrap request as mediator-svc. The wizard writes `bootstrap-request.json` to its working directory, so `cd` into `/var/lib/vti-exchange/` first (the shared handoff dir vta-svc reads via the `vti-exchange` group). `sudo --chdir` requires a `CWD=*` sudoers tag that the default `NOPASSWD:ALL` fragment doesn't grant, so wrap with `bash -c` instead. Set `umask 0027` so the dropped file is group-readable (mediator-svc's default umask is `0077`, which would leave the file mode `0600` and lock vta-svc out):
+**Phase 1** — generate the bootstrap request as mediator-svc. The wizard writes `bootstrap-request.json` to its working directory, so `cd` into `/var/lib/vti-exchange/` first (the shared handoff dir vta-svc reads via the `vti-exchange` group). `sudo --chdir` requires a `CWD=*` sudoers tag that the default `NOPASSWD:ALL` fragment doesn't grant, so wrap with `bash -c` instead. The wizard writes the request file with hardcoded mode `0o600` (via an internal `write_sensitive` helper that ignores umask), so we have to `chmod 0640` after the fact for vta-svc to read it:
 
 ```bash
-sudo -u mediator-svc bash -c 'umask 0027 && cd /var/lib/vti-exchange && /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/mediator-recipe.toml'
+sudo -u mediator-svc bash -c 'cd /var/lib/vti-exchange && /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/mediator-recipe.toml'
+sudo chmod 0640 /var/lib/vti-exchange/bootstrap-request.json
 ```
 
-This writes `/var/lib/vti-exchange/bootstrap-request.json`, persists the ephemeral seed into the configured secret backend, and prints the VTA-side command to run.
+This writes `/var/lib/vti-exchange/bootstrap-request.json`, persists the ephemeral seed into the configured secret backend, and prints the VTA-side command to run. The follow-up `chmod` opens group-read access so vta-svc (also in `vti-exchange`) can read the handoff file.
 
 > **In-flight bootstrap check:** If Phase 1 fails partway through (or you re-run it), the seed remains in the backend index and a second Phase 1 refuses with *"A bootstrap is already in progress"*. Either finalise with Phase 2 (`--bundle …`) or wipe with `--force-reprovision`. Stale seeds auto-expire after 24h.
 
@@ -330,6 +333,7 @@ The command writes `/var/lib/vti-exchange/dids-bootstrap-request.json`, stores t
 
 ```bash
 sudo -u vta-svc /usr/local/bin/vta bootstrap provision-integration \
+  --config /var/lib/vta-svc/config.toml \
   --request /var/lib/vti-exchange/dids-bootstrap-request.json \
   --out /var/lib/vti-exchange/dids-bundle.armor \
   --create-context
@@ -343,22 +347,52 @@ The command outputs the bundle details.
 
 **Phase 3** — complete offline setup:
 
-Open the recipe and make two changes: set `vta_mode` to `"offline-complete"` and replace the `[vta]` section with `bundle_path` and `expect_digest`:
+Open the recipe and replace its contents with the Phase 3 version below. Only two things change from Phase 1: `vta_mode = "offline-complete"`, and the `[vta]` section now carries `bundle_path` + `expect_digest` instead of `request_path`. The full recipe is shown so there's no risk of editing the wrong section.
 
 ```bash
 sudoedit /var/lib/dids-svc/webvh-recipe.toml
 ```
 
-Update these two sections (leave the rest of the file unchanged):
+Replace `yourdomain.com` with your actual domain, `<Mediator DID (1b)>` with your saved Mediator DID, and `<SHA-256 digest (3a)>` with the digest the VTA printed in Phase 2:
 
 ```toml
 [deployment]
 service  = "daemon"
 vta_mode = "offline-complete"
 
+[output]
+config_path = "/var/lib/dids-svc/config.toml"
+
+[server]
+host       = "0.0.0.0"
+port       = 8534
+log_level  = "info"
+log_format = "text"
+data_dir   = "/var/lib/dids-svc/data/daemon"
+
+[identity]
+public_url   = "https://dids.yourdomain.com"
+mediator_did = "<Mediator DID (1b)>"
+
 [vta]
 bundle_path   = "/var/lib/vti-exchange/dids-bundle.armor"
 expect_digest = "<SHA-256 digest (3a)>"
+
+[daemon]
+enable_control = true
+enable_server  = true
+enable_witness = true
+enable_watcher = false
+
+[secrets]
+backend           = "plaintext"
+confirm_plaintext = true
+
+[admin]
+mode = "generate"
+
+[reprovision]
+force = false
 ```
 
 Then run the same command:
@@ -404,7 +438,7 @@ sudo grep '^server_did' /var/lib/dids-svc/config.toml
 Generate an enrollment token using the Admin DID from 3b:
 
 ```bash
-sudo -u dids-svc /usr/local/bin/did-hosting-daemon invite --role admin --did <Admin DID (3b)>
+sudo -u dids-svc /usr/local/bin/did-hosting-daemon invite --config /var/lib/dids-svc/config.toml --role admin --did <Admin DID (3b)>
 ```
 
 > Save the **Enrollment URL** printed — you will need it after starting the daemon.
@@ -419,8 +453,10 @@ sudo systemctl status dids-svc
 Tail the logs to confirm startup:
 
 ```bash
-journalctl -u dids-svc -n 50 -f
+sudo journalctl -u dids-svc -n 50 -f
 ```
+
+> **Why `sudo`:** `journalctl -u <unit>` silently filters out entries from other users (per-service users like `dids-svc`) unless you're in the `systemd-journal` (or `adm`) group. `bootstrap-user.sh` adds `vti` to `systemd-journal` at user-creation time so this works without `sudo` on fresh installs, but operators bootstrapped before that change need `sudo usermod -aG systemd-journal vti` and an SSH reconnect to pick it up. Prefixing with `sudo` here works in either case.
 
 Visit the Enrollment URL in a browser, then save a passkey when prompted.
 
@@ -480,7 +516,7 @@ Next: set `admin_did = "did:key:z6Mk..."` in the VTA setup.toml, boot the VTA,
 > **Note:** The `Next:` line suggests setting `admin_did` in the setup TOML — ignore this. We register the DID with `vta import-did` instead.
 
 ```bash
-sudo -u vta-svc /usr/local/bin/vta import-did --role admin --label pnm-bootstrap --did <Admin DID (4a)>
+sudo -u vta-svc /usr/local/bin/vta import-did --config /var/lib/vta-svc/config.toml --role admin --label pnm-bootstrap --did <Admin DID (4a)>
 ```
 
 ```text
@@ -557,7 +593,7 @@ sudo systemctl stop dids-svc
 **2.** Regenerate the enrollment token:
 
 ```bash
-sudo -u dids-svc /usr/local/bin/did-hosting-daemon invite --role admin --did <Admin DID (3b)>
+sudo -u dids-svc /usr/local/bin/did-hosting-daemon invite --config /var/lib/dids-svc/config.toml --role admin --did <Admin DID (3b)>
 ```
 
 **3.** Restart the daemon:
@@ -567,7 +603,3 @@ sudo systemctl start dids-svc
 ```
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
-
-## Deployment notes
-
-> _To be documented._
