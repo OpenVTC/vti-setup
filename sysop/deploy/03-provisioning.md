@@ -8,7 +8,7 @@ This guide assumes the **standard** DID Hosting topology (single integrated daem
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.8.1 | 0.15.12 | 0.7.0 |
+| 0.8.2 | 0.15.13 | 0.7.0 |
 
 ## Prerequisites
 
@@ -31,7 +31,7 @@ The following values will be collected during setup. Save each one as prompted.
 
 ## Editing recipes
 
-Recipes are stored under `/var/lib/<svc>-svc/` so the service user can read them, and use file mode `0640` with group `<svc>-svc` so `vti` can edit them via `sudoedit` while the service user retains read access.
+Recipes are stored under `/var/lib/<svc>-svc/` so the service user can read them. Owner `root`, group `<svc>-svc`, mode `0640` — the service user has read access, and `vti` edits them via `sudoedit` (which runs as root). `sudoedit` refuses to open a file that's writable by the invoking user, so the owner must be `root`, not `vti`.
 
 To edit:
 
@@ -44,16 +44,19 @@ sudoedit /var/lib/<svc>-svc/<recipe>.toml
 To create a new recipe file with the right ownership:
 
 ```bash
-sudo install -m 0640 -o vti -g <svc>-svc /dev/null /var/lib/<svc>-svc/<recipe>.toml
+sudo install -m 0640 -o root -g <svc>-svc /dev/null /var/lib/<svc>-svc/<recipe>.toml
 sudoedit /var/lib/<svc>-svc/<recipe>.toml
 ```
+
+> NOTE: You can change the default `sudoedit` editor to vim with:  
+> `sudo update-alternatives --set editor /usr/bin/vim.basic`
 
 ## Step 1: Set up VTA
 
 Create and edit the VTA recipe:
 
 ```bash
-sudo install -m 0640 -o vti -g vta-svc /dev/null /var/lib/vta-svc/vta-setup.toml
+sudo install -m 0640 -o root -g vta-svc /dev/null /var/lib/vta-svc/vta-setup.toml
 sudoedit /var/lib/vta-svc/vta-setup.toml
 ```
 
@@ -113,7 +116,7 @@ The VTA already holds the mediator DID (created in Step 1 via `messaging.kind = 
 Create and edit the mediator recipe:
 
 ```bash
-sudo install -m 0640 -o vti -g mediator-svc /dev/null /var/lib/mediator-svc/mediator-recipe.toml
+sudo install -m 0640 -o root -g mediator-svc /dev/null /var/lib/mediator-svc/mediator-recipe.toml
 sudoedit /var/lib/mediator-svc/mediator-recipe.toml
 ```
 
@@ -127,8 +130,7 @@ use_vta   = true
 vta_mode  = "sealed-export"
 
 [vta]
-context      = "mediator"
-request_path = "/var/lib/vti-exchange/mediator-bootstrap-request.json"
+context = "mediator"
 
 [secrets]
 storage = "file:///var/lib/mediator-svc/conf/secrets.json"
@@ -152,21 +154,26 @@ listen_address = "0.0.0.0:7037"
 ```
 
 > **Why `file:///` with three slashes:** the `file://` URL form parses per RFC 3986 as authority + path. `file://conf/secrets.json` is **authority=`conf`, path=`/secrets.json`** — silently writes to the filesystem root. Three slashes (`file:///<absolute path>`) means **empty authority, absolute path** — what you want. Always use the three-slash form.
+>
+> **Backend consistency across phases:** Phase 1 persists the ephemeral HPKE seed into the configured secret backend; Phase 2 reads it back to unseal the bundle. Both phases must point at the same `[secrets].storage` URL — switching backends mid-handoff strands the seed and Phase 2 fails to open the bundle.
 
-**Phase 1** — generate the bootstrap request as mediator-svc:
+**Phase 1** — generate the bootstrap request as mediator-svc. The wizard writes `bootstrap-request.json` to its working directory, so `cd` into `/var/lib/vti-exchange/` first (the shared handoff dir vta-svc reads via the `vti-exchange` group). `sudo --chdir` requires a `CWD=*` sudoers tag that the default `NOPASSWD:ALL` fragment doesn't grant, so wrap with `bash -c` instead. Set `umask 0027` so the dropped file is group-readable (mediator-svc's default umask is `0077`, which would leave the file mode `0600` and lock vta-svc out):
 
 ```bash
-sudo -u mediator-svc /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/mediator-recipe.toml
+sudo -u mediator-svc bash -c 'umask 0027 && cd /var/lib/vti-exchange && /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/mediator-recipe.toml'
 ```
 
-This writes `/var/lib/vti-exchange/mediator-bootstrap-request.json` (visible to vta-svc via the `vti-exchange` group) and prints the VTA-side command to run.
+This writes `/var/lib/vti-exchange/bootstrap-request.json`, persists the ephemeral seed into the configured secret backend, and prints the VTA-side command to run.
+
+> **In-flight bootstrap check:** If Phase 1 fails partway through (or you re-run it), the seed remains in the backend index and a second Phase 1 refuses with *"A bootstrap is already in progress"*. Either finalise with Phase 2 (`--bundle …`) or wipe with `--force-reprovision`. Stale seeds auto-expire after 24h.
 
 Run the VTA reprovision command as vta-svc:
 
 ```bash
 sudo -u vta-svc /usr/local/bin/vta contexts reprovision \
+  --config /var/lib/vta-svc/config.toml \
   --id mediator \
-  --recipient /var/lib/vti-exchange/mediator-bootstrap-request.json \
+  --recipient /var/lib/vti-exchange/bootstrap-request.json \
   --out /var/lib/vti-exchange/mediator-bundle.armor
 ```
 
@@ -251,7 +258,7 @@ The mediator unit's `ExecStart` is `/usr/local/bin/mediator` — but the binary 
 Create and edit the daemon recipe:
 
 ```bash
-sudo install -m 0640 -o vti -g dids-svc /dev/null /var/lib/dids-svc/webvh-recipe.toml
+sudo install -m 0640 -o root -g dids-svc /dev/null /var/lib/dids-svc/webvh-recipe.toml
 sudoedit /var/lib/dids-svc/webvh-recipe.toml
 ```
 

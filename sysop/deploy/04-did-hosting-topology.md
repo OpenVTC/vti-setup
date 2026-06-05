@@ -58,7 +58,7 @@ The following values will be collected:
 Create and edit the control recipe:
 
 ```bash
-sudo install -m 0640 -o vti -g control-svc /dev/null /var/lib/control-svc/control-recipe.toml
+sudo install -m 0640 -o root -g control-svc /dev/null /var/lib/control-svc/control-recipe.toml
 sudoedit /var/lib/control-svc/control-recipe.toml
 ```
 
@@ -188,7 +188,7 @@ The command writes `config.toml` and prints:
 Create and edit the server recipe:
 
 ```bash
-sudo install -m 0640 -o vti -g dids-svc /dev/null /var/lib/dids-svc/server-recipe.toml
+sudo install -m 0640 -o root -g dids-svc /dev/null /var/lib/dids-svc/server-recipe.toml
 sudoedit /var/lib/dids-svc/server-recipe.toml
 ```
 
