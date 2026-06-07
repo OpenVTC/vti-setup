@@ -1,10 +1,11 @@
-# Interactive VTI Setup
+# Explore: VTI Walkthrough
 
 Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
-If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setup](automated-setup.md) — it produces the same end state.
+> **⚠️ Explore stream — do not use for real keys.**
+> The box runs everything as root in `/root/<svc>/` with no isolation between services. For a hardened production deployment with per-service users and systemd, see the [Deploy stream](../deploy/) instead.
 
-**Tested on:** [Ubuntu Server](ubuntu-server.md)
+**Tested on:** [Explore: Server Setup](server-setup.md)
 
 **Verified with:**
 
@@ -14,7 +15,7 @@ If you'd rather drive setup from TOML recipes and CLI flags, see [Automated setu
 
 ## Prerequisites
 
-Complete the [Ubuntu Server](ubuntu-server.md) deployment before continuing.
+Complete the [Server setup](server-setup.md) first.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
@@ -174,8 +175,10 @@ mediator-setup
 | --- | --- |
 | Where should cryptographic keys be stored?: | Choose **Local file (file://)** |
 | Confirm dev-only warning: | Type `I understand` |
-| Storage file path: | `conf/secrets.json` |
+| Storage file path: | `/root/mediator/conf/secrets.json` |
 | Where should cryptographic keys be stored? (again): | Choose **No encryption (plaintext on disk)** |
+
+> **Note:** Enter the absolute path (`/root/mediator/conf/secrets.json`), not the relative form (`conf/secrets.json`). The wizard wraps your input as a `file://` URL; a relative path produces `file://conf/secrets.json`, which RFC-parses to authority=`conf`, path=`/secrets.json` and silently writes to the filesystem root rather than your working directory.
 
 **VTA Integration:**
 
@@ -310,8 +313,6 @@ Press **Enter** to continue to Protocol.
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
 
 ### Step 4: Set up DID Hosting Daemon
-
-> **Standalone DID Hosting:** If you provisioned with `--standalone`, skip this step and follow [DID Hosting: Standalone Setup (Interactive)](did-hosting-standalone-interactive.md) instead. Return here for Step 5 (VTC) when done.
 
 ```bash
 cd ~
@@ -552,7 +553,7 @@ pnm health
 
 ### Step 5: Set up VTC
 
-Create a directory for the VTA and run the setup wizard:
+Create a directory for the VTC and run the setup wizard:
 
 ```bash
 cd ~
@@ -677,7 +678,3 @@ nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
-
-## Deployment Notes
-
-> _To be documented._
