@@ -59,7 +59,14 @@ sudo apt update && sudo apt upgrade -y
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 2/10: Install build and runtime dependencies <<<${NC}"
 # -----------------------------------------------------------------------------
-sudo apt -y install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw
+sudo apt -y install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw valkey-server
+
+# Valkey backs the mediator's queue + storage. Debian/Ubuntu packaging
+# binds 127.0.0.1 and enables the unit on install — confirm both.
+sudo systemctl is-active --quiet valkey-server || sudo systemctl enable --now valkey-server
+ss -tlnp 'sport = :6379' 2>/dev/null | grep -q 127.0.0.1 \
+  && echo -e "${GREEN}Valkey listening on 127.0.0.1:6379.${NC}" \
+  || echo -e "${YELLOW}Valkey not on 127.0.0.1:6379 — check /etc/valkey/valkey.conf bind setting.${NC}"
 
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 3/10: Configure UFW firewall <<<${NC}"

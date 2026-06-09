@@ -1,4 +1,4 @@
-# Explore: Server Setup
+# Explore 01: Server Setup
 
 Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment with per-service users, use the [Deploy stream](../deploy/) instead.
 
@@ -56,7 +56,7 @@ curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup
 The script will:
 
 1. Update system packages
-2. Install build and runtime dependencies (Git, OpenSSL, build toolchain)
+2. Install build and runtime dependencies (Git, OpenSSL, build toolchain, Valkey)
 3. Configure UFW firewall (allow ports 22, 80, 443)
 4. Install Rust
 5. Install Node.js v22
@@ -165,4 +165,4 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 
 ## Next
 
-Provision and start the stack: [Walkthrough](walkthrough.md).
+Provision and start the stack: [02 — Walkthrough](02-walkthrough.md).

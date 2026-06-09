@@ -11,11 +11,11 @@
 
 ## Prerequisites
 
-Complete [Personal VTA](personal-vta.md) first. This tutorial connects the OpenVTC TUI to the Personal VTA you set up.
+Complete [01 — Personal VTA](01-personal-vta.md) first. This tutorial connects the OpenVTC TUI to the Personal VTA you set up.
 
 You also need:
 
-- Access to your **PNM** session from the [Personal VTA](personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
+- Access to your **PNM** session from the [01 — Personal VTA](01-personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
 - A DID host for your persona DID. You can reuse the `did-host.com` placeholder from the Personal VTA tutorial (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised DID hosting server.
 
 The following values will be collected during setup. Save each one as prompted.
@@ -191,7 +191,7 @@ Enter the address of your DID on the web (e.g., `https://did-host.com/your-perso
 
 The wizard now displays the constructed DID — copy it.
 
-Next, upload the DID to your web host (see [Step 2 of the Personal VTA tutorial](personal-vta.md#step-2-publish-personal-vta-did) for details).
+Next, upload the DID to your web host (see [Step 2 of the Personal VTA tutorial](01-personal-vta.md#step-2-publish-personal-vta-did) for details).
 
 Sanity-check from another machine:
 

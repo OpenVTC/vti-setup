@@ -13,11 +13,11 @@
 
 ### Step 1 — Stand up a Personal VTA
 
-Follow [Personal VTA](personal-vta.md). You finish this step with a running VTA holding your master keys. No community connection is needed yet.
+Follow [01 — Personal VTA](01-personal-vta.md). You finish this step with a running VTA holding your master keys. No community connection is needed yet.
 
 ### Step 2 — Install the OpenVTC TUI
 
-Follow [OpenVTC TUI Setup](openvtc-tui.md). The TUI is your interactive interface to your Personal VTA, and you'll use it for every step that follows.
+Follow [02 — OpenVTC TUI Setup](02-openvtc-tui.md). The TUI is your interactive interface to your Personal VTA, and you'll use it for every step that follows.
 
 ### Step 3 — Mint an M-DID for the target community
 
@@ -57,7 +57,7 @@ At that point you have graduated to [Member Developer](member-developer.md) _(no
 
 - **VRCs are issued to your M-DID, not your Personal VTA's primary DID** — substituting the latter links your communities together.
 - **M-DIDs are scoped to a single community.** Don't re-present an old one if you leave and rejoin; mint a new one.
-- **The mnemonic for your Personal VTA backs every M-DID you mint.** Losing it loses every community identity you hold — see [Personal VTA](personal-vta.md) for recovery.
+- **The mnemonic for your Personal VTA backs every M-DID you mint.** Losing it loses every community identity you hold — see [01 — Personal VTA](01-personal-vta.md) for recovery.
 - **You can opt out of trust-registry publication** via the `registryConsent` flag (default `false` in the current SDK type). Set it true to be externally listed; most outside devs joining a community want this.
 - **There's a REST alternative to the DIDComm path.** Communities that publish their VTC service over HTTPS also accept `POST /v1/join-requests` (unauthenticated, rate-limited) with the same VP body. On REST the VP must carry a **holder-binding signature** from your M-DID, since there is no DIDComm envelope to authenticate you. Use whichever the community advertises.
 
