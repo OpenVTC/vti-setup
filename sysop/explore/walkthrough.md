@@ -175,10 +175,8 @@ mediator-setup
 | --- | --- |
 | Where should cryptographic keys be stored?: | Choose **Local file (file://)** |
 | Confirm dev-only warning: | Type `I understand` |
-| Storage file path: | `/root/mediator/conf/secrets.json` |
+| Storage file path: [`conf/secrets.json`] | Press **Enter** (use default) |
 | Where should cryptographic keys be stored? (again): | Choose **No encryption (plaintext on disk)** |
-
-> **Note:** Enter the absolute path (`/root/mediator/conf/secrets.json`), not the relative form (`conf/secrets.json`). The wizard wraps your input as a `file://` URL; a relative path produces `file://conf/secrets.json`, which RFC-parses to authority=`conf`, path=`/secrets.json` and silently writes to the filesystem root rather than your working directory.
 
 **VTA Integration:**
 
@@ -299,9 +297,8 @@ Press **Enter** to continue to Protocol.
 
 | Prompt | Action |
 | --- | --- |
-| Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Fjall** |
-| Use an absolute path on a persistent volume in production | Press **Enter** (default: `./data/mediator`) |
-| Fjall directory `./data/mediator` does not exist. Create it now?: | Choose **Yes — create the directory now** |
+| Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Redis** |
+| Connection string for the mediator's Redis-compatible database. | Press **Enter** (default: `redis://127.0.0.1/`) |
 
 **Admin Account:**
 

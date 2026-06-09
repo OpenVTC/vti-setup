@@ -56,7 +56,7 @@ curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup
 The script will:
 
 1. Update system packages
-2. Install build and runtime dependencies (Git, OpenSSL, build toolchain)
+2. Install build and runtime dependencies (Git, OpenSSL, build toolchain, Valkey)
 3. Configure UFW firewall (allow ports 22, 80, 443)
 4. Install Rust
 5. Install Node.js v22
