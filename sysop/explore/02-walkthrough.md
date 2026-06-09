@@ -5,13 +5,13 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 > **⚠️ Explore stream — do not use for real keys.**
 > The box runs everything as root in `/root/<svc>/` with no isolation between services. For a hardened production deployment with per-service users and systemd, see the [Deploy stream](../deploy/) instead.
 
-**Tested on:** [Explore 01: Server Setup](01-server-setup.md)
+**Tested on:** Ubuntu Server 26.04 ([Explore 01: Server Setup](01-server-setup.md))
 
 **Verified with:**
 
-| VTA Version | Mediator Version | DID Hosting Daemon Version |
-| --- | --- | --- |
-| 0.8.0 | 0.15.6 | 0.7.0 |
+| VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
+| --- | --- | --- | --- |
+| 0.9.0 | 0.15.6 | 0.7.0 | 0.9.0 |
 
 ## Prerequisites
 
@@ -58,7 +58,6 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
-| Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory: | Press **Enter** (default: `data/vta`) |
 
@@ -81,6 +80,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | DIDComm messaging: | Choose **Create a new mediator DID (did:webvh)** |
 | Trust context for the mediator DID [mediator]: | Press **Enter** (use default) |
 | Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
+| Mediator WebSocket URL: [wss://mediator.yourdomain.com/mediator/v1/ws] | Press **Enter** (use default) |
 | Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
 | Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
 | mediator DID URL [http://localhost:8000/]: | `https://dids.yourdomain.com/mediator` |
@@ -556,7 +556,7 @@ Create a directory for the VTC and run the setup wizard:
 cd ~
 mkdir vtc
 cd ~/vtc
-vta setup
+vtc setup
 ```
 
 When prompted, use the values below. Replace `yourdomain.com` with your actual domain.
@@ -638,6 +638,12 @@ Claim code (required at claim time):
 >
 > - Save the **VTC DID** (5a)
 > - Save the **Admin DID** (5b)
+
+Start the VTC:
+
+```bash
+nohup vtc > log.txt 2>&1 &
+```
 
 Open the **Install URL** in a browser and paste the **Claim code** in the input box on the browser page.
 
