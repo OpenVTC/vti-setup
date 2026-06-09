@@ -9,5 +9,5 @@ Stand up the VTI stack on a throwaway VM, as root, so you can play with it and l
 
 Read these in order:
 
-1. [Server setup](server-setup.md) — create the Ubuntu host, configure DNS, run `setup-explore.sh`.
-2. [Walkthrough](walkthrough.md) — step through each tool's TUI wizard, save the IDs each step asks you to save.
+1. [01 — Server setup](01-server-setup.md) — create the Ubuntu host, configure DNS, run `setup-explore.sh`.
+2. [02 — Walkthrough](02-walkthrough.md) — step through each tool's TUI wizard, save the IDs each step asks you to save.

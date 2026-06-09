@@ -1,4 +1,4 @@
-# Explore: Server Setup
+# Explore 01: Server Setup
 
 Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment with per-service users, use the [Deploy stream](../deploy/) instead.
 
@@ -165,4 +165,4 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 
 ## Next
 
-Provision and start the stack: [Walkthrough](walkthrough.md).
+Provision and start the stack: [02 — Walkthrough](02-walkthrough.md).

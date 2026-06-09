@@ -1,11 +1,11 @@
-# Explore: VTI Walkthrough
+# Explore 02: VTI Walkthrough
 
 Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
 > **⚠️ Explore stream — do not use for real keys.**
 > The box runs everything as root in `/root/<svc>/` with no isolation between services. For a hardened production deployment with per-service users and systemd, see the [Deploy stream](../deploy/) instead.
 
-**Tested on:** [Explore: Server Setup](server-setup.md)
+**Tested on:** [Explore 01: Server Setup](01-server-setup.md)
 
 **Verified with:**
 
@@ -15,7 +15,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 ## Prerequisites
 
-Complete the [Server setup](server-setup.md) first.
+Complete the [01 — Server setup](01-server-setup.md) first.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 

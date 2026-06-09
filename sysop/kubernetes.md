@@ -113,4 +113,4 @@ With the cluster provisioned and DNS propagated, pick how you want to drive the 
 | Drive from TOML recipes / CLI flags | [Deploy](./deploy/) |
 
 > Note: the setup guides were verified on [Ubuntu
-> Server](./explore/server-setup.md). Adapting them to Kubernetes is straightforward — `vta`, `mediator`, and `did-hosting-daemon` all run as standard containers — but the exact manifests are not yet documented here.
+> Server](./explore/01-server-setup.md). Adapting them to Kubernetes is straightforward — `vta`, `mediator`, and `did-hosting-daemon` all run as standard containers — but the exact manifests are not yet documented here.

@@ -8,14 +8,14 @@ You do **not** run the community's infrastructure. That's the [sysop](../sysop/)
 
 Work through these in order. Each one verifies before you move on.
 
-1. **[Personal VTA](personal-vta.md)** — stand up your own VTA on a host you control. At the end you have a running VTA holding your master keys.
-2. **[OpenVTC TUI Setup](openvtc-tui.md)** — install the TUI and bind it to the Personal VTA from step 1. This is your everyday interface.
-3. **[Joining a Community](joining-a-community.md)** — your first community: mint an M-DID, collect VRCs from two existing members, submit a join request, receive your VMC.
+1. **[01 — Personal VTA](01-personal-vta.md)** — stand up your own VTA on a host you control. At the end you have a running VTA holding your master keys.
+2. **[02 — OpenVTC TUI Setup](02-openvtc-tui.md)** — install the TUI and bind it to the Personal VTA from step 1. This is your everyday interface.
+3. **[03 — Joining a Community](03-joining-a-community.md)** — your first community: mint an M-DID, collect VRCs from two existing members, submit a join request, receive your VMC.
 
 ## Prerequisites you'll need before you start
 
 - A host for your Personal VTA. Cheapest realistic option is a small Ubuntu VPS — see [Ubuntu Server](../sysop/ubuntu-server.md) in sysop. `local-dev` is fine for trying things out but don't keep a real identity on it.
-- HTTPS-capable static hosting somewhere (GitHub Pages, your own site, S3+CDN) for the `did.jsonl` file of your VTA DID. Covered in [Personal VTA](personal-vta.md) Step 2.
+- HTTPS-capable static hosting somewhere (GitHub Pages, your own site, S3+CDN) for the `did.jsonl` file of your VTA DID. Covered in [01 — Personal VTA](01-personal-vta.md) Step 2.
 
 ## Where to go next
 
