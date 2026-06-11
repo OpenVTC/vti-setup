@@ -150,7 +150,7 @@ cd affinidi-webvh-service
 ```
 
 ```bash
-cd webvh-ui && npm install && npm run build:web && cd ..
+cd did-hosting-ui && npm install && npm run build:web && cd ..
 cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui,did-methods"
 ```
 
