@@ -178,7 +178,31 @@ sudo apt update && sudo apt upgrade -y
 banner "Install runtime dependencies"
 # -----------------------------------------------------------------------------
 # No build toolchain. No Docker. The deploy stream uses pre-built binaries only.
-sudo apt -y install ufw ca-certificates curl
+# valkey-server backs the mediator's queue + persistent state (storage = redis).
+sudo apt -y install ufw ca-certificates curl valkey-server
+
+# -----------------------------------------------------------------------------
+banner "Enable Valkey AOF persistence"
+# -----------------------------------------------------------------------------
+# Default RDB-only snapshots can lose ~minutes of mediator state on crash.
+# AOF replays at boot for ~1s loss tolerance — appropriate for a deploy that
+# carries real account/ACL state. Idempotent: matches the package default
+# exactly, so the sed is a no-op once it's already been flipped.
+if ! sudo test -f /etc/valkey/valkey.conf; then
+  echo -e "${RED}Expected /etc/valkey/valkey.conf — valkey-server install may have failed.${NC}"
+  exit 1
+fi
+if sudo grep -q '^appendonly yes' /etc/valkey/valkey.conf; then
+  echo -e "${GREEN}Valkey AOF already enabled.${NC}"
+else
+  sudo sed -i 's/^appendonly no$/appendonly yes/' /etc/valkey/valkey.conf
+  echo -e "${GREEN}Valkey AOF enabled — bouncing daemon to pick up config.${NC}"
+fi
+sudo systemctl is-active --quiet valkey-server || sudo systemctl enable --now valkey-server
+sudo systemctl restart valkey-server
+ss -tlnp 'sport = :6379' 2>/dev/null | grep -q 127.0.0.1 \
+  && echo -e "${GREEN}Valkey listening on 127.0.0.1:6379.${NC}" \
+  || echo -e "${YELLOW}Valkey not on 127.0.0.1:6379 — check /etc/valkey/valkey.conf bind setting.${NC}"
 
 # -----------------------------------------------------------------------------
 banner "Configure UFW firewall"
@@ -223,11 +247,18 @@ install_unit() {
   local desc
   binary=$(binary_for "$svc")
   desc=$(desc_for "$svc")
+  # mediator-svc reads + writes Valkey for queue and persistent state — order
+  # after it and refuse to start without it. The other services don't touch
+  # Valkey, so the dep is mediator-only.
+  local extra_unit_deps=""
+  if [ "$svc" = "mediator" ]; then
+    extra_unit_deps=$'\nAfter=valkey-server.service\nRequires=valkey-server.service'
+  fi
   sudo tee "/etc/systemd/system/${user}.service" > /dev/null <<EOF
 [Unit]
 Description=${desc}
 After=network-online.target
-Wants=network-online.target
+Wants=network-online.target${extra_unit_deps}
 
 [Service]
 Type=simple

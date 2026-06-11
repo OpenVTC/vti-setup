@@ -71,7 +71,7 @@ Domain AND email are both required — the deploy stream needs certbot renewal n
 The script will:
 
 1. Update system packages.
-2. Install runtime dependencies (`ufw`, `ca-certificates`, `curl`). No build toolchain, no Docker — pre-built binaries only.
+2. Install runtime dependencies (`ufw`, `ca-certificates`, `curl`, `valkey-server`). No build toolchain, no Docker — pre-built binaries only. Valkey backs the mediator's queue and persistent state; AOF is enabled by the script for durability.
 3. Configure UFW firewall (allow ports 22, 80, 443).
 4. Create per-service system users (`vta-svc`, `mediator-svc`, `dids-svc`, `vtc-svc`; plus `witness-svc`, `control-svc`, `watcher-svc` in `--standalone`), their data directories at `/var/lib/<svc>-svc/`, and the shared `vti-exchange` group + `/var/lib/vti-exchange/`.
 5. Install systemd unit files (one per service, with sandboxing) to `/etc/systemd/system/`. Services are **not** enabled or started yet — they have no config.
@@ -147,6 +147,14 @@ ls -ld /var/lib/vti-exchange                # 2770 vti:vti-exchange
 
 # systemd units installed, inactive
 systemctl list-unit-files | grep -- '-svc'
+
+# mediator-svc unit declares its Valkey dependency
+systemctl cat mediator-svc | grep -E '^(After|Requires)='   # → both name valkey-server.service
+
+# Valkey is up, listening on loopback only, AOF on
+sudo systemctl is-active valkey-server                      # → active
+ss -tlnp 'sport = :6379' | grep 127.0.0.1                   # → listening on 127.0.0.1:6379
+sudo grep '^appendonly' /etc/valkey/valkey.conf                  # → appendonly yes
 
 # nginx vhosts use $scheme (X-Forwarded-Proto correctness)
 sudo grep -R 'X-Forwarded-Proto' /etc/nginx/sites-enabled/
