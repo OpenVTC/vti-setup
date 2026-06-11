@@ -148,14 +148,17 @@ network_mode = "open"
 url = "redis://127.0.0.1/"
 
 [storage]
-backend  = "fjall"
-data_dir = "/var/lib/mediator-svc/data/mediator"
+backend = "redis"
 
 [output]
 config_path    = "/var/lib/mediator-svc/conf/mediator.toml"
 listen_address = "0.0.0.0:7037"
 ```
 
+> **Where the mediator's state lives now:** with `[storage].backend = "redis"`, persistent state (account index, ACLs, queued messages) lives in Valkey at `/var/lib/valkey/appendonly.aof.*` and `/var/lib/valkey/dump.rdb` — **not** under `/var/lib/mediator-svc/data/`. Backup jobs and restore drills that snapshot `/var/lib/mediator-svc/` will silently miss the mediator's state unless you also include `/var/lib/valkey/`. Stop `valkey-server` before copying the AOF file, or use `valkey-cli BGSAVE` + copy of the RDB for a hot snapshot.
+>
+> **Why no Valkey password:** the listener is bound to `127.0.0.1` only and UFW drops everything except 22/80/443, so no external process can reach the socket. Only `mediator-svc` connects (no other `-svc` user talks to Valkey). On a single-host deploy where Valkey stays loopback, `requirepass` is friction without a meaningful threat-model gain. **Consider adding `requirepass` when:** (1) you split Valkey to a separate host or container, (2) you change `bind` to a non-loopback address for any reason, or (3) your compliance posture mandates auth on every datastore regardless of transport. To do that: set `requirepass <value>` in `/etc/valkey/valkey.conf`, restart `valkey-server`, then either embed the password in `[database].url` (`redis://:<value>@127.0.0.1/`) before re-running `mediator-setup`, or pass `DATABASE_URL` via a systemd drop-in on `mediator-svc.service` (same pattern as the `MEDIATOR_FILE_BACKEND_PASSPHRASE` example shown later in this guide).
+>
 > **Why `file:///` with three slashes:** the `file://` URL form parses per RFC 3986 as authority + path. `file://conf/secrets.json` is **authority=`conf`, path=`/secrets.json`** — silently writes to the filesystem root. Three slashes (`file:///<absolute path>`) means **empty authority, absolute path** — what you want. Always use the three-slash form.
 >
 > **Why the filename is `mediator-secrets.json`, not `secrets.json`:** the wizard has a stale code path (`generators/secrets.rs::write_secrets_file`, invoked from `config_writer.rs` whenever `[secrets].storage` is a `file://` URL) that always writes a legacy `affinidi_secrets_resolver`-format array to `<config_dir>/secrets.json` — clobbering the unified-backend file if it has the same name. Using a different filename keeps the unified backend (envelope format, what the mediator binary actually reads) intact. The legacy `secrets.json` is still produced as dead-weight; ignore it (and don't grant it group read).
