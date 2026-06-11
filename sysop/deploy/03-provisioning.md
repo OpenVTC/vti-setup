@@ -447,6 +447,8 @@ Generate an enrollment token using the Admin DID from 3b:
 sudo -u dids-svc /usr/local/bin/did-hosting-daemon invite --config /var/lib/dids-svc/config.toml --role admin --did <Admin DID (3b)>
 ```
 
+> **⚠️ SAVE THIS** (3e)
+>
 > Save the **Enrollment URL** printed — you will need it after starting the daemon.
 
 Start the daemon under systemd:
