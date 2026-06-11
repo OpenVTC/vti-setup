@@ -188,7 +188,7 @@ banner "Enable Valkey AOF persistence"
 # AOF replays at boot for ~1s loss tolerance — appropriate for a deploy that
 # carries real account/ACL state. Idempotent: matches the package default
 # exactly, so the sed is a no-op once it's already been flipped.
-if [ ! -f /etc/valkey/valkey.conf ]; then
+if ! sudo test -f /etc/valkey/valkey.conf; then
   echo -e "${RED}Expected /etc/valkey/valkey.conf — valkey-server install may have failed.${NC}"
   exit 1
 fi
