@@ -154,7 +154,7 @@ systemctl cat mediator-svc | grep -E '^(After|Requires)='   # → both name valk
 # Valkey is up, listening on loopback only, AOF on
 sudo systemctl is-active valkey-server                      # → active
 ss -tlnp 'sport = :6379' | grep 127.0.0.1                   # → listening on 127.0.0.1:6379
-grep '^appendonly' /etc/valkey/valkey.conf                  # → appendonly yes
+sudo grep '^appendonly' /etc/valkey/valkey.conf                  # → appendonly yes
 
 # nginx vhosts use $scheme (X-Forwarded-Proto correctness)
 sudo grep -R 'X-Forwarded-Proto' /etc/nginx/sites-enabled/
