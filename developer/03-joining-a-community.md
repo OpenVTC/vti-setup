@@ -51,7 +51,7 @@ After an `Approved` outcome you should be able to:
 - Receive a DIDComm message addressed to your M-DID via the **members-only mediator** (not just the public/join one).
 - See an entry for your M-DID in the community's published members directory, if one is exposed.
 
-At that point you have graduated to [Member Developer](member-developer.md) _(not yet written)_.
+At that point you have graduated to Member Developer _(not yet written)_.
 
 ## Notes
 
@@ -100,4 +100,4 @@ Your join request is _addressed to_ the community's **VTC service** — the daem
 
 When the VTC receives your request it runs the community's currently-active **join policy** against your submission. The join policy is just code — a Rego module (`join.rego`) evaluated by an engine embedded in the VTC — and admins author it. The policy returns a boolean `allow`. Under current initial-days policy the rule is simple: `allow` is true if your submission carries at least two valid VRCs whose issuers are both `Active` members in the community's trust registry. On `allow=true`, the VTC mints a **VMC** and an initial role **VEC** for your M-DID, writes your M-DID into the community's ACL and trust registry as `Active`, and sealed-transfers the bundle back within seconds — no human approval step. The same machinery will gate richer policies later (more issuers, role-specific issuers, additional credential types); admins update the policy and activate it, and the wire shape of a join request does not change.
 
-If the policy returns `allow=false`, your request is recorded with status `Rejected` and a rationale; you cannot retry without a submission the current policy will accept. If the policy cannot complete cleanly — for example, a trust-registry check times out, or the community policy explicitly holds borderline cases — your request is recorded with status `Pending` (or `Deferred`) and queued for a community admin (see [VTC Admin](../community-manager/vtc-admin.md) _(not yet written)_) to review manually. That manual-review path is the fallback for cases automation can't decide on its own — not the normal path.
+If the policy returns `allow=false`, your request is recorded with status `Rejected` and a rationale; you cannot retry without a submission the current policy will accept. If the policy cannot complete cleanly — for example, a trust-registry check times out, or the community policy explicitly holds borderline cases — your request is recorded with status `Pending` (or `Deferred`) and queued for a community admin _(not yet written)_) to review manually. That manual-review path is the fallback for cases automation can't decide on its own — not the normal path.

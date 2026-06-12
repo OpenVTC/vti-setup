@@ -1,7 +1,7 @@
 # Personal VTA
 
 **Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.  
-**Tested on:** [Ubuntu Server](../sysop/ubuntu-server.md)
+**Tested on:** [Ubuntu Server](/sysop/explore/01-server-setup.md) (Path B only — Path A runs in VTA Farm's managed cluster)
 
 **Verified with:**
 
@@ -9,9 +9,93 @@
 | --- | --- | --- |
 | 0.6.0 | 0.15.3 | 0.7.0 |
 
-## Prerequisites
+## Two paths
 
-Complete the [Ubuntu Server](../sysop/ubuntu-server.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
+There are two ways to bring up a Personal VTA. Both end in the same place: a running VTA holding your master keys, reachable from your PNM. The downstream tutorials ([OpenVTC TUI](02-openvtc-tui.md), [Joining a Community](03-joining-a-community.md)) work the same regardless of which path you take.
+
+- **[Path A — VTA Farm (streamlined, recommended)](#path-a--vta-farm-streamlined)** — [VTA Farm](https://vtafarm.firstperson.dev) spins up your VTA in a managed K8s cluster. You provision it from a browser with a passkey and connect your local PNM to it. No server, no public domain, no DID hosting, no mediator wiring on your side.
+- **[Path B — VTA the hard way (self-hosted)](#path-b--vta-the-hard-way-self-hosted)** — run the VTA on a host you control, publish your own `did:webvh` DID log, and wire it to a community mediator yourself. More moving parts, more to learn.
+
+Pick whichever fits how much infrastructure you want to manage. If you're new to the stack, take Path A.
+
+## Path A — VTA Farm (streamlined)
+
+### Prerequisites
+
+- An **invite link** from a VTA Farm admin.
+- A device with **passkey** support.
+- **PNM installed locally.** PNM is a CLI tool and can run on your laptop — it does not need its own server. See [Ubuntu Server, Step 5](/sysop/explore/01-server-setup.md) for install instructions. You only need `pnm` for this path, not `vta`.
+
+The following values will be collected during setup. Save each one as prompted — they are needed across steps.
+
+| ID | What to Save | Used In |
+| --- | --- | --- |
+| A1 | Personal VTA DID (from VTA Farm UI) | Step 2 |
+| A2 | Temp DID (`did:key:...` from PNM) | Step 3 |
+
+### Steps
+
+#### Step 1: Create the VTA in VTA Farm
+
+1. Open the invite link sent to you.
+2. Click **Sign up with Passkey** and complete the passkey prompt on your device.
+3. Click **Create VTA**.
+4. Enter a **name** for your VTA, leave the default image selected, and click **Create session**.
+5. Copy the **VTA DID** displayed on the page.
+
+> **⚠️ SAVE THIS** (A1)
+>
+> The **Personal VTA DID** shown in the VTA Farm UI. You'll paste it into PNM in the next step.
+
+#### Step 2: Connect PNM
+
+Run `pnm setup` on the machine you want to drive the VTA from:
+
+```bash
+pnm setup
+```
+
+When prompted:
+
+| Prompt | Action |
+| --- | --- |
+| What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
+| Name for this VTA: | Enter the **same name** you used in Step 1 |
+| VTA DID: | Paste the **Personal VTA DID** from A1 |
+
+PNM prints a `vta import-did` command containing a generated Temp DID unique to this session:
+
+```text
+vta import-did --did did:key:z6Mk... --role admin
+```
+
+> **⚠️ SAVE THIS** (A2)
+>
+> The **Temp DID** — the `did:key:z6Mk...` value from PNM's output. You'll paste it into VTA Farm in the next step.
+
+#### Step 3: Provision the agent
+
+Back in the VTA Farm browser tab:
+
+1. Paste the **Temp DID** from A2 into the **Admin DID** input box.
+2. Click **Provision agent**.
+3. Wait for the **Agent is online** message.
+
+### Verification
+
+From the PNM machine:
+
+```bash
+pnm health
+```
+
+It should return the status of a number of checks it runs against the VTA, the Mediator, and a DIDComm trust ping.
+
+## Path B — VTA the hard way (self-hosted)
+
+### Prerequisites
+
+Complete the [Ubuntu Server](/sysop/explore/01-server-setup.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
 
 You also need the **Community Mediator DID** before starting — obtain it from the operator of the mediator you intend to use. You will paste it in Step 1.
 
@@ -28,9 +112,9 @@ The following values will be collected during setup. Save each one as prompted �
 | 1a | Personal VTA mnemonic phrase | Recovery |
 | 1b | Personal VTA DID | Step 2, Step 3 |
 
-## Steps
+### Steps
 
-### Step 1: Set up Personal VTA
+#### Step 1: Set up Personal VTA
 
 Create a directory for the personal VTA:
 
@@ -115,7 +199,7 @@ Setup complete!
 >
 > - **Personal VTA DID** (1b): the `VTA DID:` line
 
-### Step 2: Publish Personal VTA DID
+#### Step 2: Publish Personal VTA DID
 
 For other parties (mediators, peers, verifiers) to resolve your `did:webvh` DID, the **DID log** generated in Step 1 must be served at a public HTTPS URL. The URL is not a free choice — the `did:webvh` resolver derives it directly from the DID identifier, so the path you publish under must match the **VTA DID URL** you entered during `vta setup` (e.g. `https://did-host.com/your-did-path`). The resolver will fetch `https://did-host.com/your-did-path/did.jsonl`.
 
@@ -157,7 +241,7 @@ curl -sSf https://did-host.com/your-did-path/did.jsonl | head -n 1
 
 You should see the first line of the DID log returned over HTTPS.
 
-### Step 3: Connect PNM to VTA
+#### Step 3: Connect PNM to VTA
 
 > **ℹ️ NOTE**
 >
@@ -209,7 +293,7 @@ cd ~/vta
 nohup vta > log.txt 2>&1 &
 ```
 
-## Verification
+### Verification
 
 Confirm the VTA is responding:
 
