@@ -11,7 +11,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- |
-| 0.9.0 | 0.15.6 | 0.7.0 | 0.9.0 |
+| 0.9.6 | 0.16.2 | 0.7.0 | 0.9.3 |
 
 ## Prerequisites
 
@@ -25,13 +25,8 @@ The following values will be collected during setup. Save each one as prompted �
 | 1b | VTA DID | Steps 2, 3 & 5 |
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
-| 3b | Admin DID | Later |
 | 4a | DID Host Admin DID | Step 4 |
-| 4b | DID Host Admin private key | Step 4 |
-| 4c | SHA-256 digest (DID Host bundle) | Step 4 |
-| 4d | DID Host Daemon DID | Later |
-| 5a | VTC DID | |
-| 5b | Admin DID | |
+| 4b | SHA-256 digest (DID Host bundle) | Step 4 |
 
 ## Steps
 
@@ -53,21 +48,14 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Config file path [config.toml]: | Press **Enter** (use default) |
 | VTA name (leave empty to skip): | Enter a name for this VTA |
 | Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
-| Server host: | Press **Enter** (default: `0.0.0.0`) |
-| Server port: | Press **Enter** (default: `8100`) |
+| Server host [0.0.0.0]: | Press **Enter** (use default) |
+| Server port [8100]: | Press **Enter** (use default) |
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
-| Log level: | Press **Enter** (default: `info`) |
-| Log format: | Press **Enter** (default: `text`) |
+| Log level [info]: | Press **Enter** (use default) |
+| Log format: | Press **Enter** (default: **text**) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
-| Data directory: | Press **Enter** (default: `data/vta`) |
-
-**BIP-39 mnemonic:**
-
-- Choose: **Generate new 24-word mnemonic**
-- > **⚠️ SAVE THIS** (1a)
-  > Save the **24-word mnemonic phrase** to your notes.
-  > You cannot recover this VTA without it.
-- I have saved my mnemonic phrase [y/N]: → **y**
+| Data directory [data/vta]: | Press **Enter** (use default) |
+| Configure advanced server options (CORS, trusted proxy header, WebAuthn)? [y/N] | Press **Enter** (use default) |
 
 **Seed storage backend:**
 
@@ -81,14 +69,9 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Trust context for the mediator DID [mediator]: | Press **Enter** (use default) |
 | Mediator URL: | `https://mediator.yourdomain.com/mediator/v1` |
 | Mediator WebSocket URL: [wss://mediator.yourdomain.com/mediator/v1/ws] | Press **Enter** (use default) |
+| mediator DID URL [http://mediator.yourdomain.com/mediator/v1]: | `https://dids.yourdomain.com/mediator` |
 | Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
 | Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
-| mediator DID URL [http://localhost:8000/]: | `https://dids.yourdomain.com/mediator` |
-| Is this correct? [Y/n]: | Press **Enter** → **Y** |
-| DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
-| Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
-| Number of pre-rotation keys [1]: | Press **Enter** (use default) |
-| Save DID log to file [mediator-did.jsonl]: | Press **Enter** (use default) |
 
 **VTA DID:**
 
@@ -96,27 +79,32 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | --- | --- |
 | VTA DID: | Choose **Create a new did:webvh DID** |
 | VTA DID URL [http://localhost:8000/]: | `https://dids.yourdomain.com/vta` |
-| Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
-| Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
+| Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** (use default) |
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
+
+The wizard then displays a 24-word mnemonic.
+
+- > **⚠️ SAVE THIS** (1a)
+  > Save the **24-word mnemonic phrase** to your notes.
+  > You cannot recover this VTA without it.
+- I have saved my mnemonic phrase [y/N]: → **y**
+
+| Prompt | Action |
+| --- | --- |
+| Save DID log to file [mediator-did.jsonl]: | Press **Enter** (use default) |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
 
 When all prompts are complete, the wizard prints:
 
 ```text
-Setup complete!
-  Config saved to: config.toml
-  Seed stored in configured backend
-  Seed backend: config file (hex-encoded in config.toml)
-  VTA Name: <your VTA name>
-  VTA REST URL: https://vta.yourdomain.com
+Setup complete.
+  Config:   config.toml
+  Data dir: data/vta
+  Name:     Ada VTA
+  URL:      https://vta.ada.ic3.dev
   VTA DID: did:webvh:...:dids.yourdomain.com:vta
-  Services: REST, DIDComm
-  Server: 0.0.0.0:8100
   Mediator DID: did:webvh:...:dids.yourdomain.com:mediator
-  Mediator URL: https://mediator.yourdomain.com/mediator/v1
-  Contexts: vta (m/26'/2'/0')
 ```
 
 > **⚠️ SAVE THESE** (1b, 1c)
@@ -141,13 +129,13 @@ When prompted:
 | Name for this VTA: | Enter a name for this VTA |
 | VTA DID: | Paste the **VTA DID** from 1b |
 
-PNM will output a `vta import-did` command. Note it down — it contains a generated temp DID unique to this session:
+PNM will output a `vta import-did` command; copy it:
 
 ```text
 vta import-did --did did:key:z6Mk... --role admin
 ```
 
-Run that command in the `~/vta` directory:
+Then run that command in the `~/vta` directory:
 
 ```bash
 cd ~/vta
@@ -272,39 +260,35 @@ Bundle opened successfully — sealed handoff complete.
   the flow without passing through the TUI.
 ```
 
-> **⚠️ SAVE THIS** (3b)
->
-> Press **[a]** to copy the **Admin DID** (3b) and save it to your notes.
+Press **Enter** to cotinue.
 
-Press **Enter** to continue to Protocol.
-
-**Protocol:**
+**Messaging Protocol:**
 
 | Prompt | Action |
 | --- | --- |
-| Toggle protocols with Enter: | Select **DIDComm v2 (recommended)** |
+| [Space] toggles protocol, [Enter] continue: | Select ONLY **DIDComm v2 (recommended)** (default) |
 
 **Security:**
 
 | Prompt | Action |
 | --- | --- |
-| Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** |
-| Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** |
-| Network access posture: | Press **Enter** (default: **Open network**) |
+| Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** (default) |
+| Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** (default) |
+| Network access posture: | Choose **Open network** (default) |
 | CORS policy: | Choose **Allow any origin** |
 
 **Database:**
 
 | Prompt | Action |
 | --- | --- |
-| Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Redis** |
+| Choose between Redis (multi-mediator) and Fjall (embedded single-node): | Choose **Redis** (default) |
 | Connection string for the mediator's Redis-compatible database. | Press **Enter** (default: `redis://127.0.0.1/`) |
 
 **Admin Account:**
 
 | Prompt | Action |
 | --- | --- |
-| Configure the admin DID for mediator management: | Choose **Generate a new admin did:key** |
+| Configure the admin DID for mediator management: | Choose **Generate a new admin did:key** (default) |
 | Where should the wizard write mediator.toml?: | Press **Enter** (default: `conf/mediator.toml`) |
 
 The wizard shows a **Summary — Review Configuration** screen. Press **Enter** to write the configuration.
@@ -346,12 +330,12 @@ The wizard prompts for additional configuration:
 
 | Prompt | Action |
 | --- | --- |
-| Listen host: | Press **Enter** (default: `0.0.0.0`) |
-| Listen port: | Press **Enter** (default: `8534`) |
+| Listen host [0.0.0.0]: | Press **Enter** (use default) |
+| Listen port [8534]: | Press **Enter** (use default) |
 | Log level: | Press **Enter** (default: `info`) |
 | Log format: | Press **Enter** (default: `text`) |
 | Data directory root [data/daemon]: | Press **Enter** (use default) |
-| Continue with plaintext secrets storage? [y/N]: | **y** |
+| Continue with plaintext secrets storage? [y/N]: | Press **y** (NOT Enter) |
 | Admin ACL entry: | Choose **Generate a new did:key identity for the operator** |
 
 The wizard completes phase 1 and prints:
@@ -370,10 +354,9 @@ The wizard completes phase 1 and prints:
   Nonce:          <nonce>
 ```
 
-> **⚠️ SAVE THESE** (4a, 4b)
+> **⚠️ SAVE THIS** (4a)
 >
 > - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
-> - Save the **Admin private key** (4b) (the `Private key:` line — shown only once)
 
 Move the bootstrap request to the VTA directory and create the WebVH context:
 
@@ -409,7 +392,7 @@ Integration provisioned — sealed bundle written to bundle.armor
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THIS** (4c)
+> **⚠️ SAVE THIS** (4b)
 >
 > Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next command.
 
@@ -433,7 +416,7 @@ When prompted:
 | --- | --- |
 | How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
 | ASCII-armored sealed bundle path: | `/root/dids/bundle.armor` |
-| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4c |
+| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4b |
 | Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
 
 The wizard prints the completed setup:
@@ -466,11 +449,7 @@ DID Hosting Daemon — Offline Setup (step 2/2)
     did-hosting-daemon --config config.toml
 ```
 
-> **⚠️ SAVE THIS** (4d)
->
-> Save the **Daemon DID** (4d) (the `Daemon DID:` line, e.g. `did:webvh:...:dids.yourdomain.com`)
-
-Generate an enrollment token using the **Admin DID** from 4a:
+Now generate an **Enrollment URL** for the admin of the DID hosting service:
 
 ```bash
 cd ~/dids
@@ -480,7 +459,7 @@ cd ~/dids
 did-hosting-daemon invite --role admin --did <Admin DID (4a)>
 ```
 
-The command outputs an **Enrollment URL**, for example:
+The command outputs a one-time use URL:
 
 ```text
 https://dids.yourdomain.com/enroll?token=...
@@ -602,7 +581,7 @@ Then switch back to the terminal running the wizard:
 
 - Choose: **Config file (hex-encoded seed in config.toml)**
 
-The wizard completes and displays:
+The wizard then displays:
 
 ```text
 ✅ VTC setup complete.
@@ -611,33 +590,19 @@ VTC DID:       did:webvh:QmR2...:vtc.example.com
 Admin DID:     did:key:z6Mk...
 Config:        config.toml
 Data dir:      data
+```
 
-Admin key (save this — needed for CLI access):
-{
-  "did": "did:key:z6Mkm...",
-  "signing_key": {
-    "key_id": "did:key:z6Mk...",
-    "public_key_multibase": "z6Mk...",
-    "private_key_multibase": "z3u2..."
-  },
-  "ka_key": {
-    "key_id": "did:key:z6Mkm...",
-    "public_key_multibase": "z6LS...",
-    "private_key_multibase": "z3we..."
-  }
-}
+| Prompt | Action |
+| --- | --- |
+| Display the admin private key now? It's needed for CLI access and is shown only once [y/N] | Press **Enter** (use default) |
 
+```text
 Install URL (one-shot, 15 min TTL):
   https://vtc.example.com/admin/install?token=eyJ0...
 
 Claim code (required at claim time):
   NDKH...
 ```
-
-> **⚠️ SAVE THESE** (5a, 5b)
->
-> - Save the **VTC DID** (5a)
-> - Save the **Admin DID** (5b)
 
 Start the VTC:
 
