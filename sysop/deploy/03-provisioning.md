@@ -143,6 +143,7 @@ ssl          = "none"
 admin        = "generate"
 jwt_mode     = "generate"
 network_mode = "open"
+cors         = "any"
 
 [database]
 url = "redis://127.0.0.1/"
