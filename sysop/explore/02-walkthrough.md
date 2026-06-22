@@ -576,6 +576,16 @@ Then switch back to the terminal running the wizard:
 | Prompt | Action |
 | --- | --- |
 | Has the ACL grant been created at the VTA? [y/N] | Press **y** |
+| Where should the VTC DID be published?: | Press **Enter** (select your DID host) |
+| WebVH path (blank → server-assigned) []: | Enter an appropriate name linked to the VTC |
+
+> **⚠️ NOTE: DID Host Access**
+>
+> The VTA will need access to the DID Host to publish DID documents. Log into
+> your DID host and select "Access", then add the VTA DID in the "Add Entry"
+> section and click the "Admin" button, then click the "Add Entry" button. The
+> VTA's DID will be added to the access control list and can now publish DID
+> documents to it.
 
 **Seed storage backend:**
 
