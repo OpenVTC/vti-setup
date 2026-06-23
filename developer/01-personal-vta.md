@@ -145,13 +145,7 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory: | Press **Enter** (default: `data/vta`) |
-
-**BIP-39 mnemonic:**
-
-- > **⚠️ SAVE THIS** (1a)
-  > Save the **24-word mnemonic phrase** to your notes.
-  > You cannot recover this VTA without it.
-- I have saved my mnemonic phrase [y/N]: → **y**
+| Configure advanced server options (CORS, trusted proxy header, WebAuthn)? [y/N] | Press **Enter** (use default) |
 
 **Seed storage backend:**
 
@@ -171,10 +165,20 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | --- | --- |
 | VTA DID: | Choose **Create a new `did:webvh` DID** |
 | VTA DID URL: | `https://did-host.com/your-did-path` |
-| Is this correct? [Y/n]: | Press **Enter** → **Y** |
 | DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
+
+**BIP-39 mnemonic:**
+
+- > **⚠️ SAVE THIS** (1a)
+  > Save the **24-word mnemonic phrase** to your notes.
+  > You cannot recover this VTA without it.
+- I have saved my mnemonic phrase [y/N]: → **y**
+
+
+| Prompt | Action |
+| --- | --- |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
 
 When all prompts are complete, the wizard prints:
