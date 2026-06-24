@@ -308,6 +308,7 @@ sudo install -o vti -g vti-exchange -m 0640 \
   /var/lib/vti-exchange/control-did.jsonl
 
 sudo -u dids-svc /usr/local/bin/did-hosting-server bootstrap-did \
+  --config /var/lib/dids-svc/config.toml \
   --path services/control \
   --did-log /var/lib/vti-exchange/control-did.jsonl
 ```
@@ -315,32 +316,43 @@ sudo -u dids-svc /usr/local/bin/did-hosting-server bootstrap-did \
 Add the server DID to the control plane ACL:
 
 ```bash
-sudo -u control-svc /usr/local/bin/did-hosting-control add-acl --role service --did <Server DID (3h)>
+sudo -u control-svc /usr/local/bin/did-hosting-control add-acl --config /var/lib/control-svc/config.toml --role service --did <Server DID (3h)>
 ```
 
 ### Step 3.4: Load VTA and Mediator DIDs into the server store
 
 Import the DID logs generated during VTA setup so the hosting server can resolve them:
 
-```bash
-sudo -u dids-svc /usr/local/bin/did-hosting-server load-did \
-  --path mediator \
-  --did-log /var/lib/vta-svc/data/vta/did-logs/mediator-did.jsonl
+Stage the DID log files through the exchange directory (`/var/lib/vta-svc/` is `0750 vta-svc:vta-svc`, so `dids-svc` cannot traverse it directly):
 
-sudo -u dids-svc /usr/local/bin/did-hosting-server load-did \
-  --path vta \
-  --did-log /var/lib/vta-svc/data/vta/did-logs/VTA-did.jsonl
+```bash
+sudo install -o vti -g vti-exchange -m 0640 \
+  /var/lib/vta-svc/data/vta/did-logs/mediator-did.jsonl \
+  /var/lib/vti-exchange/mediator-did.jsonl
+
+sudo install -o vti -g vti-exchange -m 0640 \
+  /var/lib/vta-svc/data/vta/did-logs/VTA-did.jsonl \
+  /var/lib/vti-exchange/VTA-did.jsonl
 ```
 
-> The vta-svc-owned DID log files are readable by dids-svc because both users are members of the `vti-exchange` group and the data dir's perms allow it. If your install differs, copy the files into `/var/lib/vti-exchange/` first via `sudo install`.
+```bash
+sudo -u dids-svc /usr/local/bin/did-hosting-server load-did \
+  --config /var/lib/dids-svc/config.toml \
+  --path mediator \
+  --did-log /var/lib/vti-exchange/mediator-did.jsonl
+
+sudo -u dids-svc /usr/local/bin/did-hosting-server load-did \
+  --config /var/lib/dids-svc/config.toml \
+  --path vta \
+  --did-log /var/lib/vti-exchange/VTA-did.jsonl
+```
 
 ### Step 3.5: Dump the Server DID
 
 Export the server's DID log before starting it — you will need it to register the server's root DID in the control plane:
 
 ```bash
-sudo -u dids-svc /usr/local/bin/did-hosting-server dump-did --path .well-known \
-  | sudo tee /var/lib/vti-exchange/server-did.jsonl > /dev/null
+sudo -u dids-svc /usr/local/bin/did-hosting-server dump-did --config /var/lib/dids-svc/config.toml --path .well-known | sudo tee /var/lib/vti-exchange/server-did.jsonl > /dev/null
 sudo chown vti:vti-exchange /var/lib/vti-exchange/server-did.jsonl
 sudo chmod 0640 /var/lib/vti-exchange/server-did.jsonl
 ```
@@ -365,12 +377,13 @@ sudo systemctl status dids-svc
 
 ```bash
 sudo systemctl enable --now mediator-svc
+sudo systemctl status mediator-svc
 ```
 
 **Generate an enrollment invite for the admin DID before starting the control service:**
 
 ```bash
-sudo -u control-svc /usr/local/bin/did-hosting-control invite --role admin --did <Control Admin DID (3c)>
+sudo -u control-svc /usr/local/bin/did-hosting-control invite --config /var/lib/control-svc/config.toml --role admin --did <Control Admin DID (3c)>
 ```
 
 Save the **Enrollment URL** printed.
