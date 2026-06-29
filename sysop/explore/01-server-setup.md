@@ -16,7 +16,7 @@ Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topolo
 | Requirement | Details |
 | --- | --- |
 | Registered domain + DNS access | We use [Cloudflare](https://www.cloudflare.com) for DNS management. |
-| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance. |
+| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance (2vCPU, 4gb RAM recommended). |
 | SSH key pair | Used to connect to the server. |
 | `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `sudo apt install curl` |
 
@@ -82,7 +82,31 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 
 ### Option A: Download pre-built binaries (recommended)
 
-Saves 15–40 minutes of build time depending on your hardware:
+Saves 15–40 minutes of build time depending on your hardware.
+
+#### Last tagged release: Banyan (2026-06-22)
+
+```bash
+curl -O https://download.firstperson.dev/vta/0.10.3-d888479/vta
+chmod +x vta && sudo mv vta /usr/local/bin/
+
+curl -O https://download.firstperson.dev/vtc/0.10.12-d888479/vtc
+chmod +x vtc && sudo mv vtc /usr/local/bin/
+
+curl -O https://download.firstperson.dev/pnm/0.10.0-d888479/pnm
+chmod +x pnm && sudo mv pnm /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/0.16.7-bef422d/mediator
+chmod +x mediator && sudo mv mediator /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/0.16.7-bef422d/mediator-setup
+chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
+
+curl -O https://download.firstperson.dev/did-hosting-daemon/0.7.0-3c54f77/did-hosting-daemon
+chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
+```
+
+#### Latest main branches
 
 ```bash
 curl -O https://fpp.ic3.dev/vta/latest/vta
@@ -118,12 +142,12 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
+git checkout Banyan # last tagged release, or just stay on main
 ```
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
-cargo install --path vtc-service --no-default-features --features "setup,config-secret"
-cargo install --path cnm-cli --no-default-features --features "config-session"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret,website,admin-ui"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```
 
@@ -134,11 +158,12 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
+git checkout affinidi-messaging-mediator-v0.16.7 # part of Banyan release, or just stay on main
 ```
 
 ```bash
 cargo install --path affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
-cargo install --path affinidi-messaging-mediator/tools/mediator-setup
+cargo install --path affinidi-messaging-mediator-setup
 ```
 
 #### DID Hosting Daemon
@@ -147,6 +172,7 @@ cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
+git checkout v0.7.0 # part of Banyan release, or just stay on main
 ```
 
 ```bash
