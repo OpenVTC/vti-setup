@@ -1,6 +1,6 @@
 # Explore 01: Server Setup
 
-Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment with per-service users, use the [Deploy stream](../deploy/) instead.
+Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment, see the [Deploy stream](../deploy/) (hardened Kubernetes — not yet documented).
 
 ## Service configuration
 

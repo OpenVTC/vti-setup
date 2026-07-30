@@ -24,7 +24,7 @@ You operate a VTC: bootstrap the community, set join and role policies, manage t
 
 You run the VTI services so the other two can do their jobs. Provision the host, stand up VTA + Mediator + DID Hosting Daemon.
 
-→ [`sysop/`](sysop/) · pick a stream: **explore** the VTI or **deploy** it for a community
+→ [`sysop/`](sysop/) · **explore** the VTI end-to-end; a hardened **deploy** stream is planned
 
 ---
 
