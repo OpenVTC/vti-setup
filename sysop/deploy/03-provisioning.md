@@ -230,9 +230,9 @@ sudo -u mediator-svc /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/
   Using rotated admin DID from VTA session: did:key:z6Mk...
   Provisioning unified secret backend: file:///var/lib/mediator-svc/conf/secrets.json
     ✔ mediator_jwt_secret
-    ✔ mediator_operating_secrets (4 keys)
+    ✔ mediator_operating_secrets (3 keys)
     ✔ mediator_admin_credential
-    ✔ mediator/vta/last_known_bundle (4 keys)
+    ✔ mediator/vta/last_known_bundle (3 keys)
   ✔ Saved DID log: /var/lib/mediator-svc/conf/did.jsonl
   ✔ Configuration: /var/lib/mediator-svc/conf/mediator.toml
   ✔ Lua functions: /var/lib/mediator-svc/conf/atm-functions.lua
@@ -243,8 +243,14 @@ sudo -u mediator-svc /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/
   offline store now and clear your terminal scrollback if you care about confidentiality.
   Private key (multibase): z3u2...
   VTA DID: did:webvh:...:dids.yourdomain.com:vta   Context: mediator
-  ✔ Secrets: /var/lib/mediator-svc/conf/secrets.json
+  ✔ Secrets: /var/lib/mediator-svc/conf/mediator-secrets.json
   ✔ Setup artefacts removed — the mediator has everything it needs in the configured secret backend.
+
+  To install:
+    cargo install --path crates/messaging/affinidi-messaging-mediator
+
+  To build from source:
+    cargo build --release -p affinidi-messaging-mediator
 
   ━━━ Summary ━━━
 
@@ -252,7 +258,10 @@ sudo -u mediator-svc /usr/local/bin/mediator-setup --from /var/lib/mediator-svc/
     /var/lib/mediator-svc/conf/mediator.toml  — mediator configuration
     /var/lib/mediator-svc/conf/atm-functions.lua  — Redis Lua functions
     /var/lib/mediator-svc/conf/mediator-build.toml  — build recipe (reproducible setup)
-    /var/lib/mediator-svc/conf/secrets.json  — private keys (keep secure!)
+    /var/lib/mediator-svc/conf/mediator-secrets.json  — private keys (keep secure!)
+
+  Reproduce this setup:
+    mediator-setup --from /var/lib/mediator-svc/conf/mediator-build.toml
 ```
 
 > **⚠️ SAVE THIS** (2c)

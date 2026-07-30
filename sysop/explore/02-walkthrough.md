@@ -24,6 +24,7 @@ The following values will be collected during setup. Save each one as prompted �
 | 1a | VTA mnemonic phrase | Recovery |
 | 1b | VTA DID | Steps 2, 3 & 5 |
 | 1c | Mediator DID | Step 4 |
+| 1d | DID Host DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 4a | DID Host Admin DID | Step 4 |
 | 4b | SHA-256 digest (DID Host bundle) | Step 4 |
@@ -449,6 +450,10 @@ DID Hosting Daemon — Offline Setup (step 2/2)
     did-hosting-daemon --config config.toml
 ```
 
+> **⚠️ SAVE THIS** (1d)
+>
+> Save the **DID** — you will register this DID Hosting Daemon DID with the VTA.
+
 Now generate an **Enrollment URL** for the admin of the DID hosting service:
 
 ```bash
@@ -510,6 +515,13 @@ Wait one minute for the mediator to fully initialize, then start the VTA:
 ```bash
 cd ~/vta
 nohup vta > log.txt 2>&1 &
+```
+
+Register the DID Hosting Daemon with the VTA:
+
+```bash
+cd ~/vta
+pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (1d)>
 ```
 
 ## Verification
