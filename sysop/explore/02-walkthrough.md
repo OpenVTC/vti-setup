@@ -11,7 +11,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- |
-| 0.9.6 | 0.16.2 | 0.7.0 | 0.9.3 |
+| 0.13.18 | 0.18.0 | 0.8.3 | 0.11.45 |
 
 ## Prerequisites
 
@@ -24,10 +24,10 @@ The following values will be collected during setup. Save each one as prompted �
 | 1a | VTA mnemonic phrase | Recovery |
 | 1b | VTA DID | Steps 2, 3 & 5 |
 | 1c | Mediator DID | Step 4 |
-| 1d | DID Host DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
 | 4a | DID Host Admin DID | Step 4 |
 | 4b | SHA-256 digest (DID Host bundle) | Step 4 |
+| 4c | DID Host DID | Step 4 |
 
 ## Steps
 
@@ -57,10 +57,8 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory [data/vta]: | Press **Enter** (use default) |
 | Configure advanced server options (CORS, trusted proxy header, WebAuthn)? [y/N] | Press **Enter** (use default) |
-
-**Seed storage backend:**
-
-- Choose: **Config file (hex-encoded seed in config.toml)**
+| Seed storage backend: | Press **Enter** (default: Config file) |
+| Enable hardened configuration? (encrypts the fjall store...) y/N | Press **Enter** (use default) |
 
 **DIDComm Messaging:**
 
@@ -73,6 +71,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | mediator DID URL [http://mediator.yourdomain.com/mediator/v1]: | `https://dids.yourdomain.com/mediator` |
 | Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (leave empty) |
 | Upstream routing-key DIDs for this mediator (comma-separated, leave empty to skip): | Press **Enter** (leave empty) |
+| Automatically provision ACL on mediator after connecting? y/N | Press **Enter** (use default) |
 
 **VTA DID:**
 
@@ -261,13 +260,13 @@ Bundle opened successfully — sealed handoff complete.
   the flow without passing through the TUI.
 ```
 
-Press **Enter** to cotinue.
+Press **Enter** to continue.
 
 **Messaging Protocol:**
 
 | Prompt | Action |
 | --- | --- |
-| [Space] toggles protocol, [Enter] continue: | Select ONLY **DIDComm v2 (recommended)** (default) |
+| [Space] toggles protocol, [Enter] continue: | Select **TSP (Trust Spanning Protocol)** and **DIDComm v2** |
 
 **Security:**
 
@@ -326,6 +325,7 @@ When prompted:
 | DID path on the server [.well-known]: | Press **Enter** (use default) |
 | Context ID [webvh]: | Press **Enter** (use default) |
 | Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
+| Messaging transport: | Choose **Both DIDComm and TSP (recommended)** (default) |
 
 The wizard prompts for additional configuration:
 
@@ -450,7 +450,7 @@ DID Hosting Daemon — Offline Setup (step 2/2)
     did-hosting-daemon --config config.toml
 ```
 
-> **⚠️ SAVE THIS** (1d)
+> **⚠️ SAVE THIS** (4c)
 >
 > Save the **DID** — you will register this DID Hosting Daemon DID with the VTA.
 
@@ -521,7 +521,7 @@ Register the DID Hosting Daemon with the VTA:
 
 ```bash
 cd ~/vta
-pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (1d)>
+pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (4c)>
 ```
 
 ## Verification
@@ -558,6 +558,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTC base URL: | `https://vtc.yourdomain.com` |
 | VTA DID: | Paste the **VTA DID** from 1b |
 | Context name at the VTA for this community [default]: | Press **Enter** (use default) |
+| Trust registry DID (blank for none): | Press **Enter** (use default) |
 | DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
 
 The wizard pauses and displays:
@@ -588,16 +589,6 @@ Then switch back to the terminal running the wizard:
 | Prompt | Action |
 | --- | --- |
 | Has the ACL grant been created at the VTA? [y/N] | Press **y** |
-| Where should the VTC DID be published?: | Press **Enter** (select your DID host) |
-| WebVH path (blank → server-assigned) []: | Enter an appropriate name linked to the VTC |
-
-> **⚠️ NOTE: DID Host Access**
->
-> The VTA will need access to the DID Host to publish DID documents. Log into
-> your DID host and select "Access", then add the VTA DID in the "Add Entry"
-> section and click the "Admin" button, then click the "Add Entry" button. The
-> VTA's DID will be added to the access control list and can now publish DID
-> documents to it.
 
 **Seed storage backend:**
 
