@@ -69,6 +69,12 @@ openvtc --help
 
 ### Step 2: Run the setup wizard
 
+> **ℹ️ NOTE: Decide on the profile before you start**
+>
+> A profile is one OpenVTC account — one VTA, one set of keys. Plain `openvtc setup` builds the default profile; `openvtc setup -p <name>` builds a named one, and several can live side by side on the same host. That is what you want when testing against multiple VTAs or running separate personas.
+>
+> The wizard never asks which you are creating, so decide here. Finding out afterwards means running setup again for the profile you actually wanted. File locations are under [Where things live](#where-things-live) at the end of this step.
+
 Launch the wizard:
 
 ```bash
@@ -145,15 +151,14 @@ OpenVTC Dashboard                             No active community
 
 The public config is written to `~/.config/openvtc/config.json`. Keys and the secured config blob (BIP32 seed, ESK) are stored in your OS keyring under service `openvtc`, account = the profile name. On a headless Linux server the keyring falls back automatically to kernel keyutils — no `gnome-keyring-daemon` required.
 
-Pass `-p <name>` to maintain separate profiles on the same host — useful for testing against multiple VTAs or running several personas side by side:
+A named profile gets its own config file and its own keyring entry — the default profile's `config.json` becomes `config-alice.json`:
 
 ```bash
 openvtc setup -p alice
 openvtc -p alice
 ```
 
-- Default profile (no `-p`): `config.json`; named profile (`-p alice`): `config-alice.json`.
-- There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries.
+There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries.
 
 ## Verification
 
