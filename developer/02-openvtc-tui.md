@@ -7,7 +7,7 @@
 
 | OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- | --- |
-| 0.2.0 | 0.6.0 | 0.15.3 | 0.7.0 |
+| 0.2.1 | 0.12.46 | 0.17.12 | 0.8.2 |
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Complete [01 — Personal VTA](01-personal-vta.md) first. This tutorial connects
 You also need:
 
 - Access to your **PNM** session from the [01 — Personal VTA](01-personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
-- A DID host for your persona DID. You can reuse the `did-host.com` placeholder from the Personal VTA tutorial (with a different path), or pick a new one — the wizard will tell you whether it needs an externally-hosted URL or will host the DID for you on a VTA-advertised DID hosting server.
+- **A VTA that advertises a DID hosting server.** Setup itself does not need one, but you cannot mint a persona without it.
 
 The following values will be collected during setup. Save each one as prompted.
 
@@ -24,7 +24,6 @@ The following values will be collected during setup. Save each one as prompted.
 | --- | --- | --- |
 | 1b | Personal VTA DID (from the Personal VTA tutorial) | Step 2 |
 | 2a | OpenVTC unlock passphrase | Each TUI launch |
-| 2b | OpenVTC persona DID (P-DID) | Presentation to others |
 
 ## Setup
 
@@ -78,150 +77,92 @@ openvtc setup
 
 (Running `openvtc` with no subcommand also auto-launches the wizard if no profile exists.)
 
-> **ℹ️ NOTE: Multiple profiles for local testing**
->
-> Pass `-p <name>` to maintain separate profiles on the same host — useful for testing against multiple VTAs or running several personas side by side:
->
-> ```bash
-> openvtc setup -p alice
-> openvtc -p alice
-> ```
->
-> Profile artifacts live under `~/.config/openvtc/`
->
-> - Default profile (no `-p`): `config.json`
-> - Named profile (`-p alice`): `config-alice.json`
-> - Secured config (BIP32 seed, ESK) lives in the OS keyring under service `openvtc`, account = the profile name.
-> - `did.jsonl` (local working copy) is **not** suffixed by profile, so running the wizard under a new profile overwrites it. The authoritative copy is the one you published on the DID host.
->
-> There is no `openvtc profiles list` or `openvtc profiles delete` command. Inspect with `ls ~/.config/openvtc/`; remove a single profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` and clear the corresponding keyring entries.
+Every page shows a progress breadcrumb. It still lists **Digital Identity**, but that section no longer exists — setup only bootstraps your account, and minting a persona moved to the dashboard (see [03 — Joining a Community](03-joining-a-community.md)). The label is a leftover and will be removed; until then the counter runs 1/5 → 2/5 → 3/5 → 5/5, skipping the fourth.
 
-#### 2.1 Get started
+```text
+Section 1/5
+  ● Get Started → ○ Key Management → ○ Profile Security → ○ Digital Identity → ○ Setup Complete
+```
 
-The wizard walks through a sequence of pages. Where input is required, use the action in the right column.
+#### 2.1 Get Started
 
-Press **Enter** (use default: **New profile setup**).
+| Page | Action |
+| --- | --- |
+| New profile setup | Press **Enter** (use default) |
 
-#### 2.2 Key management
+#### 2.2 Key Management
 
-##### 2.2.1 Connect to your VTA
+You point OpenVTC at your VTA and authorise it through PNM. Only the PNM step needs anything outside the TUI.
 
-Paste the **Personal VTA DID** from 1b, then press **Enter**.
+| Page | Action |
+| --- | --- |
+| Connect to your VTA | Paste the **Personal VTA DID** (1b), then press **Enter** |
 
-##### 2.2.2 Authorise the setup DID via PNM
-
-OpenVTC mints an ephemeral admin `did:key` for this session and displays it along with a ready-to-copy `pnm contexts create` command.
-
-Press **F2** to copy the command, then switch to your PNM session from the Personal VTA tutorial and run it:
+**Authorise the setup DID.** OpenVTC mints an ephemeral admin `did:key` for this session and shows it alongside a ready-to-copy `pnm contexts create` command. Press **F2** to copy the command, then run it in the PNM session you set up in [01 — Personal VTA](01-personal-vta.md):
 
 ```bash
 pnm contexts create --id openvtc --name "OpenVTC" \
   --admin-did did:key:z6Mk... --admin-expires 1h
 ```
 
-Switch back to the OpenVTC TUI and press **Enter** to continue.
+Switch back to the TUI and press **Enter**. The grant lasts 1 hour — see [Known issues](#known-issues--edge-cases) if you overrun it.
 
-##### 2.2.3 Bootstrapping with the VTA
+**Bootstrapping with the VTA.** The wizard now works on its own: the ephemeral `did:key` authenticates to the VTA, the VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out, and the wizard opens a REST or DIDComm session against the VTA — whichever the VTA advertises in its DID document. Press **Enter** when it reports success. If it fails, Enter returns you to the PNM page to check the grant and retry.
 
-The wizard then auto-bootstraps:
+#### 2.3 Profile Security
 
-- The ephemeral `did:key` authenticates to the VTA.
-- The VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out.
-- The wizard opens a REST or DIDComm session against the VTA, depending on what the VTA advertises in its DID document.
+The unlock code encrypts your secured config.
 
-If the VTA advertises any DID hosting servers, the wizard offers to host your persona DID on one of them. Otherwise it skips ahead and prompts for a DID Hosting URL near the end of the wizard.
+| Page | Action |
+| --- | --- |
+| Set up unlock code | Press **Enter**, then type your unlock code twice (2a) |
 
-Press **Enter** to continue.
+Choosing to skip instead takes you through a warning page and leaves the config unprotected.
 
-##### 2.2.4 Creating keys
+#### 2.4 Setup Complete
 
-The wizard then creates keys for the persona via the VTA along with DID update keys.
+Press **Enter** to leave the wizard for the dashboard.
 
-Press **Enter** to continue.
-
-##### 2.2.5 DID keys
-
-Skip copying the initial keys for now.
-
-Press **Enter** to continue.
-
-##### 2.2.6 Export private keys
-
-Skip copying the private keys for now.
-
-Press **Enter** to continue.
-
-##### 2.2.7 Configure git commit signing
-
-Skip configuring git signing for now.
-
-Select **No, skip git signing setup**, then press **Enter** to continue.
-
-#### 2.3 Profile security
-
-##### 2.3.1 Set up unlock code
-
-Press **Enter** to continue to set up an unlock code.
-
-Enter your unlock code twice. It must be at least 8 characters long.
-
-Press **Enter** to continue.
-
-#### 2.4 Digital identity
-
-##### 2.4.1 Configure messaging mediator
-
-Press **Enter** (Use default VTA mediator) to continue.
-
-##### 2.4.2 Set your display name
-
-Type in your name and press **Enter** to continue.
-
-##### 2.4.3 Persona DID setup
-
-###### 2.4.3.1 Create a new DID
-
-Press **Enter** (Create a new `did:webvh` DID) to continue.
-
-###### 2.4.3.2 Enter persona DID URL
-
-Enter the address of your DID on the web (e.g., `https://did-host.com/your-persona`), and press **Enter** to continue.
-
-###### 2.4.3.3 Upload DID document
-
-The wizard now displays the constructed DID — copy it.
-
-Next, upload the DID to your web host (see [Step 2 of the Personal VTA tutorial](01-personal-vta.md#step-2-publish-personal-vta-did) for details).
-
-Sanity-check from another machine:
-
-```bash
-curl -sSf https://did-host.com/your-persona/did.jsonl | head -n 1
+```text
+OpenVTC Dashboard                             No active community
+┌Menu───────────────────┐┌Content──────────────────────────────────────┐
+│ * Communities         ││ Your account is ready. 🎉                   │
+│ * Inbox               ││                                             │
+│ * My Relationships    ││ You haven't joined any communities yet —    │
+│ * My Credentials      ││ that's where the fun begins.                │
+│ * Settings            ││                                             │
+│ * VTA Service         ││ Press  j  to join your first community.     │
+│ * Create Persona DID  ││                                             │
+│ * Logs                ││                                             │
+│ * Help / Status       ││                                             │
+│ * Quit                ││                                             │
+└───────────────────────┘└─────────────────────────────────────────────┘
 ```
 
-Press **Enter** to continue.
+**Menu** on the left, **Content** on the right — `<TAB>` switches panels, `<F10>` quits. Relaunch the TUI any time with `openvtc`.
 
-#### 2.5 Setup complete
+#### Where things live
 
-Setup is now complete.
+The public config is written to `~/.config/openvtc/config.json`. Keys and the secured config blob (BIP32 seed, ESK) are stored in your OS keyring under service `openvtc`, account = the profile name. On a headless Linux server the keyring falls back automatically to kernel keyutils — no `gnome-keyring-daemon` required.
 
-Press **Enter** to continue to the dashboard.
+Pass `-p <name>` to maintain separate profiles on the same host — useful for testing against multiple VTAs or running several personas side by side:
 
-When the wizard finishes, the public config is written to `~/.config/openvtc/config.json`. Keys and the secured config blob are stored in your OS keyring (on a headless Linux server this falls back automatically to kernel keyutils — no `gnome-keyring-daemon` required).
+```bash
+openvtc setup -p alice
+openvtc -p alice
+```
 
-After exiting the dashboard, relaunch the TUI any time with `openvtc`.
+- Default profile (no `-p`): `config.json`; named profile (`-p alice`): `config-alice.json`.
+- There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries.
 
 ## Verification
 
-From the main menu, open the **VTA Service** panel. It should show:
+From the main menu, open the **VTA Service** panel. Two rows carry the result of Step 2:
 
-- **VTA URL** matching your Personal VTA (e.g. `https://vta.yourdomain.com`)
-- **VTA DID** matching 1b
-- **Persona DID** matching 2b
-- **Mediator DID** matching the mediator your VTA advertises
-- **Total keys** of 3 (3 persona keys)
+- **VTA** — matches your Personal VTA DID (1b).
+- **Authenticated** — shows a `did:key`. This is the long-term admin DID the VTA minted for OpenVTC, and its presence is what tells you the PNM grant in 2.2 went through: the ephemeral setup DID has already been rotated out.
 
-From the Help/Status panel, hotkey **[1]** copies the persona DID and **[2]** copies the mediator DID — useful spot checks.
+Where a **Persona** row would sit, you instead get `Status: Ready — join a community to create your persona`. That is correct at this point — mint a persona in [03 — Joining a Community](03-joining-a-community.md) and the panel replaces the line with the persona itself.
 
 ## Known issues / edge cases
 

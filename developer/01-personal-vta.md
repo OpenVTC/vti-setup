@@ -176,7 +176,6 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
   > You cannot recover this VTA without it.
 - I have saved my mnemonic phrase [y/N]: → **y**
 
-
 | Prompt | Action |
 | --- | --- |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
