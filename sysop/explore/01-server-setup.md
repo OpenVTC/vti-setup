@@ -84,47 +84,47 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 
 Saves 15–40 minutes of build time depending on your hardware.
 
-#### Last tagged release: Cypress (2026-07-30)
+#### Last tagged release: VTI-Cypress-RC-1
 
 ```bash
-curl -O https://download.firstperson.dev/vta/0.13.20-87136af7/vta
+curl -O https://download.firstperson.dev/vta/VTI-Cypress-RC-1/vta
 chmod +x vta && sudo mv vta /usr/local/bin/
 
-curl -O https://download.firstperson.dev/vtc/0.11.47-87136af7/vtc
+curl -O https://download.firstperson.dev/vtc/VTI-Cypress-RC-1/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/0.11.16-87136af7/pnm
+curl -O https://download.firstperson.dev/pnm/VTI-Cypress-RC-1/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/0.18.0-7eb1ede/mediator
+curl -O https://download.firstperson.dev/mediator/VTI-Cypress-RC-1/mediator
 chmod +x mediator && sudo mv mediator /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/0.18.0-7eb1ede/mediator-setup
+curl -O https://download.firstperson.dev/mediator/VTI-Cypress-RC-1/mediator-setup
 chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
-curl -O https://download.firstperson.dev/did-hosting-daemon/0.8.3-96c7b77/did-hosting-daemon
+curl -O https://download.firstperson.dev/did-hosting-daemon/VTI-Cypress-RC-1/did-hosting-daemon
 chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
 #### Latest main branches
 
 ```bash
-curl -O https://download.firstperson.dev/vta/latest/vta
+curl -O https://download.firstperson.dev/vta/main/vta
 chmod +x vta && sudo mv vta /usr/local/bin/
 
-curl -O https://download.firstperson.dev/vtc/latest/vtc
+curl -O https://download.firstperson.dev/vtc/main/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/latest/pnm
+curl -O https://download.firstperson.dev/pnm/main/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/latest/mediator
+curl -O https://download.firstperson.dev/mediator/main/mediator
 chmod +x mediator && sudo mv mediator /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/latest/mediator-setup
+curl -O https://download.firstperson.dev/mediator/main/mediator-setup
 chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
-curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-daemon
+curl -O https://download.firstperson.dev/did-hosting-daemon/main/did-hosting-daemon
 chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
@@ -139,7 +139,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout VTI-Cypress-RC-0 # last tagged release, or just stay on main
+git checkout VTI-Cypress-RC-1 # last tagged release, or just stay on main
 ```
 
 ```bash
@@ -155,7 +155,7 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
-git checkout VTI-Cypress-RC-0 # part of Cypress release, or just stay on main
+git checkout VTI-Cypress-RC-1 # part of Cypress release, or just stay on main
 ```
 
 ```bash
@@ -169,7 +169,7 @@ cargo install --path affinidi-messaging-mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout VTI-Cypress-RC-0 # part of Cypress release, or just stay on main
+git checkout VTI-Cypress-RC-1 # part of Cypress release, or just stay on main
 ```
 
 ```bash
