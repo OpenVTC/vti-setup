@@ -11,7 +11,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- |
-| 0.13.18 | 0.18.0 | 0.8.3 | 0.11.45 |
+| 0.14.34 | 0.18.11 | 0.8.3 | 0.11.58 |
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
 | VTA name (leave empty to skip): | Enter a name for this VTA |
-| Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
+| Services to enable (select at least one): | Also select TSP and press **Enter** (all three services selected) |
 | Server host [0.0.0.0]: | Press **Enter** (use default) |
 | Server port [8100]: | Press **Enter** (use default) |
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
@@ -560,6 +560,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Context name at the VTA for this community [default]: | Press **Enter** (use default) |
 | Trust registry DID (blank for none): | Press **Enter** (use default) |
 | DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
+| Transports (space to toggle, enter to confirm): | Press **Enter** (use default: TSP & DIDComm) |
 
 The wizard pauses and displays:
 
@@ -589,6 +590,13 @@ Then switch back to the terminal running the wizard:
 | Prompt | Action |
 | --- | --- |
 | Has the ACL grant been created at the VTA? [y/N] | Press **y** |
+
+**DID Hosting:**
+
+| Prompt | Action |
+| --- | --- |
+| Where should the VTC DID be published?: | Press **Enter** (use default: did-hosting-daemon) |
+| WebVH path (blank → server-assigned): | `vtc` |
 
 **Seed storage backend:**
 
