@@ -7,13 +7,13 @@
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.6.0 | 0.15.3 | 0.7.0 |
+| 0.17.0 | 0.18.19 | 0.8.3 |
 
 ## Two paths
 
 There are two ways to bring up a Personal VTA. Both end in the same place: a running VTA holding your master keys, reachable from your PNM. The downstream tutorials ([OpenVTC TUI](02-openvtc-tui.md), [Joining a Community](03-joining-a-community.md)) work the same regardless of which path you take.
 
-- **[Path A — VTA Farm (streamlined, recommended)](#path-a--vta-farm-streamlined)** — [VTA Farm](https://vtafarm.firstperson.dev) spins up your VTA in a managed K8s cluster. You provision it from a browser with a passkey and connect your local PNM to it. No server, no public domain, no DID hosting, no mediator wiring on your side.
+- **[Path A — VTA Farm (streamlined, recommended)](#path-a--vta-farm-streamlined)** — [VTA Farm](https://vtafarm.firstperson.dev) spins up your VTA in a managed Kubernetes cluster. You provision it from a browser with a passkey and connect your local PNM to it. No server, no public domain, no DID hosting, no mediator wiring on your side.
 - **[Path B — VTA the hard way (self-hosted)](#path-b--vta-the-hard-way-self-hosted)** — run the VTA on a host you control, publish your own `did:webvh` DID log, and wire it to a community mediator yourself. More moving parts, more to learn.
 
 Pick whichever fits how much infrastructure you want to manage. If you're new to the stack, take Path A.
@@ -22,9 +22,9 @@ Pick whichever fits how much infrastructure you want to manage. If you're new to
 
 ### Prerequisites
 
-- An **invite link** from a VTA Farm admin.
-- A device with **passkey** support.
-- **PNM installed locally.** PNM is a CLI tool and can run on your laptop — it does not need its own server. See [Ubuntu Server, Step 5](/sysop/explore/01-server-setup.md) for install instructions. You only need `pnm` for this path, not `vta`.
+- An **account** at the [VTA Farm](https://vtafarm.firstperson.dev).
+- A computer with **passkey** support.
+- **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. [Download the PNM](https://firstperson.dev/#downloads).
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
@@ -37,8 +37,8 @@ The following values will be collected during setup. Save each one as prompted �
 
 #### Step 1: Create the VTA in VTA Farm
 
-1. Open the invite link sent to you.
-2. Click **Sign up with Passkey** and complete the passkey prompt on your device.
+1. Create an account at the [VTA Farm](https://vtafarm.firstperson.dev).
+2. Complete the passkey prompt on your computer.
 3. Click **Create VTA**.
 4. Enter a **name** for your VTA, leave the default image selected, and click **Create session**.
 5. Copy the **VTA DID** displayed on the page.
@@ -48,8 +48,6 @@ The following values will be collected during setup. Save each one as prompted �
 > The **Personal VTA DID** shown in the VTA Farm UI. You'll paste it into PNM in the next step.
 
 #### Step 2: Connect PNM
-
-Run `pnm setup` on the machine you want to drive the VTA from:
 
 ```bash
 pnm setup
@@ -89,7 +87,7 @@ From the PNM machine:
 pnm health
 ```
 
-It should return the status of a number of checks it runs against the VTA, the Mediator, and a DIDComm trust ping.
+It should return the status of a number of checks it runs against the VTA, the Mediator, and DIDComm/TSP trust pings.
 
 ## Path B — VTA the hard way (self-hosted)
 
@@ -116,16 +114,11 @@ The following values will be collected during setup. Save each one as prompted �
 
 #### Step 1: Set up Personal VTA
 
-Create a directory for the personal VTA:
+Create a directory for the personal VTA and run the setup wizard:
 
 ```bash
 cd ~
 mkdir vta
-```
-
-Run the setup wizard:
-
-```bash
 cd ~/vta
 vta setup
 ```
@@ -135,17 +128,18 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | Prompt | Action |
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
-| VTA name (leave empty to skip): | Enter your personal VTA name |
-| Services to enable (select at least one): | Press **Enter** (default: **REST API** and **DIDComm Messaging**) |
-| Server host: | Press **Enter** (default: `0.0.0.0`) |
-| Server port: | Press **Enter** (default: `8100`) |
-| VTA REST URL [http://localhost:8101]: | `https://vta.yourdomain.com` |
-| Log level: | Press **Enter** (default: `info`) |
-| Log format: | Press **Enter** (default: `text`) |
-| Remote DID resolver WebSocket URL (leave empty to resolve locally): | Press **Enter** (resolve locally) |
+| VTA name (leave empty to skip): | Enter a name for this VTA |
+| Services to enable (select at least one): | Also select TSP and press **Enter** (all three services selected) |
+| Server host [0.0.0.0]: | Press **Enter** (use default) |
+| Server port [8100]: | Press **Enter** (use default) |
+| VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
+| Log level [info]: | Press **Enter** (use default) |
+| Log format: | Press **Enter** (default: **text**) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
-| Data directory: | Press **Enter** (default: `data/vta`) |
+| Data directory [data/vta]: | Press **Enter** (use default) |
 | Configure advanced server options (CORS, trusted proxy header, WebAuthn)? [y/N] | Press **Enter** (use default) |
+| Seed storage backend: | Press **Enter** (default: Config file) |
+| Enable hardened configuration? (encrypts the fjall store...) y/N | Press **Enter** (use default) |
 
 **Seed storage backend:**
 
@@ -158,6 +152,7 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | DIDComm messaging: | Choose **Use an existing mediator DID** |
 | Mediator DID: | Paste the **Community Mediator DID** from 0a (e.g. `did:webvh:...:did-host.com:mediator`) |
 | Mediator hostname for vsock-bridged TEE deployments: | Press **Enter** (skip) |
+| Automatically provision ACL on mediator after connecting? y/N | Press **Enter** (use default) |
 
 **VTA DID:**
 
@@ -312,12 +307,8 @@ You can also check it from the machine running the PNM:
 pnm health
 ```
 
-It should return the status of a number of checks it runs against the VTA, the Mediator and a DIDComm trust ping.
+It should return the status of a number of checks it runs against the VTA, the Mediator and DIDComm/TSP trust pings.
 
-## Known Issues / Edge Cases
+## Next
 
-> _To be documented._
-
-## Deployment Notes
-
-> _To be documented._
+Install the TUI and bind it to this VTA: [02 — OpenVTC TUI Setup](02-openvtc-tui.md).

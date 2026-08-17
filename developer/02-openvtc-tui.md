@@ -1,13 +1,13 @@
 # OpenVTC TUI Setup
 
 **Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting membership DIDs (M-DIDs), managing community contexts, and exchanging credentials.  
-**Tested on:** Arch Linux desktop
+**Tested on:** Arch Linux desktop & macOS
 
 **Verified with:**
 
 | OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- | --- |
-| 0.2.1 | 0.12.46 | 0.17.12 | 0.8.2 |
+| 0.3.1 | 0.17.0 | 0.18.19 | 0.8.3 |
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ The following values will be collected during setup. Save each one as prompted.
 Saves the Rust toolchain install and ~2–5 minutes of build time:
 
 ```bash
-curl -O https://fpp.ic3.dev/openvtc/latest/openvtc
+curl -O https://download.firstperson.dev/openvtc/latest/openvtc
 chmod +x openvtc && sudo mv openvtc /usr/local/bin/
 ```
 
@@ -71,7 +71,7 @@ openvtc --help
 
 > **ℹ️ NOTE: Decide on the profile before you start**
 >
-> A profile is one OpenVTC account — one VTA, one set of keys. Plain `openvtc setup` builds the default profile; `openvtc setup -p <name>` builds a named one, and several can live side by side on the same host. That is what you want when testing against multiple VTAs or running separate personas.
+> A profile is one OpenVTC account, one set of keys. Plain `openvtc setup` builds the default profile; `openvtc setup -p <name>` builds a named one, and several can live side by side on the same VTA host. That is what you want when testing against multiple VTAs or running separate personas.
 >
 > The wizard never asks which you are creating, so decide here. Finding out afterwards means running setup again for the profile you actually wanted. File locations are under [Where things live](#where-things-live) at the end of this step.
 
@@ -83,11 +83,11 @@ openvtc setup
 
 (Running `openvtc` with no subcommand also auto-launches the wizard if no profile exists.)
 
-Every page shows a progress breadcrumb. It still lists **Digital Identity**, but that section no longer exists — setup only bootstraps your account, and minting a persona moved to the dashboard (see [03 — Joining a Community](03-joining-a-community.md)). The label is a leftover and will be removed; until then the counter runs 1/5 → 2/5 → 3/5 → 5/5, skipping the fourth.
+Every page shows a progress breadcrumb.
 
 ```text
-Section 1/5
-  ● Get Started → ○ Key Management → ○ Profile Security → ○ Digital Identity → ○ Setup Complete
+Section 1/4
+  ● Get Started → ○ Key Management → ○ Profile Security → ○ Setup Complete
 ```
 
 #### 2.1 Get Started
@@ -113,7 +113,7 @@ pnm contexts create --id openvtc --name "OpenVTC" \
 
 Switch back to the TUI and press **Enter**. The grant lasts 1 hour — see [Known issues](#known-issues--edge-cases) if you overrun it.
 
-**Bootstrapping with the VTA.** The wizard now works on its own: the ephemeral `did:key` authenticates to the VTA, the VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out, and the wizard opens a REST or DIDComm session against the VTA — whichever the VTA advertises in its DID document. Press **Enter** when it reports success. If it fails, Enter returns you to the PNM page to check the grant and retry.
+**Bootstrapping with the VTA.** The wizard now works on its own: the ephemeral `did:key` authenticates to the VTA, the VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out, and the wizard opens a TSP or DIDComm session against the VTA — whichever the VTA advertises in its DID document. Press **Enter** when it reports success. If it fails, Enter returns you to the PNM page to check the grant and retry.
 
 #### 2.3 Profile Security
 
@@ -158,7 +158,7 @@ openvtc setup -p alice
 openvtc -p alice
 ```
 
-There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries.
+There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries. You will also need to delete the contexts created in the PNM (e.g. `pnm context delete openvtc`).
 
 ## Verification
 
@@ -174,6 +174,6 @@ Where a **Persona** row would sit, you instead get `Status: Ready — join a com
 - **PNM grant is 1 hour.** If you take longer than that between running `pnm contexts create` and pressing Enter on the wizard's ACL page, provisioning fails. Re-running the wizard mints a fresh setup DID — re-run `pnm contexts create` against the new one.
 - **TUI eats stdout.** For tracing output, set `OPENVTC_DEBUG_LOG=/tmp/openvtc.log` before launching: the TUI writes structured logs to that file while you use the UI.
 
-## Deployment notes
+## Next
 
-> _To be documented._
+Mint a persona and submit your first join request: [03 — Joining a Community](03-joining-a-community.md).
