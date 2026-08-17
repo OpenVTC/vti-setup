@@ -9,8 +9,8 @@ You do **not** run the community's infrastructure. That's the [sysop](../sysop/)
 Work through these in order. Each one verifies before you move on.
 
 1. **[01 — Personal VTA](01-personal-vta.md)** — spin up a VTA on the [VTA Farm](https://vtafarm.firstperson.dev) (the streamlined default), or self-host one on a server you control if you want to run it the hard way. At the end you have a running VTA holding your master keys.
-2. **[02 — OpenVTC TUI Setup](02-openvtc-tui.md)** — install the TUI and bind it to the Personal VTA from step 1. This is your everyday interface.
-3. **[03 — Joining a Community](03-joining-a-community.md)** — your first community: mint an M-DID, collect VRCs from two existing members, submit a join request, receive your VMC.
+2. **[02 — OpenVTC TUI Setup](02-openvtc-tui.md)** — install the TUI, bind it to the Personal VTA from step 1, and create a persona DID. This is your everyday interface.
+3. **[03 — Joining a Community](03-joining-a-community.md)** — your first community: submit a join request under your persona, and get approved by a community admin.
 
 ## Prerequisites you'll need before you start
 
