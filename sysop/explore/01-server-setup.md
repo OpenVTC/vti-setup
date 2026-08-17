@@ -84,29 +84,29 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 
 Saves 15–40 minutes of build time depending on your hardware.
 
-#### Last tagged release: VTI-Cypress-RC-1
+#### Latest tagged release: VTI-Cypress-RC-1
 
 ```bash
-curl -O https://download.firstperson.dev/vta/VTI-Cypress-RC-1/vta
+curl -O https://download.firstperson.dev/vta/latest/vta
 chmod +x vta && sudo mv vta /usr/local/bin/
 
-curl -O https://download.firstperson.dev/vtc/VTI-Cypress-RC-1/vtc
+curl -O https://download.firstperson.dev/vtc/latest/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/VTI-Cypress-RC-1/pnm
+curl -O https://download.firstperson.dev/pnm/latest/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/VTI-Cypress-RC-1/mediator
+curl -O https://download.firstperson.dev/mediator/latest/mediator
 chmod +x mediator && sudo mv mediator /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/VTI-Cypress-RC-1/mediator-setup
+curl -O https://download.firstperson.dev/mediator/latest/mediator-setup
 chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
-curl -O https://download.firstperson.dev/did-hosting-daemon/VTI-Cypress-RC-1/did-hosting-daemon
+curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-daemon
 chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
-#### Latest main branches
+#### Last compiled commit from main branches
 
 ```bash
 curl -O https://download.firstperson.dev/vta/main/vta
@@ -139,7 +139,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout VTI-Cypress-RC-1 # last tagged release, or just stay on main
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -155,7 +155,7 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
-git checkout VTI-Cypress-RC-1 # part of Cypress release, or just stay on main
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -169,7 +169,7 @@ cargo install --path affinidi-messaging-mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout VTI-Cypress-RC-1 # part of Cypress release, or just stay on main
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash

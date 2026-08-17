@@ -11,7 +11,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- |
-| 0.14.34 | 0.18.11 | 0.8.3 | 0.11.58 |
+| 0.17.0 | 0.18.19 | 0.8.3 | 0.11.58 |
 
 ## Prerequisites
 
