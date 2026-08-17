@@ -16,7 +16,7 @@ Work through these in order. Each one verifies before you move on.
 
 Unless you use the [VTA Farm](https://vtafarm.firstperson.dev), you will need the following:
 
-- A host for your Personal VTA. Cheapest realistic option is a small Ubuntu VPS — see [Ubuntu Server](../sysop/explore/01-server-setup.md) in sysop.
+- A host for your Personal VTA. Cheapest realistic option is a small Ubuntu VPS — see [Explore 01 — Server Setup](../sysop/explore/01-server-setup.md) in sysop.
 - HTTPS-capable static hosting somewhere (GitHub Pages, your own site, S3+CDN) for the `did.jsonl` file of your VTA DID. Covered in [01 — Personal VTA](01-personal-vta.md) Step 2.
 
 ## Where to go next

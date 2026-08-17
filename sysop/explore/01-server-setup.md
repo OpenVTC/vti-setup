@@ -1,6 +1,6 @@
 # Explore 01: Server Setup
 
-Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment with per-service users, use the [Deploy stream](../deploy/) instead.
+Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment, see the [Deploy stream](../deploy/) (hardened Kubernetes — not yet documented).
 
 ## Service configuration
 
@@ -16,7 +16,7 @@ Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topolo
 | Requirement | Details |
 | --- | --- |
 | Registered domain + DNS access | We use [Cloudflare](https://www.cloudflare.com) for DNS management. |
-| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance. |
+| VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance (2vCPU, 4gb RAM recommended). |
 | SSH key pair | Used to connect to the server. |
 | `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `sudo apt install curl` |
 
@@ -82,28 +82,49 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 
 ### Option A: Download pre-built binaries (recommended)
 
-Saves 15–40 minutes of build time depending on your hardware:
+Saves 15–40 minutes of build time depending on your hardware.
+
+#### Latest tagged release: VTI-Cypress-RC-1
 
 ```bash
-curl -O https://fpp.ic3.dev/vta/latest/vta
+curl -O https://download.firstperson.dev/vta/latest/vta
 chmod +x vta && sudo mv vta /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/vtc/latest/vtc
+curl -O https://download.firstperson.dev/vtc/latest/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/cnm/latest/cnm
-chmod +x cnm && sudo mv cnm /usr/local/bin/
-
-curl -O https://fpp.ic3.dev/pnm/latest/pnm
+curl -O https://download.firstperson.dev/pnm/latest/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/mediator/latest/mediator
+curl -O https://download.firstperson.dev/mediator/latest/mediator
 chmod +x mediator && sudo mv mediator /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/mediator/latest/mediator-setup
+curl -O https://download.firstperson.dev/mediator/latest/mediator-setup
 chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
 
-curl -O https://fpp.ic3.dev/did-hosting-daemon/latest/did-hosting-daemon
+curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-daemon
+chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
+```
+
+#### Last compiled commit from main branches
+
+```bash
+curl -O https://download.firstperson.dev/vta/main/vta
+chmod +x vta && sudo mv vta /usr/local/bin/
+
+curl -O https://download.firstperson.dev/vtc/main/vtc
+chmod +x vtc && sudo mv vtc /usr/local/bin/
+
+curl -O https://download.firstperson.dev/pnm/main/pnm
+chmod +x pnm && sudo mv pnm /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/main/mediator
+chmod +x mediator && sudo mv mediator /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/main/mediator-setup
+chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
+
+curl -O https://download.firstperson.dev/did-hosting-daemon/main/did-hosting-daemon
 chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
@@ -118,12 +139,12 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
-cargo install --path vtc-service --no-default-features --features "setup,config-secret,admin-ui"
-cargo install --path cnm-cli --no-default-features --features "config-session"
+cargo install --path vtc-service --no-default-features --features "setup,config-secret,website,admin-ui"
 cargo install --path pnm-cli --no-default-features --features "config-session"
 ```
 
@@ -134,11 +155,12 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash
 cargo install --path affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
-cargo install --path affinidi-messaging-mediator/tools/mediator-setup
+cargo install --path affinidi-messaging-mediator-setup
 ```
 
 #### DID Hosting Daemon
@@ -147,6 +169,7 @@ cargo install --path affinidi-messaging-mediator/tools/mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
+git checkout VTI-Cypress-RC-1 # latest tagged release, or just stay on main
 ```
 
 ```bash

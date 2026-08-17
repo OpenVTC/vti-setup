@@ -1,16 +1,7 @@
 # Deploy Stream
 
-Stand up the VTI stack as a hardened production deployment. Two-stage server setup (root bootstraps a `vti` operator user; `vti` then provisions the stack). Each service runs as its own dedicated system user (`vta-svc`, `mediator-svc`, `dids-svc`, `vtc-svc`, plus standalone `dids` variants) with no shell and no sudo. Processes are supervised by systemd with sandboxing. Provisioning is automated from TOML recipes — no interactive wizards. Cross-service file handoffs go through a shared `vti-exchange` group.
+Stand up the VTI stack as a hardened production deployment on **Kubernetes**: TLS terminated at the ingress via cert-manager and Let's Encrypt, every secret in the cluster held in **HashiCorp Vault** (for full VTI stacks and standalone VTAs alike), and provisioning driven from TOML recipes using the offline sealed-bundle bootstrap over DIDComm.
 
-## Security model in one paragraph
+> _To be documented._
 
-`vti` is the human operator: SSH key only, NOPASSWD sudo for system maintenance. Service users are unprivileged system accounts with `nologin` shells — they cannot sudo, cannot SSH, cannot read each other's data. An in-process RCE on the mediator lands the attacker as `mediator-svc`, which has none of the routes a root-process compromise would have. Root SSH login is disabled by the bootstrap script.
-
-## Path
-
-Read in order:
-
-1. [01 — Server bootstrap](01-server-bootstrap.md) — SSH as root, run `bootstrap-user.sh`, then reconnect as vti.
-2. [02 — Server setup](02-server-setup.md) — SSH as vti, run `setup-deploy.sh`. Installs service users, systemd units, nginx, certbot.
-3. [03 — Provisioning](03-provisioning.md) — TOML-recipe-driven setup for VTA, Mediator, DID Hosting Daemon, VTC, and PNM binding. Standard DID Hosting topology.
-4. [04 — DID Hosting topology](04-did-hosting-topology.md) — when to pick standalone vs standard, and the standalone provisioning flow.
+Until this stream is written, use the [Explore stream](../explore/) to stand up and learn the stack — but do not put real keys or production data on an explore box.
