@@ -115,7 +115,10 @@ chmod +x vta && sudo mv vta /usr/local/bin/
 curl -O https://download.firstperson.dev/vtc/latest/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/latest/pnm
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/latest/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/latest/mediator
@@ -137,7 +140,10 @@ chmod +x vta && sudo mv vta /usr/local/bin/
 curl -O https://download.firstperson.dev/vtc/main/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/main/pnm
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/main/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/main/mediator
@@ -167,7 +173,7 @@ git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
 cargo install --path vtc-service --no-default-features --features "setup,config-secret,website,admin-ui"
-cargo install --path pnm-cli --no-default-features --features "config-session"
+cargo install --path pnm-cli --no-default-features --features "config-session,tsp"
 ```
 
 #### Mediator
