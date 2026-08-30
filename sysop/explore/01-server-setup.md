@@ -84,7 +84,7 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 
 Saves 15–40 minutes of build time depending on your hardware.
 
-#### Latest tagged release: Cypress
+#### Latest tagged release: VTI-Dogwood
 
 ```bash
 curl -O https://download.firstperson.dev/vta/latest/vta
@@ -139,7 +139,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout Cypress # latest tagged release, or just stay on main
+git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -155,7 +155,7 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
-git checkout Cypress # latest tagged release, or just stay on main
+git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -169,7 +169,7 @@ cargo install --path affinidi-messaging-mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout Cypress # latest tagged release, or just stay on main
+git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```
 
 ```bash
