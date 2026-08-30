@@ -19,6 +19,25 @@
 
 set -e
 
+# This script is documented as a `curl | bash` one-liner, so stdin is the pipe,
+# not a terminal. Any debconf dialog (keyboard layout, needrestart, changed
+# config files) would be unanswerable and hang the run — everything that
+# installs packages has to take its defaults instead.
+#
+# The exports below are for third-party installers we pipe into `sudo -E bash`,
+# such as the NodeSource setup script, which run apt themselves and inherit our
+# environment. They do NOT cover our own apt calls: those go through plain
+# `sudo`, whose env_reset strips both variables. apt_get() therefore sets them
+# again on the command line, where sudo cannot drop them.
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
+apt_get() {
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -y \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold "$@"
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -54,12 +73,12 @@ echo ""
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 1/10: Update system <<<${NC}"
 # -----------------------------------------------------------------------------
-sudo apt update && sudo apt upgrade -y
+apt_get update && apt_get upgrade
 
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 2/10: Install build and runtime dependencies <<<${NC}"
 # -----------------------------------------------------------------------------
-sudo apt -y install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw valkey-server
+apt_get install git curl build-essential pkg-config libssl-dev clang cmake ca-certificates libdbus-1-dev ufw valkey-server
 
 # Valkey backs the mediator's queue + storage. Debian/Ubuntu packaging
 # binds 127.0.0.1 and enables the unit on install — confirm both.
@@ -98,7 +117,7 @@ if command -v node &>/dev/null && [ "$(node -v | cut -d. -f1 | tr -d 'v')" -ge 2
   echo -e "${GREEN}Node.js already installed: $(node -v)${NC}"
 else
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  sudo apt install -y nodejs
+  apt_get install nodejs
 fi
 node -v
 npm -v
@@ -109,7 +128,7 @@ echo -e "${GREEN}>>> Step 6/10: Install Docker <<<${NC}"
 if command -v docker &>/dev/null; then
   echo -e "${GREEN}Docker already installed: $(docker --version)${NC}"
 else
-  sudo apt-get install -y ca-certificates curl gnupg
+  apt_get install ca-certificates curl gnupg
   sudo install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   sudo chmod a+r /etc/apt/keyrings/docker.gpg
@@ -117,8 +136,8 @@ else
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  apt_get update
+  apt_get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 fi
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
@@ -127,7 +146,7 @@ docker --version
 # -----------------------------------------------------------------------------
 echo -e "${GREEN}>>> Step 7/10: Install Nginx and Certbot <<<${NC}"
 # -----------------------------------------------------------------------------
-sudo apt -y install nginx
+apt_get install nginx
 sudo systemctl enable --now nginx
 if command -v certbot &>/dev/null; then
   echo -e "${GREEN}Certbot already installed.${NC}"

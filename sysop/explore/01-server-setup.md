@@ -68,6 +68,28 @@ The script will:
 
 > **Expected result:** `502 Bad Gateway` on the HTTPS URLs is normal at this stage — the backend services are not running yet.
 
+### If the script stops on a blue configuration dialog
+
+An older copy of the script (or a host with pre-seeded debconf answers) can stop at a full-screen `Configuring keyboard-configuration` dialog during Step 1, or at a `needrestart` "which services should be restarted" list later on. Because the script is piped into `bash`, stdin is the curl pipe rather than your terminal, so the dialog may not accept keystrokes at all.
+
+To get past it, `Ctrl-C` out and either run the script from a file, so stdin stays attached to your terminal:
+
+```bash
+curl -sSLO https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh
+bash setup-explore.sh <domain>
+```
+
+Or pre-seed the answers as root before re-running the one-liner:
+
+```bash
+echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+echo 'keyboard-configuration keyboard-configuration/layoutcode string us' | debconf-set-selections
+```
+
+Re-running the whole script is safe, so it does not matter how far in you got before interrupting. The Rust, Node.js, Docker and Certbot steps each skip themselves if the tool is already present, the UFW rules and `systemctl enable` calls are idempotent, and the Nginx vhosts are rewritten from scratch and re-certified on every run. The one thing to watch is Let's Encrypt's rate limit — five duplicate certificates per week — so avoid re-running it many times in a row once certificates have been issued.
+
+> **Note:** `export DEBIAN_FRONTEND=noninteractive` in your own shell will not help — the script's apt calls go through `sudo`, whose default `env_reset` strips the variable before apt sees it. Seeding the debconf database persists the setting instead, so it applies regardless of environment. The current script sets the frontend on each apt invocation itself, so a fresh copy should never prompt.
+
 ## Step 4: Reload shell environment
 
 Rust and Cargo were installed inside the script's subshell. To use `cargo` in your current session, run:
@@ -93,7 +115,10 @@ chmod +x vta && sudo mv vta /usr/local/bin/
 curl -O https://download.firstperson.dev/vtc/latest/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/latest/pnm
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/latest/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/latest/mediator
@@ -115,7 +140,10 @@ chmod +x vta && sudo mv vta /usr/local/bin/
 curl -O https://download.firstperson.dev/vtc/main/vtc
 chmod +x vtc && sudo mv vtc /usr/local/bin/
 
-curl -O https://download.firstperson.dev/pnm/main/pnm
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/main/pnm
 chmod +x pnm && sudo mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/main/mediator
@@ -145,7 +173,7 @@ git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```bash
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
 cargo install --path vtc-service --no-default-features --features "setup,config-secret,website,admin-ui"
-cargo install --path pnm-cli --no-default-features --features "config-session"
+cargo install --path pnm-cli --no-default-features --features "config-session,tsp"
 ```
 
 #### Mediator
