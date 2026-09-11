@@ -1,0 +1,95 @@
+name: release
+
+# Publishes scripts/setup-explore.sh as a GitHub Release asset with a
+# SHA256SUMS file and a build provenance attestation, so operators can verify
+# what they run as root. See RELEASING.md.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  attest:
+    name: Checksum and attest release assets
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write # Sigstore signing certificate for the attestation
+      attestations: write # store the attestation on this repository
+    outputs:
+      sha256: ${{ steps.assets.outputs.sha256 }}
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Require the tag to point at a commit on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main
+
+      - name: Build release assets
+        id: assets
+        run: |
+          mkdir dist
+          install -m 0644 scripts/setup-explore.sh dist/setup-explore.sh
+          (cd dist && sha256sum setup-explore.sh > SHA256SUMS)
+          cat dist/SHA256SUMS
+          echo "sha256=$(cut -d ' ' -f 1 dist/SHA256SUMS)" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/setup-explore.sh
+            dist/SHA256SUMS
+
+  publish:
+    name: Publish GitHub Release
+    needs: attest
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write # create the release and upload its assets
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Rebuild assets and match the attested digest
+        env:
+          ATTESTED_SHA256: ${{ needs.attest.outputs.sha256 }}
+        run: |
+          mkdir dist
+          install -m 0644 scripts/setup-explore.sh dist/setup-explore.sh
+          (cd dist && sha256sum setup-explore.sh > SHA256SUMS)
+          printf '%s  setup-explore.sh\n' "$ATTESTED_SHA256" | (cd dist && sha256sum -c -)
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          ATTESTED_SHA256: ${{ needs.attest.outputs.sha256 }}
+        run: |
+          {
+            echo "setup-explore.sh SHA-256: \`${ATTESTED_SHA256}\`"
+            echo
+            echo "Check the download against the hash pinned in sysop/explore/01-server-setup.md, then verify provenance:"
+            echo
+            echo '```bash'
+            echo "gh attestation verify setup-explore.sh --repo ${GITHUB_REPOSITORY} --signer-workflow ${GITHUB_REPOSITORY}/.github/workflows/release.yml"
+            echo '```'
+          } > notes.md
+          gh release create "$TAG" dist/setup-explore.sh dist/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "$TAG" \
+            --notes-file notes.md

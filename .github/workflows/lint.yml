@@ -1,0 +1,27 @@
+name: lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shell:
+    name: shellcheck and remote-exec guard
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: shellcheck
+        run: |
+          shellcheck --version
+          shellcheck scripts/*.sh .github/scripts/*.sh
+
+      - name: No downloads piped into a shell, no scripts fetched from main
+        run: bash .github/scripts/guard-remote-exec.sh
