@@ -39,63 +39,79 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 
 ## Step 3: Run the setup script
 
-SSH into your server as **root** and run the setup script directly:
+SSH into your server as **root**. Download the setup script from a tagged release of this repository and check it before you run it. Do not run a copy from the `main` branch: `main` changes without notice and is not tied to a reviewed release.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh | bash -s -- <domain>
+VER=v1.0.0
+SHA256=c59f53c74f423327a233bb3178651bf7958449efd88df05df8c2f8d179db1340
+curl -fsSLO "https://github.com/OpenVTC/vti-setup/releases/download/${VER}/setup-explore.sh"
+curl -fsSLO "https://github.com/OpenVTC/vti-setup/releases/download/${VER}/SHA256SUMS"
+echo "${SHA256}  setup-explore.sh" | sha256sum -c -
+sha256sum -c SHA256SUMS
+```
+
+Both checks must print `setup-explore.sh: OK`. Stop if either fails. The first compares your download with the hash pinned on this page for `VER`, and is the check that matters. The second only confirms that the release's own `SHA256SUMS` agrees; that file comes from the same place as the script, so on its own it cannot catch a tampered release.
+
+Then verify the build provenance attestation, which shows the file was published by this repository's release workflow. This needs GitHub CLI 2.49 or later, signed in with `gh auth login`. Ubuntu 26.04's `gh` package (2.46) is too old, so if the server has no newer `gh`, run this on your workstation against a copy downloaded there, and check that `sha256sum setup-explore.sh` prints the same hash as above:
+
+```bash
+gh attestation verify setup-explore.sh \
+  --repo OpenVTC/vti-setup \
+  --signer-workflow OpenVTC/vti-setup/.github/workflows/release.yml
+```
+
+Run the verified script:
+
+```bash
+sudo bash setup-explore.sh <domain>
 # or with email (used for Let's Encrypt expiry notifications):
-curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh | bash -s -- <domain> <email>
+sudo bash setup-explore.sh <domain> <email>
 ```
 
 Example:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh | bash -s -- example.com
+sudo bash setup-explore.sh example.com
 ```
+
+The script checks that `<domain>` is a plain hostname and `<email>` a plain address, and stops before changing anything if either is not. The whole script is one function called on its last line, so an incomplete download runs nothing.
 
 The script will:
 
 1. Update system packages
 2. Install build and runtime dependencies (Git, OpenSSL, build toolchain, Valkey)
 3. Configure UFW firewall (allow ports 22, 80, 443)
-4. Install Rust
-5. Install Node.js v22
-6. Install Docker
-7. Install Nginx and Certbot (via snap)
-8. Create Nginx reverse proxy configs (4 services)
-9. Obtain SSL certificates via Certbot
-10. Verify each HTTPS URL responds
+4. Install Rust (Ubuntu's `rustup` package, then the stable toolchain)
+5. Install Nginx and Certbot (via snap)
+6. Create Nginx reverse proxy configs (4 services)
+7. Obtain SSL certificates via Certbot
+8. Verify each HTTPS URL responds
+
+Node.js is not installed here: the one step that needs it, the optional DID Hosting UI build in [Option B](#option-b-build-from-source), installs it. Docker is not used anywhere in this guide and is not installed.
 
 > **Expected result:** `502 Bad Gateway` on the HTTPS URLs is normal at this stage — the backend services are not running yet.
 
 ### If the script stops on a blue configuration dialog
 
-An older copy of the script (or a host with pre-seeded debconf answers) can stop at a full-screen `Configuring keyboard-configuration` dialog during Step 1, or at a `needrestart` "which services should be restarted" list later on. Because the script is piped into `bash`, stdin is the curl pipe rather than your terminal, so the dialog may not accept keystrokes at all.
+Older copies of the script, which this page used to pipe straight into `bash`, can stop at a full-screen `Configuring keyboard-configuration` dialog during Step 1, or at a `needrestart` "which services should be restarted" list later on. With the script piped in, stdin was the download rather than your terminal, so the dialog may not accept keystrokes at all.
 
-To get past it, `Ctrl-C` out and either run the script from a file, so stdin stays attached to your terminal:
-
-```bash
-curl -sSLO https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh
-bash setup-explore.sh <domain>
-```
-
-Or pre-seed the answers as root before re-running the one-liner:
+To get past it, `Ctrl-C` out and run the verified release copy as shown above. It sets the apt frontend on every call and runs from a file, so stdin stays attached to your terminal. On a host with pre-seeded debconf answers, you can also pre-seed the answers as root before re-running:
 
 ```bash
 echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 echo 'keyboard-configuration keyboard-configuration/layoutcode string us' | debconf-set-selections
 ```
 
-Re-running the whole script is safe, so it does not matter how far in you got before interrupting. The Rust, Node.js, Docker and Certbot steps each skip themselves if the tool is already present, the UFW rules and `systemctl enable` calls are idempotent, and the Nginx vhosts are rewritten from scratch and re-certified on every run. The one thing to watch is Let's Encrypt's rate limit — five duplicate certificates per week — so avoid re-running it many times in a row once certificates have been issued.
+Re-running the whole script is safe, so it does not matter how far in you got before interrupting. The Rust and Certbot steps each skip themselves if the tool is already present, the UFW rules and `systemctl enable` calls are idempotent, and the Nginx vhosts are rewritten from scratch and re-certified on every run. The one thing to watch is Let's Encrypt's rate limit — five duplicate certificates per week — so avoid re-running it many times in a row once certificates have been issued.
 
 > **Note:** `export DEBIAN_FRONTEND=noninteractive` in your own shell will not help — the script's apt calls go through `sudo`, whose default `env_reset` strips the variable before apt sees it. Seeding the debconf database persists the setting instead, so it applies regardless of environment. The current script sets the frontend on each apt invocation itself, so a fresh copy should never prompt.
 
 ## Step 4: Reload shell environment
 
-Rust and Cargo were installed inside the script's subshell. To use `cargo` in your current session, run:
+`cargo install` puts the binaries it builds in `~/.cargo/bin`. The script adds that directory to `PATH` for new login shells. To use it in your current session, run:
 
 ```bash
-source $HOME/.cargo/env
+export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
 Or simply log out and SSH back in — the environment will be loaded automatically on the next login.
@@ -105,6 +121,8 @@ Or simply log out and SSH back in — the environment will be loaded automatical
 ### Option A: Download pre-built binaries (recommended)
 
 Saves 15–40 minutes of build time depending on your hardware.
+
+> **Not integrity-checked.** `download.firstperson.dev` does not publish checksums or signatures yet, so nothing below verifies these binaries beyond HTTPS. That is acceptable only on a throwaway explore host: do not copy them to a machine that holds real keys.
 
 #### Latest tagged release: VTI-Dogwood
 
@@ -131,7 +149,9 @@ curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-d
 chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 ```
 
-#### Last compiled commit from main branches
+#### Last compiled commit from main branches (unverified)
+
+Unverified builds of whatever was last merged, published without checksums or signatures. Use them only on a throwaway host, to try a change that is not in a tagged release yet.
 
 ```bash
 curl -O https://download.firstperson.dev/vta/main/vta
@@ -158,7 +178,7 @@ chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
 
 ### Option B: Build from source
 
-The setup script installed Rust, Node.js, and the C/C++ build toolchain, so you can also build the binaries yourself.
+The setup script installed Rust and the C/C++ build toolchain, so you can also build the binaries yourself. The DID Hosting UI build also needs Node.js, which that step installs.
 
 #### VTA, CNM, and PNM
 
@@ -201,9 +221,14 @@ git checkout VTI-Dogwood # latest tagged release, or just stay on main
 ```
 
 ```bash
+# Node.js and npm are needed only for the UI build. apt verifies Ubuntu's
+# packages against the Ubuntu archive signing key.
+sudo apt-get install -y nodejs npm
 cd did-hosting-ui && npm install && npm run build:web && cd ..
 cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui,did-methods"
 ```
+
+> **Node.js version:** `did-hosting-ui` declares Node.js `>=24.3.0` in its `package.json`, and Ubuntu 26.04 ships Node.js 22. If the UI build fails on Node.js 22, install the pre-built `did-hosting-daemon` from Option A instead.
 
 ## Resulting URL map
 
