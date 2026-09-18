@@ -24,7 +24,7 @@ You operate a VTC: bootstrap the community, set join and role policies, manage t
 
 You run the VTI services so the other two can do their jobs. Provision the host, stand up VTA + Mediator + DID Hosting Daemon.
 
-→ [`sysop/`](sysop/) · **explore** the VTI end-to-end; a hardened **deploy** stream is planned
+→ [`sysop/`](sysop/) · **explore** the VTI end-to-end on a throwaway VM, or **deploy** a hardened VTA Farm on Kubernetes
 
 ---
 
@@ -55,6 +55,7 @@ graph TB
 | **DID Host** | [affinidi/affinidi-webvh-service](https://github.com/affinidi/affinidi-webvh-service) | Hosts `did:webvh` DID documents publicly |
 | **Mediator** | [affinidi/affinidi-tdk-rs · affinidi-messaging-mediator](https://github.com/affinidi/affinidi-tdk-rs/tree/main/crates/messaging/affinidi-messaging-mediator) | DIDComm v2 relay and message routing |
 | **OpenVTC** | [OpenVTC/openvtc](https://github.com/OpenVTC/openvtc) | CLI/TUI for joining and participating in VTCs |
+| **VTA Farm** | [ic3software/vtafarm-k8s](https://github.com/ic3software/vtafarm-k8s) · [vtafarm-api](https://github.com/ic3software/vtafarm-api) · [vtafarm](https://github.com/ic3software/vtafarm) | Hardened multi-tenant Kubernetes platform that hosts VTAs, with master seeds held in HashiCorp Vault |
 
 ---
 

@@ -14,7 +14,7 @@ Organised by **persona** — who's reading — not by topic.
 | --- | --- | --- |
 | `developer/` | Individual using OpenVTC to take part in VTCs | Personal VTA, OpenVTC TUI, joining a community |
 | `community-manager/` | VTC operator | Bootstrap a VTC, policy authoring, ACL/registry management (mostly future) |
-| `sysop/` | VTI infra operator | Explore stream (throwaway Ubuntu VM, interactive TUIs); Deploy stream placeholder (hardened Kubernetes + Vault — to be documented) |
+| `sysop/` | VTI infra operator | Explore stream (throwaway Ubuntu VM, interactive TUIs); Deploy stream (hardened multi-tenant Kubernetes VTA Farm with HashiCorp Vault — index page pointing at the `ic3software/vtafarm`, `vtafarm-api`, and `vtafarm-k8s` repos) |
 
 Each folder has a `README.md` that is the persona's entry point — a one-page index of the journey, with links into the per-topic pages.
 
