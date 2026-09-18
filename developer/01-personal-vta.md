@@ -13,7 +13,7 @@
 
 There are two ways to bring up a Personal VTA. Both end in the same place: a running VTA holding your master keys, reachable from your PNM. The downstream tutorials ([OpenVTC TUI](02-openvtc-tui.md), [Joining a Community](03-joining-a-community.md)) work the same regardless of which path you take.
 
-- **[Path A — VTA Farm (streamlined, recommended)](#path-a--vta-farm-streamlined)** — [VTA Farm](https://vtafarm.firstperson.dev) spins up your VTA in a managed Kubernetes cluster. You provision it from a browser with a passkey and connect your local PNM to it. No server, no public domain, no DID hosting, no mediator wiring on your side.
+- **[Path A — VTA Farm (streamlined, recommended)](#path-a--vta-farm-streamlined)** — [VTA Farm](https://vtafarm.firstperson.dev) spins up your VTA in a managed Kubernetes cluster (the sysop [Deploy stream](../sysop/deploy/) describes how a farm is built). You provision it from a browser with a passkey and connect your local PNM to it. No server, no public domain, no DID hosting, no mediator wiring on your side.
 - **[Path B — VTA the hard way (self-hosted)](#path-b--vta-the-hard-way-self-hosted)** — run the VTA on a host you control, publish your own `did:webvh` DID log, and wire it to a community mediator yourself. More moving parts, more to learn.
 
 Pick whichever fits how much infrastructure you want to manage. If you're new to the stack, take Path A.
