@@ -4,13 +4,17 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    # A pinned release that is never published breaks the explore guide without
+    # any commit going near it, so check on a timer as well as on push.
+    - cron: "17 6 * * *"
 
 permissions:
   contents: read
 
 jobs:
   shell:
-    name: shellcheck and remote-exec guard
+    name: shellcheck and guards
     runs-on: ubuntu-24.04
     steps:
       - name: Check out
@@ -25,3 +29,24 @@ jobs:
 
       - name: No downloads piped into a shell, no scripts fetched from main
         run: bash .github/scripts/guard-remote-exec.sh
+
+      - name: The explore guide's pin matches the setup script
+        run: bash .github/scripts/guard-release-pin.sh
+
+  release-pin:
+    name: pinned release is published
+    # Not on pull_request. RELEASING.md has the version and hash pinned in a
+    # merged PR before the tag that publishes the release exists, so requiring
+    # the release here would block the very PR that makes it possible.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: The pinned release is published and matches the pin
+        env:
+          CHECK_PUBLISHED: "1"
+        run: bash .github/scripts/guard-release-pin.sh
