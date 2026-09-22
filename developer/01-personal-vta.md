@@ -1,7 +1,7 @@
 # Personal VTA
 
 **Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.  
-**Tested on:** [Ubuntu Server](/sysop/explore/01-server-setup.md) (Path B only — Path A runs in VTA Farm's managed cluster)
+**Tested on:** [Ubuntu Server](../sysop/explore/01-server-setup.md) (Path B only — Path A runs in VTA Farm's managed cluster)
 
 **Verified with:**
 
@@ -93,7 +93,7 @@ It should return the status of a number of checks it runs against the VTA, the M
 
 ### Prerequisites
 
-Complete the [Ubuntu Server](/sysop/explore/01-server-setup.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
+Complete the [Ubuntu Server](../sysop/explore/01-server-setup.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
 
 > **Which PNM build?** Step 5 of that guide installs the `pnm-server` build, which keeps secrets in plaintext config instead of an OS keyring — the right choice for the headless server you are standing up. If you would rather drive that VTA from your own workstation, install the default build there via [Download the PNM](https://firstperson.dev/#downloads) instead. Either way the binary is called `pnm`, so every command below is unchanged.
 
