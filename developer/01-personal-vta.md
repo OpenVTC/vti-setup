@@ -7,7 +7,7 @@
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- |
-| 0.17.0 | 0.18.19 | 0.8.3 |
+| 0.39.0 | 0.28.36 | 0.8.3 |
 
 ## Two paths
 
@@ -22,7 +22,6 @@ Pick whichever fits how much infrastructure you want to manage. If you're new to
 
 ### Prerequisites
 
-- An **account** at the [VTA Farm](https://vtafarm.firstperson.dev).
 - A computer with **passkey** support.
 - **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. [Download the PNM](https://firstperson.dev/#downloads).
 
@@ -69,7 +68,7 @@ vta import-did --did did:key:z6Mk... --role admin
 
 > **⚠️ SAVE THIS** (A2)
 >
-> The **Temp DID** — the `did:key:z6Mk...` value from PNM's output. You'll paste it into VTA Farm in the next step.
+> The **Temp DID** — the `did:key:z6Mk...` value from PNM's output. You'll paste it into VTA Farm in the next step. Don't copy the entire line; just the DID, for example: **did:key:z6MkqYgeCR8hJS9A5Eu98hfMBiYHb8MZ8S9R2Mz4PqErZyLF**
 
 #### Step 3: Provision the agent
 
@@ -88,6 +87,10 @@ pnm health
 ```
 
 It should return the status of a number of checks it runs against the VTA, the Mediator, and DIDComm/TSP trust pings.
+
+### Next
+
+Assuming the health check is successful, you can now install the TUI and bind it to this VTA: [02 — OpenVTC TUI Setup](02-openvtc-tui.md).
 
 ## Path B — VTA the hard way (self-hosted)
 
@@ -311,6 +314,6 @@ pnm health
 
 It should return the status of a number of checks it runs against the VTA, the Mediator and DIDComm/TSP trust pings.
 
-## Next
+### Next
 
 Install the TUI and bind it to this VTA: [02 — OpenVTC TUI Setup](02-openvtc-tui.md).

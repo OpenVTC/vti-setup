@@ -7,7 +7,7 @@
 
 | OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- | --- |
-| 0.3.1 | 0.17.0 | 0.18.19 | 0.8.3 |
+| 0.11.58 | 0.39.0 | 0.28.36 | 0.8.3 |
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Complete [01 — Personal VTA](01-personal-vta.md) first. This tutorial connects
 You also need:
 
 - Access to your **PNM** session from the [01 — Personal VTA](01-personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
-- **A VTA that advertises a DID hosting server.** Setup itself does not need one, but you cannot mint a persona without it.
+- **A VTA that advertises a DID hosting server.** Setup itself does not need one, but you cannot mint a persona without it. If you are using the VTA Farm to host your VTA, this is already done for you.
 
 The following values will be collected during setup. Save each one as prompted.
 
@@ -37,10 +37,6 @@ Saves the Rust toolchain install and ~2–5 minutes of build time:
 curl -O https://download.firstperson.dev/openvtc/latest/openvtc
 chmod +x openvtc && sudo mv openvtc /usr/local/bin/
 ```
-
-> **ℹ️ NOTE**
->
-> The binary above is installed with `no-default-features`, so you will not have hardware-token support. Follow the build instructions below if you want that.
 
 #### Option B: Build from source
 
