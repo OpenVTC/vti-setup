@@ -1,6 +1,6 @@
 # OpenVTC TUI Setup
 
-**Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting membership DIDs (M-DIDs), managing community contexts, and exchanging credentials.  
+**Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting persona DIDs, managing community contexts, and exchanging credentials.  
 **Tested on:** Arch Linux desktop & macOS
 
 **Verified with:**

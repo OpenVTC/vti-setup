@@ -122,7 +122,7 @@ Paste the Community DID and press **Enter**. What comes next depends on whether 
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Pick the persona from Step 3, or let OpenVTC mint a fresh one. Either way you end up with a community-scoped identity — one persona per community is the rule (see [One M-DID per community](#one-m-did-per-community)).
+Pick the persona from Step 3, or let OpenVTC mint a fresh one. Either way you end up with a community-scoped identity — one persona per community is the rule (see [One persona per community](#one-persona-per-community)).
 
 Choosing an existing persona always brings up a linkage warning, even on its first use. It is there so you don't link your identities across communities by accident; the last line tells you whether any other community already knows you by this persona. Press **Y** to continue.
 
@@ -245,12 +245,12 @@ At that point you have graduated to Member Developer _(not yet written)_.
 
 ## Notes
 
-- **"Persona" in the TUI is the M-DID in the spec.** Both mean the per-community identity minted from your Personal VTA — this page uses the TUI's word in the walkthrough and the spec's word in the background sections.
+- **"Persona" is what older spec drafts called an M-DID.** The DTG credentials spec has retired the M-DID, R-DID, C-DID and P-DID identifier types ([dtgwg-cred-spec#30](https://github.com/trustoverip/dtgwg-cred-spec/pull/30)). An identifier is now a plain DID with a declared correlation scope: `pairwise`, `directed` or `public`. This page uses the TUI's word, **persona**, throughout.
 - **Present a persona, never your Personal VTA's primary DID.** Substituting the latter links all your communities together.
 - **Personas are scoped to a single community.** Don't re-present an old one if you leave and rejoin; mint a new one.
 - **The mnemonic for your Personal VTA backs every persona you mint.** Losing it loses every community identity you hold — see [01 — Personal VTA](01-personal-vta.md) for recovery.
 - **Trust-registry publication is off.** A join request carries a `registryConsent` flag, and OpenVTC always sends `false`, so your persona is not externally listed. The TUI has no setting to opt in.
-- **There's a REST alternative to the TSP and DIDComm paths.** Communities that publish their VTC service over HTTPS also accept `POST /v1/join-requests` (unauthenticated, rate-limited) with the same VP body. On REST the VP must carry a **holder-binding signature** from your M-DID, since there is no TSP or DIDComm envelope to authenticate you. Use whichever the community advertises.
+- **There's a REST alternative to the TSP and DIDComm paths.** Communities that publish their VTC service over HTTPS also accept `POST /v1/join-requests` (unauthenticated, rate-limited) with the same VP body. On REST the VP must carry a **holder-binding signature** from your persona, since there is no TSP or DIDComm envelope to authenticate you. Use whichever the community advertises.
 
 ## How joining works
 
@@ -262,15 +262,15 @@ If you want to understand why the path above is shaped the way it is, read on.
 
 ### Your Personal VTA holds many DIDs, not just one
 
-Your Personal VTA is the master key store and DID factory for _all_ of your identities. It is not itself your community identity. Each community you participate in gets its own DID — an **M-DID** — minted from the same VTA but logically separate. This is deliberate: the M-DID separation means two communities you belong to cannot correlate you.
+Your Personal VTA is the master key store and DID factory for _all_ of your identities. It is not itself your community identity. Each community you participate in gets its own DID — a **persona** — minted from the same VTA but logically separate. This is deliberate: because each persona is known only to its own community, two communities you belong to cannot correlate you.
 
-### One M-DID per community
+### One persona per community
 
-You will mint a fresh M-DID for _this_ community. If you go on to join other communities later, each gets its own M-DID. Re-using an M-DID across communities, or presenting your Personal VTA's primary DID as your membership identity, would leak your cross-community presence and defeats the design. The hazard is particularly acute across revocation events — re-presenting an old M-DID after a status-list bit has been flipped invites correlation with the prior identity.
+You will mint a fresh persona for _this_ community. If you go on to join other communities later, each gets its own. In the spec's terms, a persona known only to its community is `pairwise`: it has exactly one counterparty. Re-using it with another community widens it to `directed`, known to every community you chose to use it with, which leaks your cross-community presence and defeats the design. Presenting your Personal VTA's primary DID as your membership identity does the same, across everything that DID is used with. The hazard is particularly acute across revocation events — re-presenting an old persona after a status-list bit has been flipped invites correlation with the prior identity.
 
 ### Membership is gated by two separate claims, from two members
 
-A VRC carries two kinds of attestation from the issuer: an **identity attestation** ("this M-DID belongs to the person I know") and a **membership recommendation** ("I think this person should be a member of the community"). The two are conceptually distinct — a member could in principle attest to your identity without recommending you — but the initial-days community policy requires both kinds of claim, from at least two distinct existing members, before granting membership. Expect this threshold to tighten as the community matures.
+A VRC carries two kinds of attestation from the issuer: an **identity attestation** ("this persona belongs to the person I know") and a **membership recommendation** ("I think this person should be a member of the community"). The two are conceptually distinct — a member could in principle attest to your identity without recommending you — but the initial-days community policy requires both kinds of claim, from at least two distinct existing members, before granting membership. Expect this threshold to tighten as the community matures.
 
 _Note: The VTC spec (§6.1) lists Verifiable Invitation Credentials (VICs, issued by community admins) as the natural credential type for gating joins. OpenVTC's initial-days policy deliberately uses VRCs instead — peer-issued, member-to-member trust edges — so that any two existing members can admit a new one, rather than routing applicants through an admin-controlled invitation funnel. The trade-off is acknowledged: peer-vouching does not scale to communities large enough that "two members vouching" stops representing meaningful trust, and the policy is expected to evolve before then. The specific two-claim VRC body (identity attestation + membership recommendation) used here is also ahead of the spec, which currently leaves the VRC payload undefined._
 
@@ -285,7 +285,7 @@ As an outside developer you only ever interact with the public/join mediator. Th
 
 ### How the submission reaches the VTC
 
-The OpenVTC TUI assembles your VP and sends it to the community's VTC service, routed through the public/join mediator. It sends over TSP when the community's DID document offers TSP and your persona's mediator carries it, and falls back to DIDComm when the community also offers DIDComm and your mediator doesn't carry TSP. The progress page tells you which it used (`Sent over:`). Either envelope authenticates the sender — your M-DID — so the VP itself does not need a separate holder-binding signature (the envelope already binds the message to the M-DID it was sealed from).
+The OpenVTC TUI assembles your VP and sends it to the community's VTC service, routed through the public/join mediator. It sends over TSP when the community's DID document offers TSP and your persona's mediator carries it, and falls back to DIDComm when the community also offers DIDComm and your mediator doesn't carry TSP. The progress page tells you which it used (`Sent over:`). Either envelope authenticates the sender — your persona — so the VP itself does not need a separate holder-binding signature (the envelope already binds the message to the persona it was sealed from).
 
 Every wire operation in OpenVTC carries a Trust Task URL identifying the protocol and version (in DIDComm, the message `type` field). The join-request task is `https://trusttasks.org/spec/vtc/join-requests/submit/0.2`. The VTC's immediate reply on the same thread is a `https://trusttasks.org/spec/vtc/join-requests/submit-receipt/0.1` message — an acknowledgement only. The actual policy outcome, and any credentials issued on `Approved`, are delivered separately.
 
@@ -293,7 +293,7 @@ Every wire operation in OpenVTC carries a Trust Task URL identifying the protoco
 
 Your join request is _addressed to_ the community's **VTC service** — the daemon that runs community lifecycle, holds the ACL, and issues community credentials — and _routes through_ the public/join mediator. The mediator is transport; the VTC service is the decider.
 
-When the VTC receives your request it runs the community's currently-active **join policy** against your submission. The join policy is just code — a Rego module (`join.rego`) evaluated by an engine embedded in the VTC — and admins author it. The policy returns a boolean `allow`. Under current initial-days policy the rule is simple: `allow` is true if your submission carries at least two valid VRCs whose issuers are both `Active` members in the community's trust registry. On `allow=true`, the VTC mints a **VMC** and an initial role **VEC** for your M-DID, writes your M-DID into the community's ACL and trust registry as `Active`, and sealed-transfers the bundle back within seconds — no human approval step. The same machinery will gate richer policies later (more issuers, role-specific issuers, additional credential types); admins update the policy and activate it, and the wire shape of a join request does not change.
+When the VTC receives your request it runs the community's currently-active **join policy** against your submission. The join policy is just code — a Rego module (`join.rego`) evaluated by an engine embedded in the VTC — and admins author it. The policy returns a boolean `allow`. Under current initial-days policy the rule is simple: `allow` is true if your submission carries at least two valid VRCs whose issuers are both `Active` members in the community's trust registry. On `allow=true`, the VTC mints a **VMC** and an initial role **VEC** for your persona, writes your persona's DID into the community's ACL and trust registry as `Active`, and sealed-transfers the bundle back within seconds — no human approval step. The same machinery will gate richer policies later (more issuers, role-specific issuers, additional credential types); admins update the policy and activate it, and the wire shape of a join request does not change.
 
 If the policy returns `allow=false`, your request is recorded with status `Rejected` and a rationale; you cannot retry without a submission the current policy will accept. If the policy cannot complete cleanly — for example, a trust-registry check times out, or the community policy explicitly holds borderline cases — your request is recorded with status `Pending` (or `Deferred`) and queued for a community admin _(not yet written)_ to review manually.
 

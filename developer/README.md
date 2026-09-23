@@ -9,7 +9,7 @@ You do **not** run the community's infrastructure. That's the [sysop](../sysop/)
 Work through these in order. Each one verifies before you move on.
 
 1. **[01 — Personal VTA](01-personal-vta.md)** — spin up a VTA on the [VTA Farm](https://vtafarm.firstperson.dev) (the streamlined default), or self-host one on a server you control if you want to run it the hard way. At the end you have a running VTA holding your master keys.
-2. **[02 — OpenVTC TUI Setup](02-openvtc-tui.md)** — install the TUI, bind it to the Personal VTA from step 1, and create a persona DID. This is your everyday interface.
+2. **[02 — OpenVTC TUI Setup](02-openvtc-tui.md)** — install the TUI and bind it to the Personal VTA from step 1. This is your everyday interface.
 3. **[03 — Joining a Community](03-joining-a-community.md)** — your first community: submit a join request under your persona, and get approved by a community admin.
 
 ## Prerequisites you'll need before you start
@@ -21,4 +21,4 @@ Unless you use the [VTA Farm](https://vtafarm.firstperson.dev), you will need th
 
 ## Where to go next
 
-After joining a community you graduate to the **Member Developer** flow — minting role-scoped credentials, presenting them to verifiers, rotating M-DIDs. _(Not yet written.)_
+After joining a community you graduate to the **Member Developer** flow — minting role-scoped credentials, presenting them to verifiers, rotating your personas. _(Not yet written.)_
