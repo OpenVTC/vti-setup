@@ -29,8 +29,8 @@ The following values will be collected during setup. Save each one as prompted �
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| A1 | Personal VTA DID (from VTA Farm UI) | Step 2 |
-| A2 | Temp DID (`did:key:...` from PNM) | Step 3 |
+| 1a | Personal VTA DID (from VTA Farm UI) | Step 2 |
+| 2a | Temp DID (`did:key:...` from PNM) | Step 3 |
 
 ### Steps
 
@@ -42,7 +42,7 @@ The following values will be collected during setup. Save each one as prompted �
 4. Enter a **name** for your VTA, leave the default image selected, and click **Create session**.
 5. Copy the **VTA DID** displayed on the page.
 
-> **⚠️ SAVE THIS** (A1)
+> **⚠️ SAVE THIS** (1a)
 >
 > The **Personal VTA DID** shown in the VTA Farm UI. You'll paste it into PNM in the next step.
 
@@ -58,7 +58,7 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter the **same name** you used in Step 1 |
-| VTA DID: | Paste the **Personal VTA DID** from A1 |
+| VTA DID: | Paste the **Personal VTA DID** from 1a |
 
 PNM prints a `vta import-did` command containing a generated Temp DID unique to this session:
 
@@ -66,7 +66,7 @@ PNM prints a `vta import-did` command containing a generated Temp DID unique to 
 vta import-did --did did:key:z6Mk... --role admin
 ```
 
-> **⚠️ SAVE THIS** (A2)
+> **⚠️ SAVE THIS** (2a)
 >
 > The **Temp DID** — the `did:key:z6Mk...` value from PNM's output. You'll paste it into VTA Farm in the next step. Don't copy the entire line; just the DID, for example: **did:key:z6MkqYgeCR8hJS9A5Eu98hfMBiYHb8MZ8S9R2Mz4PqErZyLF**
 
@@ -74,7 +74,7 @@ vta import-did --did did:key:z6Mk... --role admin
 
 Back in the VTA Farm browser tab:
 
-1. Paste the **Temp DID** from A2 into the **Admin DID** input box.
+1. Paste the **Temp DID** from 2a into the **Admin DID** input box.
 2. Click **Provision agent**.
 3. Wait for the **Agent is online** message.
 

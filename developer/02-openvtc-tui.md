@@ -15,6 +15,7 @@ Complete [01 — Personal VTA](01-personal-vta.md) first. This tutorial connects
 
 You also need:
 
+- Your **Personal VTA DID**, which you saved in [01 — Personal VTA](01-personal-vta.md). You paste it into the setup wizard in Step 2.
 - Access to your **PNM** session from the [01 — Personal VTA](01-personal-vta.md) tutorial — the OpenVTC setup wizard mints an ephemeral DID and asks you to authorise it via PNM. The grant is short-lived (1 hour), so keep PNM at the ready.
 - **A VTA that advertises a DID hosting server.** Setup itself does not need one, but you cannot mint a persona without it. If you are using the VTA Farm to host your VTA, this is already done for you.
 
@@ -22,7 +23,6 @@ The following values will be collected during setup. Save each one as prompted.
 
 | ID | What to Save | Used In |
 | --- | --- | --- |
-| 1b | Personal VTA DID (from the Personal VTA tutorial) | Step 2 |
 | 2a | OpenVTC unlock passphrase | Each TUI launch |
 
 ## Setup
@@ -98,7 +98,7 @@ You point OpenVTC at your VTA and authorise it through PNM. Only the PNM step ne
 
 | Page | Action |
 | --- | --- |
-| Connect to your VTA | Paste the **Personal VTA DID** (1b), then press **Enter** |
+| Connect to your VTA | Paste your **Personal VTA DID**, then press **Enter** |
 
 **Authorise the setup DID.** OpenVTC mints an ephemeral admin `did:key` for this session and shows it alongside a ready-to-copy `pnm contexts create` command. Press **F2** to copy the command, then run it in the PNM session you set up in [01 — Personal VTA](01-personal-vta.md):
 
@@ -160,7 +160,7 @@ There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `
 
 From the main menu, open the **VTA Service** panel. Two rows carry the result of Step 2:
 
-- **VTA** — matches your Personal VTA DID (1b).
+- **VTA** — matches your Personal VTA DID.
 - **Authenticated** — shows a `did:key`. This is the long-term admin DID the VTA minted for OpenVTC, and its presence is what tells you the PNM grant in 2.2 went through: the ephemeral setup DID has already been rotated out.
 
 Where a **Persona** row would sit, you instead get `Status: Ready — join a community to create your persona`. That is correct at this point — mint a persona in [03 — Joining a Community](03-joining-a-community.md) and the panel replaces the line with the persona itself.
