@@ -7,13 +7,13 @@
 
 | OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- | --- |
-| 0.3.1 | 0.17.0 | 0.18.19 | 0.8.3 | 0.11.58 |
+| 0.3.1 | 0.39.0 | 0.28.36 | 0.8.3 | 0.11.58 |
 
 ## Prerequisites
 
 - **A Personal VTA and the OpenVTC TUI**, from [01](01-personal-vta.md) and [02](02-openvtc-tui.md).
 - **The target community's DID.** Published on the community's home page — see Step 4.
-- **A community admin who will act on your request.** A community that accepts open join requests still admits nobody until an admin approves. If it issues invitation credentials (VICs) instead, paste the VIC into the join prompt to skip the wait.
+- **A community admin who will act on your request.** A community that accepts open join requests still admits nobody until an admin approves. If it issues invitation credentials (VICs) instead, create your persona first (Step 3), give its DID to the admin, and paste the VIC they send you into the join prompt to skip the wait.
 
 ## Path
 
@@ -29,15 +29,18 @@ Follow [02 — OpenVTC TUI Setup](02-openvtc-tui.md). You finish on the OpenVTC 
 
 ### Step 3 — Create a persona DID
 
-A **persona** is a `did:webvh` identity you present to a community. It is what you join as — never your Personal VTA's primary DID, and never a persona you already use elsewhere (see [How joining works](#how-joining-works) below). Setup in [02](02-openvtc-tui.md) deliberately leaves you without one: personas are community-scoped, so the first is minted here.
+A **persona** is a `did:webvh` identity you present to a community. It is what you join as — never your Personal VTA's primary DID, and never a persona you already use elsewhere (see [How joining works](#how-joining-works) below). Setup in [02](02-openvtc-tui.md) deliberately leaves you without one: personas are community-scoped, so the first is minted here or during the join.
 
-From the dashboard, select **Create Persona DID** in the Menu panel. The Content panel ends with `Press <Enter> to create a persona DID` — press **Enter**. (The **VTA Service** panel's Context Identities list has the same action on `n`.)
+This step is optional. If you have no persona when you join in Step 5, OpenVTC mints one for you. Make one here if the community will send you an invitation credential (VIC): an invitation is bound to a persona DID, so the community admin needs yours before you join.
+
+From the dashboard, select **My Identity** in the Menu panel and press **Enter** to move into the Content panel. It opens on the **Personas** tab, which reads `You have no personas yet.` Press `n` to open the **Create persona DID** overlay:
 
 | Prompt | Action |
 | --- | --- |
-| Label for the new persona: | Enter a label (e.g. `alice`), then press **Enter** |
+| What should this persona be called? | Enter a name (e.g. `alice`), then press **Enter** |
+| Where should this persona's DID live on the hosting server? | Press **Enter** to create it with a path the server picks (press `p` first if you want to type the path yourself) |
 
-The label is local to your profile — it is how you pick this identity in the next step, and is not part of the DID.
+The name is only for you: communities are shown the DID, not the name, and you can rename it later. It also names the VTA sub-context the persona's keys live in (`openvtc/alice` for the default profile).
 
 ```text
 ┌ Create persona DID ──────────────────────────────────────┐
@@ -55,7 +58,7 @@ The label is local to your profile — it is how you pick this identity in the n
 >
 > Save the **persona DID**. It is how the community's admin console identifies you, and the only way to find your own request in their queue.
 
-The DID host and the path (`quiet-harbor` above) are both chosen for you — you neither pick a URL nor upload anything. Without DID hosting rights on your VTA the mint fails outright:
+The DID host is chosen for you, and so is the path (`quiet-harbor` above) unless you pressed `p`. You don't upload anything. Without DID hosting rights on your VTA the mint fails outright:
 
 ```text
 No WebVH server available from the VTA (serverless mint not yet supported).
@@ -82,14 +85,14 @@ Back in the OpenVTC dashboard, select **Communities** in the Menu panel and pres
 │  OpenVTC will mint a fresh persona and submit a join request on      │
 │  your behalf.                                                        │
 │                                                                      │
-│  Have an invitation?                                                 │
-│  Load the invitation credential (VIC) JSON — it fills in the         │
-│  community DID for you and rides along with the join request.        │
-│  [Ctrl+V] paste an invitation from the clipboard, or paste the       │
-│  JSON straight in                                                    │
-│                                                                      │
 │  Enter the community's DID or agent name:                            │
 │  >                                                                   │
+│                                                                      │
+│  Don't have the DID?                                                 │
+│  If you were handed an invitation credential (VIC), paste the JSON   │
+│  here instead — it names the community, so it fills the DID in for   │
+│  you, and it rides along with the join request.                      │
+│  [Ctrl+V] paste from the clipboard                                   │
 │                                                                      │
 │  Examples:                                                           │
 │    • did:webvh:QmRoot…:community.example.com                         │
@@ -99,17 +102,21 @@ Back in the OpenVTC dashboard, select **Communities** in the Menu panel and pres
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Paste the Community DID and press **Enter**. OpenVTC then asks which identity to present:
+Paste the Community DID and press **Enter**. What comes next depends on whether you made a persona in Step 3.
+
+**If you skipped Step 3**, OpenVTC goes straight to **Where should this community live?** Press **Enter** to accept the first option, `✦ A context of its own`, which puts the community in a new VTA sub-context named after it, with a new persona. Then skip ahead to the **Joining community** progress page below.
+
+**If you made a persona in Step 3**, OpenVTC asks which persona to present:
 
 ```text
-┌ Choose an identity for this community ───────────────────────────────┐
+┌ Who should this community know you as? ──────────────────────────────┐
 │                                                                      │
-│  Select the identity to present to this community:                   │
+│  Choose the persona this community will know you as:                 │
 │                                                                      │
 │  ▸ alice                                                             │
 │      did:webvh:QmPersona…:dids.example.com:quiet-harbor              │
-│    ✦ Create a new identity for this community                        │
-│      A fresh did:webvh, unlinked from your other communities         │
+│    ✦ Be someone new to this community                                │
+│      A fresh did:webvh — nothing links it to your other communities  │
 │                                                                      │
 │  [↑/↓] select   [ENTER] choose   [ESC] cancel                        │
 └──────────────────────────────────────────────────────────────────────┘
@@ -117,23 +124,23 @@ Paste the Community DID and press **Enter**. OpenVTC then asks which identity to
 
 Pick the persona from Step 3, or let OpenVTC mint a fresh one. Either way you end up with a community-scoped identity — one persona per community is the rule (see [One M-DID per community](#one-m-did-per-community)).
 
-Press "Y" to "reuse" the identity; this is actually the first use of it but you will see here if it has already been used before, so you don't cross-link your identity accidentally.
+Choosing an existing persona always brings up a linkage warning, even on its first use. It is there so you don't link your identities across communities by accident; the last line tells you whether any other community already knows you by this persona. Press **Y** to continue.
 
 ```text
-┌ Choose an identity for this community ───────────────────────────────┐
+┌ Who should this community know you as? ──────────────────────────────┐
 │                                                                      │
-│  Reuse an existing identity?                                         │
+│  Use a persona this community can already be linked to?              │
 │                                                                      │
-│  Presenting "alice" to this community links you across every         │
-│  community that uses it.                                             │
-│  It is not yet presented to any other community.                     │
+│  Being known here as "alice" makes you the same person to anyone     │
+│  who sees both this community and the others using it.               │
+│  No other community knows you by it yet.                             │
 │                                                                      │
 │  [Y] reuse and continue   [N/ESC] go back                            │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Arrow down to the "Join without it" option and press **Enter**.
+OpenVTC then offers any invitation it holds for this persona. With none, arrow down to **Join without it — send an open request** and press **Enter**.
 
 ```text
 ┌ Use an invitation for this community? ───────────────────────────────┐
@@ -152,17 +159,23 @@ Arrow down to the "Join without it" option and press **Enter**.
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-OpenVTC creates a sub-context for the community, submits the request, and reports:
+A persona from Step 3 already has its own sub-context (`openvtc/alice`), so the community joins that one and OpenVTC doesn't ask where it should live.
+
+A community that vets its members, or asks applicants to tell it about themselves, adds a page here first. It sets out what the community requires or asks, and what would be sent, before anything leaves. An open-request community shows neither.
+
+OpenVTC prepares the sub-context, submits the request, and reports:
 
 ```text
 ┌ Joining community ───────────────────────────────────────────────────┐
 │                                                                      │
 │  INFO: Joining did:webvh:QmPXUR…:dids.firstperson.dev:firstperson-vtc│
 │  INFO: Community reachable over TSP.                                 │
+│  INFO: Using context openvtc/alice.                                  │
 │  INFO: Reusing persona                                               │
-│      did:webvh:QmeHMZ…:dids.firstperson.dev:quiet-harbor             │
-│  INFO: Creating sub-context openvtc-alice/qmpxurcjupgn…              │
+│      did:webvh:QmeHMZ…:dids.firstperson.dev:quiet-harbor…            │
 │  INFO: Submitting join request…                                      │
+│  INFO: Joining without an invitation — submitting an open request    │
+│  (awaiting approval).                                                │
 │  INFO: Connecting the new persona to its mediator…                   │
 │  INFO: Persona connected — ready to receive the community's reply.   │
 │  INFO: Join request sent over TSP. Waiting for the community to      │
@@ -209,18 +222,18 @@ You are not involved in this step; the outcome reaches you over TSP or DIDComm.
 
 Confirm from the community side — the admin console's **Members** list shows your persona DID with role `member`.
 
-On the OpenVTC side, open the **VTA Service** panel. Your persona is listed under **Context Identities**:
+On the OpenVTC side, open the **My Identity** panel. Your persona is listed on the **Personas** tab:
 
 ```text
- Context Identities (1)   ◀ focus
+ 1 persona
 
 ▸ ● did:webvh:QmPersona…:dids.example.com:quiet-harbor
-      alice  ·  active  ·  1 community
+      alice  ·  active  ·  known to 1 community
 
-↑/↓ select   n: new persona   g: agent names   d: remove orphan
+↑/↓ select   n: new persona   g: agent names   d: remove unused   ⇥/⇧⇥: tab
 ```
 
-Read that carefully: `1 community` says the persona is bound to a community, **not** that the community accepted you. Acceptance is what the credentials prove: on approval the VTC issues your persona a **VMC** (membership) and an initial role **VEC**, and both land in **My Credentials**. The checks that should pass are:
+Read that carefully: `known to 1 community` says the persona is bound to a community, **not** that the community accepted you. Acceptance is what the credentials prove: on approval the VTC issues your persona a **VMC** (membership) and an initial role **VEC**, and both land in **My Credentials**. The checks that should pass are:
 
 - Your persona resolves via the community's DID host.
 - **My Credentials** lists a VMC and a role VEC, both issued by the community.
@@ -236,7 +249,7 @@ At that point you have graduated to Member Developer _(not yet written)_.
 - **Present a persona, never your Personal VTA's primary DID.** Substituting the latter links all your communities together.
 - **Personas are scoped to a single community.** Don't re-present an old one if you leave and rejoin; mint a new one.
 - **The mnemonic for your Personal VTA backs every persona you mint.** Losing it loses every community identity you hold — see [01 — Personal VTA](01-personal-vta.md) for recovery.
-- **Trust-registry publication is on by default.** The `registryConsent` flag defaults to `true` in the current SDK type, which the admin console shows as `REGISTRY CONSENT: Yes` — your persona is externally listed. Set it false to opt out and stay off the published registry.
+- **Trust-registry publication is off.** A join request carries a `registryConsent` flag, and OpenVTC always sends `false`, so your persona is not externally listed. The TUI has no setting to opt in.
 - **There's a REST alternative to the TSP and DIDComm paths.** Communities that publish their VTC service over HTTPS also accept `POST /v1/join-requests` (unauthenticated, rate-limited) with the same VP body. On REST the VP must carry a **holder-binding signature** from your M-DID, since there is no TSP or DIDComm envelope to authenticate you. Use whichever the community advertises.
 
 ## How joining works
@@ -272,9 +285,9 @@ As an outside developer you only ever interact with the public/join mediator. Th
 
 ### How the submission reaches the VTC
 
-The OpenVTC TUI assembles your VP and wraps it in a DIDComm message addressed to the community's VTC service, routed through the public/join mediator. The DIDComm authcrypt envelope authenticates the sender — your M-DID — so the VP itself does not need a separate holder-binding signature (the envelope already binds the message to the M-DID it was sealed from).
+The OpenVTC TUI assembles your VP and sends it to the community's VTC service, routed through the public/join mediator. It sends over TSP when the community's DID document offers TSP and your persona's mediator carries it, and falls back to DIDComm when the community also offers DIDComm and your mediator doesn't carry TSP. The progress page tells you which it used (`Sent over:`). Either envelope authenticates the sender — your M-DID — so the VP itself does not need a separate holder-binding signature (the envelope already binds the message to the M-DID it was sealed from).
 
-Every wire operation in OpenVTC carries a Trust Task URL in the DIDComm message `type` field, identifying the protocol and version. The join-request task is `https://trusttasks.org/openvtc/vtc/join-requests/submit/1.0`. The VTC's immediate reply on the same thread is a `https://trusttasks.org/openvtc/vtc/join-requests/submit-receipt/1.0` message — an acknowledgement only. The actual policy outcome, and any credentials issued on `Approved`, are delivered separately.
+Every wire operation in OpenVTC carries a Trust Task URL identifying the protocol and version (in DIDComm, the message `type` field). The join-request task is `https://trusttasks.org/spec/vtc/join-requests/submit/0.2`. The VTC's immediate reply on the same thread is a `https://trusttasks.org/spec/vtc/join-requests/submit-receipt/0.1` message — an acknowledgement only. The actual policy outcome, and any credentials issued on `Approved`, are delivered separately.
 
 ### The policy engine decides; admins set the policy
 
