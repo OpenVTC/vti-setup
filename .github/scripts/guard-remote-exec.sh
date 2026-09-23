@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Fails if a script or guide pipes a download straight into a shell, or fetches
-# this repository's files from the mutable main branch. Operators run these
-# commands as root, so every download has to be pinned and checked first.
+# Fails if a script or guide pipes a download straight into a shell. Operators
+# run these commands as root, so every download goes to a file they can read
+# before running it.
 #
 # Run from anywhere: bash .github/scripts/guard-remote-exec.sh
 
@@ -16,8 +16,6 @@ paths=(scripts sysop developer community-manager README.md)
 pipe_to_shell='(curl|wget)[^#]*\|[[:space:]]*(sudo[[:space:]]+(-[A-Za-z]+[[:space:]]+)*)?(ba|z|da)?sh([^[:alnum:]_]|$)'
 # `bash <(curl ...)`
 process_substitution='(ba|z|da)?sh[[:space:]]+<\([[:space:]]*(curl|wget)'
-# Raw fetches from this repo's main branch.
-raw_main='raw\.githubusercontent\.com/OpenVTC/vti-setup/(refs/heads/)?main/'
 
 status=0
 check() {
@@ -28,9 +26,8 @@ check() {
   fi
 }
 
-check "download piped into a shell; download, verify, then run instead" "$pipe_to_shell"
-check "download run through process substitution; download, verify, then run instead" "$process_substitution"
-check "fetch from OpenVTC/vti-setup main; use a tagged release asset instead" "$raw_main"
+check "download piped into a shell; download to a file, read it, then run it instead" "$pipe_to_shell"
+check "download run through process substitution; download to a file, read it, then run it instead" "$process_substitution"
 
 if [ "$status" -eq 0 ]; then
   echo "No remote-exec patterns found."

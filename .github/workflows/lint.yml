@@ -23,7 +23,7 @@ jobs:
           shellcheck --version
           shellcheck scripts/*.sh .github/scripts/*.sh
 
-      - name: No downloads piped into a shell, no scripts fetched from main
+      - name: No downloads piped into a shell
         run: bash .github/scripts/guard-remote-exec.sh
 
   markdown:

@@ -39,28 +39,14 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 
 ## Step 3: Run the setup script
 
-SSH into your server as **root**. Download the setup script from a tagged release of this repository and check it before you run it. Do not run a copy from the `main` branch: `main` changes without notice and is not tied to a reviewed release.
+SSH into your server as **root**. Download the setup script from this repository's `main` branch, read it, then run it. Download it to a file rather than piping it into `bash`, so you can read what you are about to run as root and so the script's prompts stay attached to your terminal.
 
 ```bash
-VER=v1.0.0
-SHA256=c59f53c74f423327a233bb3178651bf7958449efd88df05df8c2f8d179db1340
-curl -fsSLO "https://github.com/OpenVTC/vti-setup/releases/download/${VER}/setup-explore.sh"
-curl -fsSLO "https://github.com/OpenVTC/vti-setup/releases/download/${VER}/SHA256SUMS"
-echo "${SHA256}  setup-explore.sh" | sha256sum -c -
-sha256sum -c SHA256SUMS
+curl -fsSLO https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh
+less setup-explore.sh
 ```
 
-Both checks must print `setup-explore.sh: OK`. Stop if either fails. The first compares your download with the hash pinned on this page for `VER`, and is the check that matters. The second only confirms that the release's own `SHA256SUMS` agrees; that file comes from the same place as the script, so on its own it cannot catch a tampered release.
-
-Then verify the build provenance attestation, which shows the file was published by this repository's release workflow. This needs GitHub CLI 2.49 or later, signed in with `gh auth login`. Ubuntu 26.04's `gh` package (2.46) is too old, so if the server has no newer `gh`, run this on your workstation against a copy downloaded there, and check that `sha256sum setup-explore.sh` prints the same hash as above:
-
-```bash
-gh attestation verify setup-explore.sh \
-  --repo OpenVTC/vti-setup \
-  --signer-workflow OpenVTC/vti-setup/.github/workflows/release.yml
-```
-
-Run the verified script:
+Run the script:
 
 ```bash
 sudo bash setup-explore.sh <domain>
@@ -95,7 +81,7 @@ Node.js is not installed here: the one step that needs it, the optional DID Host
 
 Older copies of the script, which this page used to pipe straight into `bash`, can stop at a full-screen `Configuring keyboard-configuration` dialog during Step 1, or at a `needrestart` "which services should be restarted" list later on. With the script piped in, stdin was the download rather than your terminal, so the dialog may not accept keystrokes at all.
 
-To get past it, `Ctrl-C` out and run the verified release copy as shown above. It sets the apt frontend on every call and runs from a file, so stdin stays attached to your terminal. On a host with pre-seeded debconf answers, you can also pre-seed the answers as root before re-running:
+To get past it, `Ctrl-C` out and run a downloaded copy as shown above. It sets the apt frontend on every call and runs from a file, so stdin stays attached to your terminal. On a host with pre-seeded debconf answers, you can also pre-seed the answers as root before re-running:
 
 ```bash
 echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections

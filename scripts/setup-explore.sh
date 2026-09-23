@@ -16,9 +16,8 @@
 # DO NOT use a box set up this way for real keys or production data. This
 # stream is for learning and experimentation only.
 #
-# Get this script from a tagged GitHub release and check it before running it
-# (sysop/explore/01-server-setup.md, Step 3). Never run a copy taken from the
-# main branch.
+# Download this script to a file and read it before running it
+# (sysop/explore/01-server-setup.md, Step 3). Do not pipe it into a shell.
 #
 # Usage: sudo bash setup-explore.sh <domain> [email]
 # Example: sudo bash setup-explore.sh example.com
