@@ -25,3 +25,17 @@ jobs:
 
       - name: No downloads piped into a shell, no scripts fetched from main
         run: bash .github/scripts/guard-remote-exec.sh
+
+  markdown:
+    name: markdownlint
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: markdownlint-cli2
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
+        with:
+          globs: "**/*.md"
