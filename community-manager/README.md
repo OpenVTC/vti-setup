@@ -13,4 +13,4 @@ Future tutorials will cover authoring `join.rego` policies, role-credential issu
 ## Prerequisites you'll need before you start
 
 - A running [VTI deployment](../sysop/) — your community VTA needs a host, a mediator to talk on, and a DID host to publish DIDs. The sysop [Explore stream](../sysop/explore/) is the quickest way to get one on a throwaway VM; the [Deploy stream](../sysop/deploy/) covers a hardened VTA Farm on Kubernetes.
-- A clear policy stance on who gets in. The current OpenVTC initial-days default is "two existing members vouch via VRCs" — see [03 — Joining a Community](../developer/03-joining-a-community.md) for what that looks like from the applicant's side. You can change the rule, but you should know what you're changing from.
+- A clear policy stance on who gets in. OpenVTC does not prescribe a join policy; each community writes its own. [03 — Joining a Community](../developer/03-joining-a-community.md) shows two from the applicant's side: open requests that an admin approves by hand, which is what its walkthrough uses, and an example where two existing members vouch for the applicant with VRCs.
