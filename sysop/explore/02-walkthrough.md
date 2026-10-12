@@ -1,6 +1,6 @@
 # Explore 02: VTI Walkthrough
 
-Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard. Uses the offline sealed-bundle bootstrap flow over DIDComm.
+Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard (the DID Hosting Daemon uses a setup recipe, see Step 4). Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
 > **⚠️ Explore stream — do not use for real keys.**
 > The box runs everything as root in `/root/<svc>/` with no isolation between services. For a hardened production deployment, see the [Deploy stream](../deploy/) (a VTA Farm on hardened Kubernetes).
@@ -11,7 +11,7 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by
 
 | VTA Version | Mediator Version | DID Hosting Daemon Version | VTC Version |
 | --- | --- | --- | --- |
-| 0.23.2 | 0.20.2 | 0.8.3 | 0.11.58 |
+| 0.50.0 | 0.37.0 | 0.8.3 | 0.11.58 |
 
 ## Prerequisites
 
@@ -25,9 +25,9 @@ The following values will be collected during setup. Save each one as prompted �
 | 1b | VTA DID | Steps 2, 3 & 5 |
 | 1c | Mediator DID | Step 4 |
 | 3a | SHA-256 digest (mediator bundle) | Step 3 |
-| 4a | DID Host Admin DID | Step 4 |
-| 4b | SHA-256 digest (DID Host bundle) | Step 4 |
-| 4c | DID Host DID | Step 4 |
+| 4a | SHA-256 digest (DID Host bundle) | Step 4 |
+| 4b | DID Host DID | Step 4 |
+| 4c | DID Host Admin DID | Step 4 |
 
 ## Steps
 
@@ -48,7 +48,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
 | VTA name (leave empty to skip): | Enter a name for this VTA |
-| Services to enable (select at least one): | Also select TSP and press **Enter** (all three services selected) |
+| Services to enable (select at least one): | Press **Enter** (all three services selected) |
 | Server host [0.0.0.0]: | Press **Enter** (use default) |
 | Server port [8100]: | Press **Enter** (use default) |
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
@@ -266,7 +266,7 @@ Press **Enter** to continue.
 
 | Prompt | Action |
 | --- | --- |
-| [Space] toggles protocol, [Enter] continue: | Select **TSP (Trust Spanning Protocol)** and **DIDComm v2** |
+| [Space] toggles protocol, [Enter] continue: | Press **Enter** (use defaults) |
 
 **Security:**
 
@@ -295,69 +295,82 @@ The wizard shows a **Summary — Review Configuration** screen. Press **Enter** 
 
 ### Step 4: Set up DID Hosting Daemon
 
+> **Why this step uses a recipe instead of the wizard.** Since DID Hosting Daemon 0.8.3 the setup wizard refuses to continue on a host with no OS keychain (a headless Ubuntu box has none) and no longer offers plaintext secrets storage. Plaintext is still available for test deployments, but only through a non-interactive setup recipe that sets `backend = "plaintext"` together with `confirm_plaintext = true`. The explore box is a throwaway, so that is what we do here. The private keys end up in `~/dids/config.secrets.plaintext`; delete the box when you are done with it.
+
+Create a directory for the daemon and write the recipe:
+
 ```bash
 cd ~
 mkdir dids
 cd dids
-did-hosting-daemon setup
+vi daemon.toml
 ```
 
-When prompted:
+Paste the following, replacing `yourdomain.com` with your actual domain and the mediator DID with the **Mediator DID** (1c):
 
-| Prompt | Action |
-| --- | --- |
-| How will the daemon obtain its identity?: | Choose **Offline — start a new sealed-bundle bootstrap (phase 1)** |
-| Bootstrap request file path [bootstrap-request.json]: | Press **Enter** (use default) |
-| Pending state file path [setup-offline-state.toml]: | Press **Enter** (use default) |
-| Configuration file path [config.toml]: | Press **Enter** (use default) |
+```toml
+[deployment]
+service = "daemon"
+vta_mode = "offline-prepare"
 
-**Services to enable:**
+[output]
+config_path = "config.toml"
 
-| Prompt | Action |
-| --- | --- |
-| Which services should the daemon run?: | Press **Enter** (default: control, server, witness) |
+[server]
+host = "0.0.0.0"
+port = 8534
+log_level = "info"
+log_format = "text"
+data_dir = "data/daemon"
 
-**Connection:**
+[identity]
+public_url = "https://dids.yourdomain.com"
+mediator_did = "<Mediator DID (1c)>"
+transport = "both"
 
-| Prompt | Action |
-| --- | --- |
-| Public URL: | `https://dids.yourdomain.com` |
-| DID path on the server [.well-known]: | Press **Enter** (use default) |
-| Context ID [webvh]: | Press **Enter** (use default) |
-| Mediator DID (leave empty to skip): | Paste the **Mediator DID** (1c) |
-| Messaging transport: | Choose **Both DIDComm and TSP (recommended)** (default) |
+[vta]
+context_id = "webvh"
+request_path = "bootstrap-request.json"
 
-The wizard prompts for additional configuration:
+[daemon]
+enable_control = true
+enable_server = true
+enable_witness = true
+enable_watcher = false
 
-| Prompt | Action |
-| --- | --- |
-| Listen host [0.0.0.0]: | Press **Enter** (use default) |
-| Listen port [8534]: | Press **Enter** (use default) |
-| Log level: | Press **Enter** (default: `info`) |
-| Log format: | Press **Enter** (default: `text`) |
-| Data directory root [data/daemon]: | Press **Enter** (use default) |
-| Continue with plaintext secrets storage? [y/N]: | Press **y** (NOT Enter) |
-| Admin ACL entry: | Choose **Generate a new did:key identity for the operator** |
+[secrets]
+backend = "plaintext"
+confirm_plaintext = true
 
-The wizard completes phase 1 and prints:
+[admin]
+mode = "generate"
+```
+
+A bare host in `public_url` publishes the daemon's own DID at `.well-known`. The daemon runs control, server and witness in one process, the same defaults the wizard would pick.
+
+**Phase 1 — write the bootstrap request:**
+
+```bash
+cd ~/dids
+did-hosting-daemon setup --from daemon.toml
+```
+
+The recipe runner prints:
 
 ```text
-  Generated admin did:key: did:key:z6Mk...
-  Private key (save this now — will not be re-shown): z3u2...
+  [setup-recipe] service       = did-hosting-daemon
+  [setup-recipe] vta_mode      = offline-prepare
+  [setup-recipe] config_path   = config.toml
+  [setup-recipe] public_url    = https://dids.yourdomain.com
 
-  Offline setup step 1/2 complete.
-
-  Request file:   bootstrap-request.json
-  State file:     setup-offline-state.toml
-  Bootstrap seed: stored in the configured secrets backend
-
-  Consumer DID:   did:key:z6Mk...
-  Nonce:          <nonce>
+  [setup-recipe:offline-prepare] phase 1 complete
+  [setup-recipe:offline-prepare] request_path = bootstrap-request.json
+  [setup-recipe:offline-prepare] client_did   = did:key:z6Mk...
+  [setup-recipe:offline-prepare] nonce        = <nonce>
+  [setup-recipe:offline-prepare] seed stored in configured secret backend
 ```
 
-> **⚠️ SAVE THIS** (4a)
->
-> - Save the **Admin DID** (4a) (the `Generated admin did:key:` line)
+Nothing needs saving from this output. The `client_did` is the ephemeral bootstrap key, not the admin DID.
 
 Move the bootstrap request to the VTA directory and create the WebVH context:
 
@@ -367,7 +380,7 @@ cd ~/vta
 ```
 
 ```bash
-vta contexts create --id webvh --admin-expires 1h --admin-did <Admin DID (4a)>
+vta contexts create --id webvh
 ```
 
 Seal the bundle:
@@ -387,15 +400,16 @@ Integration provisioned — sealed bundle written to bundle.armor
   Client DID:      did:key:z6Mk...
   Admin DID:       did:key:z6Mk... (== client)
   Integration DID: did:webvh:...:dids.yourdomain.com
-  Template:        did-hosting-control (did-hosting-control)
+  Template:        did-host-didcomm (did-host-didcomm)
   Secrets:         1
   Outputs:         1
   SHA-256 digest:  <hex>
 ```
 
-> **⚠️ SAVE THIS** (4b)
+> **⚠️ SAVE THESE** (4a, 4b)
 >
-> Save the **SHA-256 digest** — you will pass it to `--expect-digest` in the next command.
+> - Save the **SHA-256 digest** (4a) — you will put it in the recipe for phase 2.
+> - Save the **Integration DID** (4b) — this is the DID Host DID you will register with the VTA.
 
 Move the bundle to the dids directory:
 
@@ -404,55 +418,57 @@ mv ~/vta/bundle.armor ~/dids/
 cd ~/dids
 ```
 
-Complete offline setup (phase 2):
+**Phase 2 — open the sealed bundle:**
+
+Edit the same recipe. Change `vta_mode` and add the two bundle lines under `[vta]`; leave everything else as it is:
 
 ```bash
 cd ~/dids
-did-hosting-daemon setup
+vi daemon.toml
 ```
 
-When prompted:
+```toml
+[deployment]
+service = "daemon"
+vta_mode = "offline-complete"
 
-| Prompt | Action |
-| --- | --- |
-| How will the daemon obtain its identity?: | Choose **Offline — complete a pending sealed-bundle bootstrap (phase 2)** |
-| ASCII-armored sealed bundle path: | `/root/dids/bundle.armor` |
-| Expected SHA-256 digest (lowercase hex): | Paste the **SHA-256 digest** from 4b |
-| Pending state file path (from phase 1): | Press **Enter** (default: `setup-offline-state.toml`) |
+[vta]
+context_id = "webvh"
+request_path = "bootstrap-request.json"
+bundle_path = "bundle.armor"
+expect_digest = "<SHA-256 digest (4a)>"
+```
 
-The wizard prints the completed setup:
+Run the same command again:
+
+```bash
+did-hosting-daemon setup --from daemon.toml
+```
+
+The recipe runner opens the bundle with the seed it stored in phase 1, writes `config.toml`, imports the daemon DID, and generates the admin identity:
 
 ```text
-DID Hosting Daemon — Offline Setup (step 2/2)
-========================================
+  [setup-recipe] service       = did-hosting-daemon
+  [setup-recipe] vta_mode      = offline-complete
+  [setup-recipe] config_path   = config.toml
+  [setup-recipe] public_url    = https://dids.yourdomain.com
 
-  Sealed response opened.
-  DID:          did:webvh:...:dids.yourdomain.com
-  VTA DID:      did:webvh:...:dids.yourdomain.com:vta
-  VTA URL:      https://vta.yourdomain.com
+  [setup-recipe] config written to config.toml
+  [setup-recipe] secrets stored in Plaintext backend
+  [setup-recipe] daemon DID imported at '.well-known' (scid=<scid>)
+  Generated admin did:key: did:key:z6Mk...
+  Private key (save now, not re-shown): z3u2...
+  [setup-recipe] admin ACL entry added for did:key:z6Mk...
+  [setup-recipe] provisioning-VTA ACL entry added for did:webvh:...:dids.yourdomain.com:vta
 
-  Generated JWT signing key.
-  Configuration written to config.toml
-  Secrets stored in secret store.
+  [setup-recipe] setup complete
 
-  Importing daemon DID into store at path '.well-known'...
-  Daemon DID imported!
-  DID:  did:webvh:...:dids.yourdomain.com
-  SCID: <scid>
-  server_did updated in config.toml
-  Admin ACL entry added for did:key:z6Mk...
-
-  Setup complete!
-
-  Daemon DID: did:webvh:...:dids.yourdomain.com
-
-  Start the daemon:
-    did-hosting-daemon --config config.toml
+  Next: did-hosting-daemon --config config.toml
 ```
 
 > **⚠️ SAVE THIS** (4c)
 >
-> Save the **DID** — you will register this DID Hosting Daemon DID with the VTA.
+> Save the **Admin DID** (4c) (the `Generated admin did:key:` line). This is the DID you will enroll with a passkey. It is not the `client_did` from phase 1 and not the `Client DID` from the bundle output.
 
 Now generate an **Enrollment URL** for the admin of the DID hosting service:
 
@@ -461,13 +477,17 @@ cd ~/dids
 ```
 
 ```bash
-did-hosting-daemon invite --role admin --did <Admin DID (4a)>
+did-hosting-daemon invite --role admin --did <Admin DID (4c)>
 ```
 
-The command outputs a one-time use URL:
+The command outputs a one-time use URL and a claim code:
 
 ```text
-https://dids.yourdomain.com/enroll?token=...
+  Enrollment URL:
+  https://dids.yourdomain.com/enroll?token=...
+
+  Claim code:
+  XXXX-XXXX-XXXX
 ```
 
 Start the DID hosting daemon:
@@ -477,7 +497,7 @@ cd ~/dids
 nohup did-hosting-daemon > log.txt 2>&1 &
 ```
 
-Visit the Enrollment URL in a browser, then save a passkey when prompted.
+Visit the Enrollment URL in a browser, enter the claim code, then save a passkey when prompted.
 
 > The enrollment URL is **single-use**. If you missed it or the passkey prompt failed, see [Enrollment URL is single-use](#enrollment-url-is-single-use).
 
@@ -521,7 +541,7 @@ Register the DID Hosting Daemon with the VTA:
 
 ```bash
 cd ~/vta
-pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (4c)>
+pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (4b)>
 ```
 
 ## Verification
@@ -559,6 +579,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | VTA DID: | Paste the **VTA DID** from 1b |
 | Context name at the VTA for this community [default]: | Press **Enter** (use default) |
 | Trust registry DID (blank for none): | Press **Enter** (use default) |
+| Second administrator DID (blank for none): | Press **Enter** (use default) |
 | DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
 | Transports (space to toggle, enter to confirm): | Press **Enter** (use default: TSP & DIDComm) |
 
@@ -625,6 +646,19 @@ Claim code (required at claim time):
   NDKH...
 ```
 
+Before starting the VTC, enable single-administrator mode. The VTC normally requires a second administrator to consent to certain actions, which protects a real community against one person holding full control. On the explore box there is only you, so turn that check off. This setting is host configuration only: it cannot be set through the admin UI or API, so it has to go into `config.toml` before the service starts.
+
+```bash
+vi config.toml
+```
+
+Find the `[acl]` section (add it if it is not there) and add the following line under it:
+
+```toml
+[acl]
+single_admin_mode = true
+```
+
 Start the VTC:
 
 ```bash
@@ -657,7 +691,7 @@ kill -9 $(pgrep -f did-hosting-daemon)
 
 ```bash
 cd ~/dids
-did-hosting-daemon invite --role admin --did <Admin DID (4a)>
+did-hosting-daemon invite --role admin --did <Admin DID (4c)>
 ```
 
 **3.** Restart the daemon:
