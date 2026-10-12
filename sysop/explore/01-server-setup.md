@@ -110,7 +110,7 @@ Saves 15–40 minutes of build time depending on your hardware.
 
 > **Not integrity-checked.** `download.firstperson.dev` does not publish checksums or signatures yet, so nothing below verifies these binaries beyond HTTPS. That is acceptable only on a throwaway explore host: do not copy them to a machine that holds real keys.
 
-#### Latest tagged release: VTI-Dogwood
+#### Latest tagged release: VTI-Eucalyptus
 
 ```bash
 curl -O https://download.firstperson.dev/vta/latest/vta
@@ -173,7 +173,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout VTI-Dogwood # latest tagged release, or just stay on main
+git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -189,7 +189,7 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-tdk-rs.git
 cd affinidi-tdk-rs/crates/messaging
-git checkout VTI-Dogwood # latest tagged release, or just stay on main
+git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
 ```
 
 ```bash
@@ -203,7 +203,7 @@ cargo install --path affinidi-messaging-mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout VTI-Dogwood # latest tagged release, or just stay on main
+git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
 ```
 
 ```bash
