@@ -3,6 +3,8 @@
 # Explore-stream setup script for the VTI stack.
 #
 # Run once, as root, over the default SSH session of a fresh Ubuntu 26.04 host.
+# The whole explore stream runs as root on purpose (see "Why root?" in
+# sysop/explore/01-server-setup.md), so nothing here uses sudo.
 # Installs everything needed to play with the stack: build toolchain, Rust,
 # Valkey, nginx, certbot, ufw. Wires up four nginx vhosts (mediator, vta, vtc,
 # dids) and obtains Let's Encrypt certificates.
@@ -19,9 +21,9 @@
 # Download this script to a file and read it before running it
 # (sysop/explore/01-server-setup.md, Step 3). Do not pipe it into a shell.
 #
-# Usage: sudo bash setup-explore.sh <domain> [email]
-# Example: sudo bash setup-explore.sh example.com
-# Example: sudo bash setup-explore.sh example.com admin@example.com
+# Usage: bash setup-explore.sh <domain> [email]
+# Example: bash setup-explore.sh example.com
+# Example: bash setup-explore.sh example.com admin@example.com
 
 set -euo pipefail
 
@@ -46,18 +48,18 @@ NC='\033[0m'
 
 # No debconf dialog (keyboard layout, needrestart, changed config files) may
 # open during the run: everything that installs packages has to take its
-# defaults. The variables go on the command line because sudo's env_reset
-# strips them from the exported environment.
+# defaults. The variables are set per call so the run does not depend on the
+# caller's environment.
 apt_get() {
-  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -y \
+  DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -y \
     -o Dpkg::Options::=--force-confdef \
     -o Dpkg::Options::=--force-confold "$@"
 }
 
 usage() {
-  echo "Usage: sudo bash setup-explore.sh <domain> [email]" >&2
-  echo "Example: sudo bash setup-explore.sh example.com" >&2
-  echo "Example: sudo bash setup-explore.sh example.com admin@example.com" >&2
+  echo "Usage: bash setup-explore.sh <domain> [email]" >&2
+  echo "Example: bash setup-explore.sh example.com" >&2
+  echo "Example: bash setup-explore.sh example.com admin@example.com" >&2
   echo "" >&2
   echo "Domain is required. Email is optional (used for Let's Encrypt certificate expiry notifications)." >&2
   exit 1
@@ -66,6 +68,16 @@ usage() {
 die() {
   echo -e "${RED}Error: $*${NC}" >&2
   exit 1
+}
+
+# Everything after this point writes system files and installs into root's
+# home directory, and the rest of the explore stream expects to find it there.
+# Under plain sudo, a non-root shell would be left without the tools on PATH,
+# so ask for a root shell instead.
+require_root() {
+  if [ "$(id -u)" -ne 0 ]; then
+    die "run this script as root. Log in as root, or run 'sudo -i' first and work from that root shell for the rest of the explore stream."
+  fi
 }
 
 # Both values end up in nginx server_name lines and certbot arguments, so
@@ -154,7 +166,7 @@ install_rust() {
 }
 
 write_nginx_configs() {
-  sudo tee /etc/nginx/sites-available/mediator.conf >/dev/null <<EOF
+  tee /etc/nginx/sites-available/mediator.conf >/dev/null <<EOF
 server {
     listen 80;
     server_name mediator.${DOMAIN};
@@ -185,7 +197,7 @@ EOF
       vtc) port=8200 ;;
       dids) port=8534 ;;
     esac
-    sudo tee "/etc/nginx/sites-available/${name}.conf" >/dev/null <<EOF
+    tee "/etc/nginx/sites-available/${name}.conf" >/dev/null <<EOF
 server {
     listen 80;
     server_name ${name}.${DOMAIN};
@@ -211,12 +223,12 @@ obtain_certificates() {
     account=(--register-unsafely-without-email)
   fi
 
-  if sudo certbot --nginx "${domains[@]}" "${account[@]}" --agree-tos --non-interactive; then
+  if certbot --nginx "${domains[@]}" "${account[@]}" --agree-tos --non-interactive; then
     echo -e "${GREEN}Certbot completed successfully.${NC}"
   else
     echo -e "${YELLOW}Certbot did not complete (e.g. DNS not ready).${NC}"
     echo -e "You can run manually later:"
-    echo "  sudo certbot --nginx ${domains[*]} ${account[*]} --agree-tos"
+    echo "  certbot --nginx ${domains[*]} ${account[*]} --agree-tos"
   fi
 }
 
@@ -240,6 +252,7 @@ main() {
   DOMAIN="${1:-}"
   EMAIL="${2:-}"
   validate_args
+  require_root
 
   echo -e "${GREEN}=== VTI Stack Explore Setup ===${NC}"
   echo -e "${GREEN}Domain: $DOMAIN${NC}"
@@ -263,7 +276,7 @@ main() {
 
   # Valkey backs the mediator's queue + storage. Debian/Ubuntu packaging
   # binds 127.0.0.1 and enables the unit on install — confirm both.
-  sudo systemctl is-active --quiet valkey-server || sudo systemctl enable --now valkey-server
+  systemctl is-active --quiet valkey-server || systemctl enable --now valkey-server
   local listeners
   listeners=$(ss -tln 'sport = :6379' 2>/dev/null) || listeners=""
   if grep -q '127\.0\.0\.1' <<<"$listeners"; then
@@ -275,13 +288,13 @@ main() {
   # ---------------------------------------------------------------------------
   echo -e "${GREEN}>>> Step 3/8: Configure UFW firewall <<<${NC}"
   # ---------------------------------------------------------------------------
-  sudo ufw default deny incoming
-  sudo ufw default allow outgoing
-  sudo ufw allow 22/tcp
-  sudo ufw allow 80/tcp
-  sudo ufw allow 443/tcp
-  sudo ufw --force enable
-  sudo ufw status
+  ufw default deny incoming
+  ufw default allow outgoing
+  ufw allow 22/tcp
+  ufw allow 80/tcp
+  ufw allow 443/tcp
+  ufw --force enable
+  ufw status
 
   # ---------------------------------------------------------------------------
   echo -e "${GREEN}>>> Step 4/8: Install Rust <<<${NC}"
@@ -292,12 +305,12 @@ main() {
   echo -e "${GREEN}>>> Step 5/8: Install Nginx and Certbot <<<${NC}"
   # ---------------------------------------------------------------------------
   apt_get install nginx
-  sudo systemctl enable --now nginx
+  systemctl enable --now nginx
   if command -v certbot >/dev/null 2>&1; then
     echo -e "${GREEN}Certbot already installed.${NC}"
   else
-    sudo snap install --classic certbot
-    sudo ln -sf /snap/bin/certbot /usr/bin/certbot
+    snap install --classic certbot
+    ln -sf /snap/bin/certbot /usr/bin/certbot
   fi
 
   # ---------------------------------------------------------------------------
@@ -309,18 +322,18 @@ main() {
   echo -e "${YELLOW}Enabling sites...${NC}"
   local site
   for site in mediator vta vtc dids; do
-    sudo ln -sf "/etc/nginx/sites-available/${site}.conf" /etc/nginx/sites-enabled/
+    ln -sf "/etc/nginx/sites-available/${site}.conf" /etc/nginx/sites-enabled/
   done
 
   echo -e "${YELLOW}Testing Nginx configuration...${NC}"
-  if sudo nginx -t; then
+  if nginx -t; then
     echo -e "${GREEN}Nginx config test passed.${NC}"
   else
     die "Nginx config test failed. Please check your setup."
   fi
 
   echo -e "${YELLOW}Reloading Nginx...${NC}"
-  sudo systemctl reload nginx || sudo service nginx reload
+  systemctl reload nginx || service nginx reload
 
   # ---------------------------------------------------------------------------
   echo -e "${GREEN}>>> Step 7/8: Obtain SSL certificates (Certbot) <<<${NC}"
