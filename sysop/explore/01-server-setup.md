@@ -2,6 +2,19 @@
 
 Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topology; everything runs as root. For a hardened production deployment, see the [Deploy stream](../deploy/) (a VTA Farm on hardened Kubernetes).
 
+## Why root?
+
+Every command in the explore stream runs as root, with no `sudo` anywhere. That is a deliberate choice for a box that exists only to learn on:
+
+- **It's throwaway.** The host holds no real keys or data and gets deleted when you're done, so per-user isolation buys nothing here.
+- **Fewer commands.** No `sudo` prefixes, no service users, no `chown` or `chmod` steps to get files where each service can read them.
+- **No permission problems to debug.** If you're new to the stack, you can focus on how the VTA, Mediator, DID Hosting Daemon and VTC fit together, not on why one of them can't read its own config.
+- **One home directory.** The setup script installs Rust into `/root/.cargo`, and the walkthrough keeps each service's files under `/root/<svc>/`. Every step expects to find them there.
+
+A production host should never be run this way. The [Deploy stream](../deploy/) covers the hardened setup.
+
+If you disable root SSH logins, as many people do, log in as your normal user and run `sudo -i` before Step 3, then do the rest of both explore pages from that root shell. Don't put `sudo` in front of individual commands instead: `sudo bash setup-explore.sh` would install Rust into `/root/.cargo`, leaving your own shell without the tools on its `PATH` and unable to reach the `/root/<svc>/` files the walkthrough uses.
+
 ## Service configuration
 
 | Service | Default Port | DNS Record | DID Hosting Path |
@@ -18,7 +31,7 @@ Provision an Ubuntu 26.04 host for the explore stream. Single DID Hosting topolo
 | Registered domain + DNS access | We use [Cloudflare](https://www.cloudflare.com) for DNS management. |
 | VPS or cloud account | We use [Hetzner](https://www.hetzner.com). Create an Ubuntu 26.04 instance (2vCPU, 4gb RAM recommended). |
 | SSH key pair | Used to connect to the server. |
-| `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `sudo apt install curl` |
+| `curl` on the server | Hetzner Ubuntu image already includes it. If not using Hetzner: `apt install curl` |
 
 ## Step 1: Create Ubuntu 26.04 server
 
@@ -39,7 +52,7 @@ Create the following DNS **A records**, all pointing to the public IP from Step 
 
 ## Step 3: Run the setup script
 
-SSH into your server as **root**. Download the setup script from this repository's `main` branch, read it, then run it. Download it to a file rather than piping it into `bash`, so you can read what you are about to run as root and so the script's prompts stay attached to your terminal.
+SSH into your server as **root** (see [Why root?](#why-root) if your host doesn't allow root logins). Download the setup script from this repository's `main` branch, read it, then run it. Download it to a file rather than piping it into `bash`, so you can read what you are about to run as root and so the script's prompts stay attached to your terminal.
 
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/OpenVTC/vti-setup/main/scripts/setup-explore.sh
@@ -49,15 +62,15 @@ less setup-explore.sh
 Run the script:
 
 ```bash
-sudo bash setup-explore.sh <domain>
+bash setup-explore.sh <domain>
 # or with email (used for Let's Encrypt expiry notifications):
-sudo bash setup-explore.sh <domain> <email>
+bash setup-explore.sh <domain> <email>
 ```
 
 Example:
 
 ```bash
-sudo bash setup-explore.sh example.com
+bash setup-explore.sh example.com
 ```
 
 The script checks that `<domain>` is a plain hostname and `<email>` a plain address, and stops before changing anything if either is not. The whole script is one function called on its last line, so an incomplete download runs nothing.
@@ -90,7 +103,7 @@ echo 'keyboard-configuration keyboard-configuration/layoutcode string us' | debc
 
 Re-running the whole script is safe, so it does not matter how far in you got before interrupting. The Rust and Certbot steps each skip themselves if the tool is already present, the UFW rules and `systemctl enable` calls are idempotent, and the Nginx vhosts are rewritten from scratch and re-certified on every run. The one thing to watch is Let's Encrypt's rate limit — five duplicate certificates per week — so avoid re-running it many times in a row once certificates have been issued.
 
-> **Note:** `export DEBIAN_FRONTEND=noninteractive` in your own shell will not help — the script's apt calls go through `sudo`, whose default `env_reset` strips the variable before apt sees it. Seeding the debconf database persists the setting instead, so it applies regardless of environment. The current script sets the frontend on each apt invocation itself, so a fresh copy should never prompt.
+> **Note:** Seeding the debconf database persists the setting, so it applies however the script is started. The current script sets the frontend on each apt invocation itself, so a fresh copy should never prompt.
 
 ## Step 4: Reload shell environment
 
@@ -114,25 +127,25 @@ Saves 15–40 minutes of build time depending on your hardware.
 
 ```bash
 curl -O https://download.firstperson.dev/vta/latest/vta
-chmod +x vta && sudo mv vta /usr/local/bin/
+chmod +x vta && mv vta /usr/local/bin/
 
 curl -O https://download.firstperson.dev/vtc/latest/vtc
-chmod +x vtc && sudo mv vtc /usr/local/bin/
+chmod +x vtc && mv vtc /usr/local/bin/
 
 # pnm-server: the server build of PNM — secrets live in plaintext config
 # rather than an OS keyring, which a headless host has no access to.
 # Do not "correct" this back to the pnm/ path.
 curl -O https://download.firstperson.dev/pnm-server/latest/pnm
-chmod +x pnm && sudo mv pnm /usr/local/bin/
+chmod +x pnm && mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/latest/mediator
-chmod +x mediator && sudo mv mediator /usr/local/bin/
+chmod +x mediator && mv mediator /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/latest/mediator-setup
-chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
+chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
 
 curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-daemon
-chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
+chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
 ```
 
 #### Last compiled commit from main branches (unverified)
@@ -141,25 +154,25 @@ Unverified builds of whatever was last merged, published without checksums or si
 
 ```bash
 curl -O https://download.firstperson.dev/vta/main/vta
-chmod +x vta && sudo mv vta /usr/local/bin/
+chmod +x vta && mv vta /usr/local/bin/
 
 curl -O https://download.firstperson.dev/vtc/main/vtc
-chmod +x vtc && sudo mv vtc /usr/local/bin/
+chmod +x vtc && mv vtc /usr/local/bin/
 
 # pnm-server: the server build of PNM — secrets live in plaintext config
 # rather than an OS keyring, which a headless host has no access to.
 # Do not "correct" this back to the pnm/ path.
 curl -O https://download.firstperson.dev/pnm-server/main/pnm
-chmod +x pnm && sudo mv pnm /usr/local/bin/
+chmod +x pnm && mv pnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/main/mediator
-chmod +x mediator && sudo mv mediator /usr/local/bin/
+chmod +x mediator && mv mediator /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/main/mediator-setup
-chmod +x mediator-setup && sudo mv mediator-setup /usr/local/bin/
+chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
 
 curl -O https://download.firstperson.dev/did-hosting-daemon/main/did-hosting-daemon
-chmod +x did-hosting-daemon && sudo mv did-hosting-daemon /usr/local/bin/
+chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
 ```
 
 ### Option B: Build from source
@@ -209,7 +222,7 @@ git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
 ```bash
 # Node.js and npm are needed only for the UI build. apt verifies Ubuntu's
 # packages against the Ubuntu archive signing key.
-sudo apt-get install -y nodejs npm
+apt-get install -y nodejs npm
 cd did-hosting-ui && npm install && npm run build:web && cd ..
 cargo install --path did-hosting-daemon --no-default-features --features "store-fjall,ui,did-methods"
 ```

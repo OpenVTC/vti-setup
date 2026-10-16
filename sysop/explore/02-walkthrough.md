@@ -3,7 +3,7 @@
 Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon and VTC — by stepping through each tool's interactive wizard (the DID Hosting Daemon uses a setup recipe, see Step 4). Uses the offline sealed-bundle bootstrap flow over DIDComm.
 
 > **⚠️ Explore stream — do not use for real keys.**
-> The box runs everything as root in `/root/<svc>/` with no isolation between services. For a hardened production deployment, see the [Deploy stream](../deploy/) (a VTA Farm on hardened Kubernetes).
+> The box runs everything as root in `/root/<svc>/` with no isolation between services ([why root?](01-server-setup.md#why-root)). Run every command on this page from a root shell, not with `sudo`. For a hardened production deployment, see the [Deploy stream](../deploy/) (a VTA Farm on hardened Kubernetes).
 
 **Tested on:** Ubuntu Server 26.04 ([Explore 01: Server Setup](01-server-setup.md))
 
