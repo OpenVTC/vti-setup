@@ -23,6 +23,9 @@ If you disable root SSH logins, as many people do, log in as your normal user an
 | Verifiable Trust Agent | 8100 | `vta.yourdomain.com` | `https://dids.yourdomain.com/vta` |
 | Verifiable Trust Community | 8200 | `vtc.yourdomain.com` | `https://dids.yourdomain.com/vtc` |
 | DID Hosting Service | 8534 | `dids.yourdomain.com` | `https://dids.yourdomain.com` |
+| Trust Registry | 3232 (loopback only) | none | `https://dids.yourdomain.com/trust-registry` |
+
+The Trust Registry gets no DNS record or Nginx vhost on the explore box. Clients reach it through its DID and the mediator over DIDComm and TSP; its REST API is bound to loopback for health checks only.
 
 ## Prerequisites
 
@@ -146,33 +149,41 @@ chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
 
 curl -O https://download.firstperson.dev/did-hosting-daemon/latest/did-hosting-daemon
 chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
+
+# trust-registry: built with the VTA, TSP and fjall features the walkthrough
+# needs (see Option B for the exact feature list).
+curl -O https://download.firstperson.dev/trust-registry/latest/trust-registry
+chmod +x trust-registry && mv trust-registry /usr/local/bin/
 ```
 
-#### Last compiled commit from main branches (unverified)
+#### Nightly builds (unverified)
 
-Unverified builds of whatever was last merged, published without checksums or signatures. Use them only on a throwaway host, to try a change that is not in a tagged release yet.
+Unverified builds from each project's `nightly` branch, published without checksums or signatures. Use them only on a throwaway host, to try a change that is not in a tagged release yet. The Trust Registry has no `nightly` branch, so its line below fetches the last build from `main` instead.
 
 ```bash
-curl -O https://download.firstperson.dev/vta/main/vta
+curl -O https://download.firstperson.dev/vta/nightly/vta
 chmod +x vta && mv vta /usr/local/bin/
 
-curl -O https://download.firstperson.dev/vtc/main/vtc
+curl -O https://download.firstperson.dev/vtc/nightly/vtc
 chmod +x vtc && mv vtc /usr/local/bin/
 
 # pnm-server: the server build of PNM — secrets live in plaintext config
 # rather than an OS keyring, which a headless host has no access to.
 # Do not "correct" this back to the pnm/ path.
-curl -O https://download.firstperson.dev/pnm-server/main/pnm
+curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
 chmod +x pnm && mv pnm /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/main/mediator
+curl -O https://download.firstperson.dev/mediator/nightly/mediator
 chmod +x mediator && mv mediator /usr/local/bin/
 
-curl -O https://download.firstperson.dev/mediator/main/mediator-setup
+curl -O https://download.firstperson.dev/mediator/nightly/mediator-setup
 chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
 
-curl -O https://download.firstperson.dev/did-hosting-daemon/main/did-hosting-daemon
+curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
 chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
+
+curl -O https://download.firstperson.dev/trust-registry/main/trust-registry
+chmod +x trust-registry && mv trust-registry /usr/local/bin/
 ```
 
 ### Option B: Build from source
@@ -186,7 +197,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
+git checkout VTI-Eucalyptus # latest tagged release, or 'git checkout nightly' for the nightly branch
 ```
 
 ```bash
@@ -200,15 +211,17 @@ cargo install --path pnm-cli --no-default-features --features "config-session,ts
 ```bash
 cd ~
 mkdir affinidi && cd affinidi
-git clone https://github.com/affinidi/affinidi-tdk-rs.git
-cd affinidi-tdk-rs/crates/messaging
-git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
+git clone https://github.com/affinidi/affinidi-messaging-mediator.git
+cd affinidi-messaging-mediator
+git checkout v0.42.0 # latest tagged release, or 'git checkout nightly' for the nightly branch
 ```
 
 ```bash
-cargo install --path affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
-cargo install --path affinidi-messaging-mediator-setup
+cargo install --path crates/affinidi-messaging-mediator --no-default-features --features "didcomm,redis-backend,fjall-backend"
+cargo install --path crates/affinidi-messaging-mediator/tools/mediator-setup
 ```
+
+The mediator moved out of `affinidi-tdk-rs` into its own repository, which has no `VTI-Eucalyptus` tag; `v0.42.0` is its first release.
 
 #### DID Hosting Daemon
 
@@ -216,7 +229,7 @@ cargo install --path affinidi-messaging-mediator-setup
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout VTI-Eucalyptus # latest tagged release, or just stay on main
+git checkout VTI-Eucalyptus # latest tagged release, or 'git checkout nightly' for the nightly branch
 ```
 
 ```bash
@@ -229,6 +242,31 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 
 > **Node.js version:** `did-hosting-ui` declares Node.js `>=24.3.0` in its `package.json`, and Ubuntu 26.04 ships Node.js 22. If the UI build fails on Node.js 22, install the pre-built `did-hosting-daemon` from Option A instead.
 
+#### Trust Registry
+
+The default build of the registry has no VTA integration, so the feature list matters. The explore walkthrough needs `vta` to take its identity from the VTA, `tsp` to answer the VTC's default TSP transport, `storage-fjall` for an embedded trust-record store with no external database, `secrets-config` for the on-disk bundle cache, and `standalone` for the `trust-registry` binary itself. The pre-built binaries in Option A are built with this same list.
+
+```bash
+cd ~/affinidi
+git clone https://github.com/affinidi/affinidi-trust-registry-rs.git
+cd affinidi-trust-registry-rs
+git checkout trust-registry-v0.26.0 # latest tagged release, or just stay on main (this repo has no nightly branch)
+```
+
+```bash
+cargo install --path trust-registry --no-default-features --features "tsp,secrets-config,storage-fjall,vta,standalone"
+```
+
+If `~/affinidi` does not exist yet because you built nothing else, create it first with `mkdir ~/affinidi`.
+
+Whichever way you installed it, confirm the binary has the `vta` feature before moving on. A registry built without it ignores every `TR_VTA_*` setting and refuses to start with `Required environment variable 'PROFILE_CONFIG' is not set`:
+
+```bash
+grep -ac TR_VTA_CREDENTIAL "$(command -v trust-registry)"
+```
+
+Any number above zero is fine. Zero means the feature is missing: rebuild with the command above, or fetch a binary that was built with it.
+
 ## Resulting URL map
 
 | URL | Backend |
@@ -237,6 +275,8 @@ cargo install --path did-hosting-daemon --no-default-features --features "store-
 | `https://vta.yourdomain.com` | `localhost:8100` |
 | `https://vtc.yourdomain.com` | `localhost:8200` |
 | `https://dids.yourdomain.com` | `localhost:8534` |
+
+The Trust Registry has no public URL on the explore box; it listens on `127.0.0.1:3232` and is reached through its DID (`https://dids.yourdomain.com/trust-registry`).
 
 ## Next
 

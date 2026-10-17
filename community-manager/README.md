@@ -6,7 +6,7 @@ You're not [the developer](../developer/) using the community. And you're not th
 
 ## Your path
 
-1. **[01 — Bootstrap a VTC](01-bootstrap-vtc.md)** — bring the community into existence: VTC service, initial admin keys, initial trust-registry state. _(Not yet written.)_ Until then, the sysop walkthrough's [Step 5 — Set up VTC](../sysop/explore/02-walkthrough.md#step-5-set-up-vtc) covers standing up the VTC service.
+1. **[01 — Bootstrap a VTC](01-bootstrap-vtc.md)** — bring the community into existence: VTC service, initial admin keys, initial trust-registry state. _(Not yet written.)_ Until then, the sysop walkthrough's [Step 6 — Set up VTC](../sysop/explore/02-walkthrough.md#step-6-set-up-vtc) covers standing up the VTC service.
 
 Future tutorials will cover authoring `join.rego` policies, role-credential issuance, ACL changes, status-list management, and the manual-review queue for `Pending`/`Deferred` join requests.
 
