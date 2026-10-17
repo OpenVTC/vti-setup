@@ -1,6 +1,6 @@
 # Sysop
 
-You install and manage the VTI infrastructure: VTA, VTC, DIDComm Mediator, and DID Hosting. [Developers](../developer/) and [community managers](../community-manager/) use and run on top of what you set up.
+You install and manage the VTI infrastructure: VTA, VTC, DIDComm Mediator, DID Hosting, and Trust Registry. [Developers](../developer/) and [community managers](../community-manager/) use and run on top of what you set up.
 
 ## Pick a stream
 
