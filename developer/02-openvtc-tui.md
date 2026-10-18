@@ -106,10 +106,18 @@ You point OpenVTC at your VTA and authorise it through PNM. Only the PNM step ne
 
 ```bash
 pnm contexts create --id openvtc --name "OpenVTC" \
-  --admin-did did:key:z6Mk... --admin-expires 1h --admin-holder
+  --admin-did did:key:z6Mk... --admin-expires 1h --admin-holder --admin-handoff
 ```
 
 `--admin-holder` also lets OpenVTC manage your own identity (attributes, profiles and disclosures), which sits above any single context. Without it, the **My Identity** panel's Attributes, Profiles and Disclosures tabs are refused.
+
+`--admin-handoff` lets the one-hour setup DID roll over once to the long-term admin DID the VTA mints at the end of setup. Without it, that last step is refused with `VTI-ACL-053`, and the flag can't be added to the context afterwards. If you already created the context without it, replace the setup DID's grant instead (OpenVTC's setup page prints these commands too):
+
+```bash
+pnm acl delete did:key:z6Mk...
+pnm acl create --did did:key:z6Mk... --role admin --contexts openvtc \
+  --expires 1h --handoff --capabilities persona-holder
+```
 
 Switch back to the TUI and press **Enter**. The grant lasts 1 hour — see [Known issues](#known-issues--edge-cases) if you overrun it.
 
@@ -156,7 +164,7 @@ OpenVTC Dashboard                             No active community
 
 #### Where things live
 
-The public config is written to `~/.config/openvtc/config.json`. Keys and the secured config blob (BIP32 seed, ESK) are stored in your OS keyring under service `openvtc`, account = the profile name. On a headless Linux server the keyring falls back automatically to kernel keyutils — no `gnome-keyring-daemon` required.
+The public config is written to `~/.config/openvtc/config.json`. Keys and the secured config blob (BIP32 seed, ESK) are stored in your OS keyring under service `openvtc`, account = the profile name. If the OS keyring (on Linux, a Secret Service such as GNOME Keyring, KWallet or KeePassXC) can't be opened, OpenVTC stops and explains why rather than falling back to somewhere else. On a headless machine with no keyring, choose encrypted file storage deliberately with `OPENVTC_SECURE_STORE=file openvtc`: secrets then live in `~/.config/openvtc/secrets/`, and the store refuses to hold a profile without an unlock code or hardware token. PNM's equivalent is `VTI_SECURE_STORE=file pnm`, which keeps its secrets in plaintext at mode `0600`.
 
 A named profile gets its own config file and its own keyring entry — the default profile's `config.json` becomes `config-alice.json`:
 

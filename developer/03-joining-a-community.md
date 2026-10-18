@@ -64,6 +64,8 @@ The DID host is chosen for you, and so is the path (`quiet-harbor` above) unless
 No WebVH server available from the VTA (serverless mint not yet supported).
 ```
 
+If the mint fails with a **502** or **504** instead, the VTA's call to its DID hosting server failed. The fault is between those two, not in OpenVTC or your setup, and `pnm health` passing does not rule it out. Report it to your VTA operator (for VTA Farm, the Farm team) with the time it happened. Skipping this step won't get you past it: a join mints a persona through the same server.
+
 ### Step 4 — Copy the community DID
 
 The community publishes its DID on its home page:
