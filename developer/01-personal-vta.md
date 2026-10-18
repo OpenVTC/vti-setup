@@ -9,6 +9,8 @@
 | --- | --- | --- |
 | 0.39.0 | 0.28.36 | 0.8.3 |
 
+> **⚠️ Out of date until VTI-Fig.** Verified on the builds above, which predate the VTI-Eucalyptus release. Where a prompt, flag or output differs, trust the tool. This page will be re-verified on VTI-Fig; see [Versions](../README.md#versions).
+
 ## Two paths
 
 There are two ways to bring up a Personal VTA. Both end in the same place: a running VTA holding your master keys, reachable from your PNM. The downstream tutorials ([OpenVTC TUI](02-openvtc-tui.md), [Joining a Community](03-joining-a-community.md)) work the same regardless of which path you take.
@@ -23,7 +25,7 @@ Pick whichever fits how much infrastructure you want to manage. If you're new to
 ### Prerequisites
 
 - A computer with **passkey** support.
-- **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. [Download the PNM](https://firstperson.dev/#downloads).
+- **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. [Download the PNM](https://firstperson.dev/#downloads). PNM changes quickly and some of its changes break older VTAs, so take it from the same release as your VTA.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 

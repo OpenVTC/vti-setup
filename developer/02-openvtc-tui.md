@@ -7,7 +7,9 @@
 
 | OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
 | --- | --- | --- | --- |
-| 0.11.58 | 0.39.0 | 0.28.36 | 0.8.3 |
+| 0.3.1 | 0.39.0 | 0.28.36 | 0.8.3 |
+
+> **⚠️ Out of date until VTI-Fig.** Verified on the builds above, which predate the VTI-Eucalyptus release. Where a prompt, flag or output differs, trust the tool. This page will be re-verified on VTI-Fig; see [Versions](../README.md#versions).
 
 ## Prerequisites
 

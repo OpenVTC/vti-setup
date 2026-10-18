@@ -9,6 +9,8 @@
 | --- | --- | --- | --- | --- |
 | 0.3.1 | 0.39.0 | 0.28.36 | 0.8.3 | 0.11.58 |
 
+> **⚠️ Out of date until VTI-Fig.** Verified on the builds above, which predate the VTI-Eucalyptus release. Where a prompt, flag or output differs, trust the tool. This page will be re-verified on VTI-Fig; see [Versions](../README.md#versions).
+
 ## Prerequisites
 
 - **A Personal VTA and the OpenVTC TUI**, from [01](01-personal-vta.md) and [02](02-openvtc-tui.md).
