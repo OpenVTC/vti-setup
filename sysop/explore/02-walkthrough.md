@@ -9,11 +9,11 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon, Trust Registr
 
 **Verified with:**
 
-| VTA Version | Mediator Version | DID Hosting Daemon Version | Trust Registry Version | VTC Version |
-| --- | --- | --- | --- | --- |
-| 0.62.0 | 0.43.0 | 0.10.0 | 0.26.0 | 0.11.58 |
+| Build | VTA Version | Mediator Version | DID Hosting Daemon Version | Trust Registry Version | VTC Version |
+| --- | --- | --- | --- | --- | --- |
+| Nightly, 2026-10-17 | 0.62.0 | 0.43.0 | 0.10.0 | 0.26.0 | 0.11.58 |
 
-> **Trust Registry step not yet verified.** [Step 5](#step-5-set-up-trust-registry) was written against trust-registry 0.26.0 and pnm-cli 0.41.0 from the upstream [Trust Registry + VTA setup guide](https://github.com/affinidi/affinidi-trust-registry-rs/blob/main/VTA_SETUP.md) and has not been run end to end on an explore box yet. If a prompt or output differs from what is shown, trust the tool and open a PR here.
+**Verified on a nightly, not a release.** Nightly builds are only kept for a week or two, so these exact builds will soon be gone from the download server. This page will be re-verified on the upcoming VTI-Fig release, after which every guide in this repo tracks a coordinated release.
 
 ## Prerequisites
 

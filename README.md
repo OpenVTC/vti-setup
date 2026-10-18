@@ -28,6 +28,19 @@ You run the VTI services so the other two can do their jobs. Provision the host,
 
 ---
 
+## Versions
+
+Each guide states the builds it was verified with in a **Verified with** table near the top; trust that table over anything else. From the upcoming **VTI-Fig** release on, every guide tracks a coordinated VTI release, so they all agree on one set of versions.
+
+Until then they are out of sync:
+
+- The [explore stream](sysop/explore/) was verified on the **2026-10-17 nightly**. Nightly builds are only kept for a week or two, so those exact builds will soon be gone.
+- The [developer guides](developer/) were verified on builds that **predate** the VTI-Eucalyptus release, and are out of date in places.
+
+Both will be re-verified on VTI-Fig, which is expected shortly.
+
+---
+
 ## Components
 
 ```mermaid

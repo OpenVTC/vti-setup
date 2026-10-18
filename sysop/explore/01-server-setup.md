@@ -126,7 +126,39 @@ Saves 15–40 minutes of build time depending on your hardware.
 
 > **Not integrity-checked.** `download.firstperson.dev` does not publish checksums or signatures yet, so nothing below verifies these binaries beyond HTTPS. That is acceptable only on a throwaway explore host: do not copy them to a machine that holds real keys.
 
-#### Latest tagged release: VTI-Eucalyptus
+#### Nightly builds (what the walkthrough was verified on)
+
+Builds from each project's `nightly` branch, published without checksums or signatures. Until the VTI-Fig release, these are what the [walkthrough](02-walkthrough.md) matches: it was verified on the 2026-10-17 nightly. Nightly builds are only kept for a week or two, so the server may already be serving newer ones. The Trust Registry has no `nightly` branch, so its line below fetches the last build from `main` instead.
+
+```bash
+curl -O https://download.firstperson.dev/vta/nightly/vta
+chmod +x vta && mv vta /usr/local/bin/
+
+curl -O https://download.firstperson.dev/vtc/nightly/vtc
+chmod +x vtc && mv vtc /usr/local/bin/
+
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
+chmod +x pnm && mv pnm /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/nightly/mediator
+chmod +x mediator && mv mediator /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/nightly/mediator-setup
+chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
+
+curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
+chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
+
+curl -O https://download.firstperson.dev/trust-registry/main/trust-registry
+chmod +x trust-registry && mv trust-registry /usr/local/bin/
+```
+
+#### Latest tagged release: VTI-Eucalyptus (older than the walkthrough)
+
+VTI-Eucalyptus predates the builds the walkthrough was verified on, so some prompts and outputs will differ from what it shows. Use the nightly builds above until VTI-Fig.
 
 ```bash
 curl -O https://download.firstperson.dev/vta/latest/vta
@@ -156,39 +188,11 @@ curl -O https://download.firstperson.dev/trust-registry/latest/trust-registry
 chmod +x trust-registry && mv trust-registry /usr/local/bin/
 ```
 
-#### Nightly builds (unverified)
-
-Unverified builds from each project's `nightly` branch, published without checksums or signatures. Use them only on a throwaway host, to try a change that is not in a tagged release yet. The Trust Registry has no `nightly` branch, so its line below fetches the last build from `main` instead.
-
-```bash
-curl -O https://download.firstperson.dev/vta/nightly/vta
-chmod +x vta && mv vta /usr/local/bin/
-
-curl -O https://download.firstperson.dev/vtc/nightly/vtc
-chmod +x vtc && mv vtc /usr/local/bin/
-
-# pnm-server: the server build of PNM — secrets live in plaintext config
-# rather than an OS keyring, which a headless host has no access to.
-# Do not "correct" this back to the pnm/ path.
-curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
-chmod +x pnm && mv pnm /usr/local/bin/
-
-curl -O https://download.firstperson.dev/mediator/nightly/mediator
-chmod +x mediator && mv mediator /usr/local/bin/
-
-curl -O https://download.firstperson.dev/mediator/nightly/mediator-setup
-chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
-
-curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
-chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
-
-curl -O https://download.firstperson.dev/trust-registry/main/trust-registry
-chmod +x trust-registry && mv trust-registry /usr/local/bin/
-```
-
 ### Option B: Build from source
 
 The setup script installed Rust and the C/C++ build toolchain, so you can also build the binaries yourself. The DID Hosting UI build also needs Node.js, which that step installs.
+
+The checkouts below default to the latest tagged release. Until VTI-Fig, check out `nightly` instead where a repo has that branch, to match what the [walkthrough](02-walkthrough.md) was verified on.
 
 #### VTA, CNM, and PNM
 
