@@ -143,6 +143,11 @@ chmod +x vtc && mv vtc /usr/local/bin/
 curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
 chmod +x pnm && mv pnm /usr/local/bin/
 
+# cnm-server: the same server build of CNM, the community administrator's
+# tool, used from this box in Explore 03. Same rule: not the cnm/ path.
+curl -O https://download.firstperson.dev/cnm-server/nightly/cnm
+chmod +x cnm && mv cnm /usr/local/bin/
+
 curl -O https://download.firstperson.dev/mediator/nightly/mediator
 chmod +x mediator && mv mediator /usr/local/bin/
 
@@ -172,6 +177,11 @@ chmod +x vtc && mv vtc /usr/local/bin/
 # Do not "correct" this back to the pnm/ path.
 curl -O https://download.firstperson.dev/pnm-server/latest/pnm
 chmod +x pnm && mv pnm /usr/local/bin/
+
+# cnm-server: the same server build of CNM, the community administrator's
+# tool, used from this box in Explore 03. Same rule: not the cnm/ path.
+curl -O https://download.firstperson.dev/cnm-server/latest/cnm
+chmod +x cnm && mv cnm /usr/local/bin/
 
 curl -O https://download.firstperson.dev/mediator/latest/mediator
 chmod +x mediator && mv mediator /usr/local/bin/
@@ -208,7 +218,10 @@ git checkout VTI-Eucalyptus # latest tagged release, or 'git checkout nightly' f
 cargo install --path vta-service --no-default-features --features "setup,config-seed,didcomm,rest,cli-synthesis"
 cargo install --path vtc-service --no-default-features --features "setup,config-secret,website,admin-ui"
 cargo install --path pnm-cli --no-default-features --features "config-session,tsp"
+cargo install --path cnm-cli --no-default-features --features "config-session"
 ```
+
+`pnm` and `cnm` are built with `config-session` in place of their default `keyring` feature, so their sessions go to a plaintext file instead of an OS keyring, which a headless host has no access to. `cnm-cli` has no `tsp` feature to add back; its TSP comes with `vtc-client`.
 
 #### Mediator
 

@@ -15,7 +15,7 @@ The shape to hold in your head: **the VTC decides, the bridge acts, the registry
 | --- | --- | --- | --- | --- | --- | --- |
 | Nightly, 2026-10-22 | 0.64.0 | 0.12.0 | 0.11.0 | 0.20.0 (release) | 0.38.0 | 0.18.2 |
 
-The mediator and Trust Registry were the same day's nightly builds. `cnm` was the config-session build of that nightly's commit, compiled from source before the download server carried it. The bridge is a tagged release of [verifiable-git-infrastructure](https://github.com/OpenVTC/verifiable-git-infrastructure) (VGI); its own operator guide is [SETUP-GITHUB-VTC.md](https://github.com/OpenVTC/verifiable-git-infrastructure/blob/main/docs/SETUP-GITHUB-VTC.md), and the VTC side is [git-namespaces.md](https://github.com/OpenVTC/verifiable-trust-infrastructure/blob/main/docs/03-vtc/git-namespaces.md). This page is the explore-box walk through both.
+The mediator and Trust Registry were the same day's nightly builds. The bridge is a tagged release of [verifiable-git-infrastructure](https://github.com/OpenVTC/verifiable-git-infrastructure) (VGI); its own operator guide is [SETUP-GITHUB-VTC.md](https://github.com/OpenVTC/verifiable-git-infrastructure/blob/main/docs/SETUP-GITHUB-VTC.md), and the VTC side is [git-namespaces.md](https://github.com/OpenVTC/verifiable-trust-infrastructure/blob/main/docs/03-vtc/git-namespaces.md). This page is the explore-box walk through both.
 
 ## Prerequisites
 
@@ -36,31 +36,9 @@ This page uses the IDs the walkthrough had you save, plus these new ones:
 
 ## Steps
 
-### Step 1: Install a server build of `cnm`
+### Step 1: Check the server build of `cnm`
 
-Every change on this page is a signed Trust Task sent by `cnm`, the Community Network Manager. The default `cnm` build keeps its session in the OS keyring, which a headless box does not have, and stops with `the OS credential store is unavailable`. You need the **config-session** build, the counterpart of the `pnm-server` build the walkthrough installed. It keeps the session in `/root/.config/cnm/sessions.json`, in plaintext, which is acceptable on the explore box and nowhere else.
-
-The download server publishes it as `cnm-server`, next to `pnm-server`, from the same nightly build. The same caveat as [Server Setup, Option A](01-server-setup.md#option-a-download-pre-built-binaries-recommended) applies: no checksum or signature, so an explore box only.
-
-```bash
-cd ~
-curl -fO https://download.firstperson.dev/cnm-server/nightly/cnm
-chmod +x cnm && mv cnm /usr/local/bin/
-```
-
-For a tagged release, use `cnm-server/latest/cnm` instead, matching the channel the rest of the stack came from. Do not "correct" the path to `cnm/`: that is the keyring build.
-
-If `curl` answers `404`, the server build is not published yet (it joined the build pipeline on 2026-10-23 and appears with the next nightly). Build it instead, from the checkout at `~/fpp/verifiable-trust-infrastructure` if you used [Option B](01-server-setup.md#option-b-build-from-source), or from a fresh clone of the `nightly` branch to match the binaries you downloaded:
-
-```bash
-mkdir -p ~/fpp && cd ~/fpp
-git clone --depth 1 --branch nightly https://github.com/OpenVTC/verifiable-trust-infrastructure.git
-cd verifiable-trust-infrastructure
-cargo build --release -p cnm-cli --no-default-features --features config-session
-install -m 0755 target/release/cnm /usr/local/bin/cnm
-```
-
-On the recommended 2 vCPU / 4 GB box that build takes 20 to 40 minutes. If you would rather build on a faster Linux machine and copy the binary over, build it the same way there, and check before copying that it asks for no newer glibc than the box has (`ldd --version` on the box; `objdump -T target/release/cnm | grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail -1` on the binary), since the two must agree.
+Every change on this page is a signed Trust Task sent by `cnm`, the Community Network Manager. [Server Setup, Step 5](01-server-setup.md#step-5-install-service-binaries) installed its **config-session** build, `cnm-server`, the counterpart of `pnm-server`: the default build keeps its session in the OS keyring, which a headless box does not have, while this one keeps it in `/root/.config/cnm/sessions.json`, in plaintext, which is acceptable on the explore box and nowhere else.
 
 **Check:**
 
@@ -68,7 +46,7 @@ On the recommended 2 vCPU / 4 GB box that build takes 20 to 40 minutes. If you w
 cnm community list
 ```
 
-> **Expected result:** `No communities configured.`, with a note that sessions are stored as plaintext. The DBus error means you still have the keyring build.
+> **Expected result:** `No communities configured.`, with a note that sessions are stored as plaintext. A DBus or `OS credential store is unavailable` error means the keyring build is installed; go back to Server Setup, Step 5, and install `cnm-server` (the `cnm-server/` download path, or the `cargo install` line for `cnm-cli`).
 
 ### Step 2: Give `cnm` an identity at the VTC
 
@@ -427,7 +405,7 @@ GitHub's own **Verified** badge is a separate axis. The commit is validly signed
 
 ### `cnm` fails with a DBus or keyring error
 
-You have the default keyring build. Install the config-session build from [Step 1](#step-1-install-a-server-build-of-cnm).
+You have the default keyring build. Install `cnm-server` as in [Server Setup, Step 5](01-server-setup.md#step-5-install-service-binaries), then rerun the check in [Step 1](#step-1-check-the-server-build-of-cnm).
 
 ### The step-up link opens the community website
 
