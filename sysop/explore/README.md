@@ -11,3 +11,4 @@ Read these in order:
 
 1. [01 — Server setup](01-server-setup.md) — create the Ubuntu host, configure DNS, run `setup-explore.sh`.
 2. [02 — Walkthrough](02-walkthrough.md) — step through each tool's TUI wizard, provision the Trust Registry with `pnm`, save the IDs each step asks you to save.
+3. [03 — Verifiable Git Infrastructure](03-verifiable-git-infrastructure.md) — put a GitHub organization under the VTC: install the VGI bridge, register its GitHub App, bind the organization, adopt a repository, grant members rights, and sign commits with VTA-held keys.

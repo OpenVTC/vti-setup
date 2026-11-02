@@ -875,6 +875,10 @@ Navigate to `https://vtc.yourdomain.com/admin` and sign in with your new passkey
 
 You now have access to the VTC Admin Dashboard and can set up access for the community manager(s) of the VTC.
 
+## Next
+
+Put a GitHub organization under the community: [03 — Verifiable Git Infrastructure](03-verifiable-git-infrastructure.md).
+
 ## Known Issues / Edge Cases
 
 ### DID Enrollment URL is single-use
