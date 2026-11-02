@@ -7,6 +7,9 @@ The shape to hold in your head: **the VTC decides, the bridge acts, the registry
 > **⚠️ Explore stream — do not use for real keys.**
 > Same box, same rules as the walkthrough: everything runs as root under `/root/<svc>/` ([why root?](01-server-setup.md#why-root)). Run every command on this page from a root shell on the box unless it says otherwise.
 
+> **📌 A one-off run on an older build, kept as a guide for your AI.**
+> This page records one walk through the bridge on the builds in the table below, and it will not be updated as those move on. The bridge, the VTC and `cnm` have all released since, and the commands, prompts and outputs here will drift from what the latest versions do. To get onto the latest versions, do not follow the page step by step: have your AI assistant read it for the shape of the work, the order of the steps, the identifiers to save and the checks to run, then look at the current state of [verifiable-git-infrastructure](https://github.com/OpenVTC/verifiable-git-infrastructure) (its releases, `docs/BRIDGE.md` and `docs/SETUP-GITHUB-VTC.md`) and [verifiable-trust-infrastructure](https://github.com/OpenVTC/verifiable-trust-infrastructure) (`docs/03-vtc/git-namespaces.md` and the `cnm git` command help), work out which versions go together, and carry out the install from those. The [Upgrading the bridge](#upgrading-the-bridge) section shows what that digging looks like for one upgrade.
+
 **Tested on:** Ubuntu Server 26.04 ([Explore 01: Server Setup](01-server-setup.md))
 
 **Verified with:**
