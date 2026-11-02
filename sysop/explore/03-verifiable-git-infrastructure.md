@@ -401,6 +401,57 @@ GitHub's own **Verified** badge is a separate axis. The commit is validly signed
 - The admin console's **Community → Repos** page shows the namespace card and the repository; a granted member sees the repository and their right at `https://vtc.yourdomain.com/members/#/repos`.
 - A signed pull request passes *Verify commit trust*; a commit made with `git -c commit.gpgsign=false commit` fails it and cannot be merged.
 
+## Upgrading the bridge
+
+The bridge is released often, and most releases exist to track the VTA, the mediator and the Trust Task versions the VTC speaks, so a bridge left behind stops working against a newer stack before anything in its own feature set changes. The versions in `cargo search vgi-bridge`, the [releases page](https://github.com/OpenVTC/verifiable-git-infrastructure/releases) and the newest tag can briefly disagree while a release is being built; the release page is the one with the tarball. Verified with the upgrade from 0.20.0 to 0.30.0 on 2026-11-02.
+
+Before upgrading, check the box's VTA is new enough for the release: since bridge 0.26.0 the bridge pages its context's keys and app-state with Trust Task versions that need vta-service 0.67 or later ([BRIDGE.md, *The VTA's version*](https://github.com/OpenVTC/verifiable-git-infrastructure/blob/main/docs/BRIDGE.md)). The nightly builds [Server Setup](01-server-setup.md) installs are. Everything under `/root/vgi-bridge` carries over: the configuration, the VTA credential, the bridge's DID and the state it keeps in the VTA. Nothing is set up again.
+
+**1. Download and verify the release**, as in [Step 3](#step-3-install-the-bridge), into a fresh directory:
+
+```bash
+V=0.30.0
+mkdir -p ~/vgi-bridge-dl-$V && cd ~/vgi-bridge-dl-$V
+curl -fsSLO https://github.com/OpenVTC/verifiable-git-infrastructure/releases/download/v$V/vgi-bridge-x86_64-unknown-linux-gnu.tar.gz
+curl -fsSLO https://github.com/OpenVTC/verifiable-git-infrastructure/releases/download/v$V/vgi-bridge-x86_64-unknown-linux-gnu.tar.gz.sha256
+sha256sum -c vgi-bridge-x86_64-unknown-linux-gnu.tar.gz.sha256
+tar xzf vgi-bridge-x86_64-unknown-linux-gnu.tar.gz
+```
+
+**2. Swap the binary.** Stop the bridge first: its store allows one process at a time. Keep the old binary beside the new one, so a rollback is the same swap the other way:
+
+```bash
+systemctl stop vgi-bridge.service
+cp /usr/local/bin/vgi-bridge /usr/local/bin/vgi-bridge.previous
+install -m 0755 vgi-bridge-x86_64-unknown-linux-gnu/vgi-bridge /usr/local/bin/vgi-bridge
+vgi-bridge --version
+```
+
+**3. Move the verify-trust pin.** [Step 4](#step-4-set-up-the-bridge)'s setup pinned the CI action in `bridge.toml` to the commit of the release it was run from, and nothing updates it, so until it is moved every bootstrap keeps writing the old verifier into repositories. The pin is the commit of the new release's tag:
+
+```bash
+SHA=$(curl -fsSL -H 'Accept: application/vnd.github+json' https://api.github.com/repos/OpenVTC/verifiable-git-infrastructure/commits/v$V | python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])')
+echo $SHA
+cp /root/vgi-bridge/bridge.toml /root/vgi-bridge/bridge.toml.bak
+sed -i -e "s|verify-trust@[0-9a-f]\{40\}|verify-trust@$SHA|" -e "s|^version = \"v[0-9.]*\"|version = \"v$V\"|" /root/vgi-bridge/bridge.toml
+grep -n -A3 '^\[verify_trust\]' /root/vgi-bridge/bridge.toml
+```
+
+> **Expected result:** a 40-hex `SHA`, and the `[verify_trust]` section showing `action = "OpenVTC/verifiable-git-infrastructure/.github/actions/verify-trust@<that SHA>"` and `version = "v0.30.0"`. If either line kept its old value, edit it by hand.
+
+**4. Start it again**, then give it a few seconds before checking: the bridge opens its listener only after it has reached the VTA, so a check in the same breath as the start answers `Connection refused`.
+
+```bash
+systemctl start vgi-bridge.service
+sleep 5
+curl -s http://127.0.0.1:8080/healthz
+grep -E "starting the VGI bridge|connected to the mediator|revision mismatch" /root/vgi-bridge/bridge.log | tail -3
+```
+
+> **Expected result:** `ok`, a `starting the VGI bridge` line and `connected to the mediator` from the new process, and no further `TSP revision mismatch` lines. A `send failed; the outbox will retry` or `not connected to the mediator` in the moment before `connected to the mediator` is the start-up race the outbox exists for, not a fault.
+
+Repositories bootstrapped under the old pin keep the old workflow: the bridge does not report an outdated workflow as drift, so nothing re-sends the bootstrap on its own. Have the VTC send the repository's bootstrap job again (`cnm git repos --namespace <7c>` lists them) when you next touch the namespace.
+
 ## Known Issues / Edge Cases
 
 ### `cnm` fails with a DBus or keyring error
@@ -448,6 +499,10 @@ git push origin --delete first
 ```
 
 Creating a branch is not restricted by the ruleset, so the push succeeds; from then on changes reach `main` by pull request.
+
+### `could not check for rotated keys … TSP revision mismatch` every minute
+
+The mediator was upgraded to a newer TSP revision than the bridge speaks (`message is 0.2, this build speaks 1.0`); the bridge keeps its current keys in service but can no longer list them, and will not see a rotation. [Upgrade the bridge](#upgrading-the-bridge).
 
 ### The Trust Registry reports `degraded` after a reboot
 
