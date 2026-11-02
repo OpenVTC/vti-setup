@@ -450,7 +450,7 @@ grep -E "starting the VGI bridge|connected to the mediator|revision mismatch" /r
 
 > **Expected result:** `ok`, a `starting the VGI bridge` line and `connected to the mediator` from the new process, and no further `TSP revision mismatch` lines. A `send failed; the outbox will retry` or `not connected to the mediator` in the moment before `connected to the mediator` is the start-up race the outbox exists for, not a fault.
 
-Repositories bootstrapped under the old pin keep the old workflow: the bridge does not report an outdated workflow as drift, so nothing re-sends the bootstrap on its own. Have the VTC send the repository's bootstrap job again (`cnm git repos --namespace <7c>` lists them) when you next touch the namespace.
+On this page's setup the pin changes nothing already in place: a Free-plan organization has the bridge-posted check as its guard, which the bridge runs with its own binary, so no repository carries a verify-trust workflow to refresh. The pin matters where the guard is a workflow, an organization required workflow on Team or Enterprise, an in-repo workflow, or Forgejo. There a repository bootstrapped under the old pin keeps the old workflow, the bridge does not report that as drift, and no `cnm` command sends a bootstrap on demand: the VTC sends one at adoption, after an inspection finds a step missing, when a `protectionChanged` event removes the required check, or for a `cnm git drift resolve … revert` of drift the bridge has reported. [BRIDGE.md, *Upgrading*](https://github.com/OpenVTC/verifiable-git-infrastructure/blob/main/docs/BRIDGE.md) has the per-guard steps.
 
 ## Known Issues / Edge Cases
 
