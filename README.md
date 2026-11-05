@@ -2,7 +2,7 @@
 
 Setup guides for the **Verifiable Trust Infrastructure** stack — VTA, DID Host, and the DIDComm Mediator — and for the things people do on top of it.
 
-The repo is organised by **who you are**, not by which service you're touching. Pick your role and follow the path.
+The repo is organized by **who you are**, not by which service you're touching. Pick your role and follow the path.
 
 ---
 
@@ -34,7 +34,7 @@ Each guide states the builds it was verified with in a **Verified with** table n
 
 Until then they are out of sync:
 
-- The [explore stream](sysop/explore/) was verified on the **2026-10-17 nightly**. Nightly builds are only kept for a week or two, so those exact builds will soon be gone.
+- The [explore stream](sysop/explore/) was verified on the **2026-11-05 nightly**. Nightly builds are only kept for a week or two, so those exact builds will soon be gone.
 - The [developer guides](developer/) were verified on builds that **predate** the VTI-Eucalyptus release, and are out of date in places.
 
 Both will be re-verified on VTI-Fig, which is expected shortly.

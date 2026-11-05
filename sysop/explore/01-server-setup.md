@@ -128,7 +128,9 @@ Saves 15–40 minutes of build time depending on your hardware.
 
 #### Nightly builds (what the walkthrough was verified on)
 
-Builds from each project's `nightly` branch, published without checksums or signatures. Until the VTI-Fig release, these are what the [walkthrough](02-walkthrough.md) matches: it was verified on the 2026-10-17 nightly. Nightly builds are only kept for a week or two, so the server may already be serving newer ones. The Trust Registry has no `nightly` branch, so its line below fetches the last build from `main` instead.
+Builds from each project's `nightly` branch, published without checksums or signatures. Until the VTI-Fig release, these are what the [walkthrough](02-walkthrough.md) matches: it was verified on the 2026-11-05 nightly. Nightly builds are only kept for a week or two, so the server may already be serving newer ones.
+
+Take every binary from the same night's builds, so the services all match each other.
 
 ```bash
 curl -O https://download.firstperson.dev/vta/nightly/vta
@@ -157,7 +159,7 @@ chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
 curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
 chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
 
-curl -O https://download.firstperson.dev/trust-registry/main/trust-registry
+curl -O https://download.firstperson.dev/trust-registry/nightly/trust-registry
 chmod +x trust-registry && mv trust-registry /usr/local/bin/
 ```
 
@@ -267,7 +269,7 @@ The default build of the registry has no VTA integration, so the feature list ma
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-trust-registry-rs.git
 cd affinidi-trust-registry-rs
-git checkout trust-registry-v0.26.0 # latest tagged release, or just stay on main (this repo has no nightly branch)
+git checkout v0.31.0 # latest tagged release, or 'git checkout nightly' for the nightly branch
 ```
 
 ```bash
