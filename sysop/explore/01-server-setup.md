@@ -126,46 +126,9 @@ Saves 15–40 minutes of build time depending on your hardware.
 
 > **Not integrity-checked.** `download.firstperson.dev` does not publish checksums or signatures yet, so nothing below verifies these binaries beyond HTTPS. That is acceptable only on a throwaway explore host: do not copy them to a machine that holds real keys.
 
-#### Nightly builds (what the walkthrough was verified on)
+#### Latest release: VTI-Fig (what the walkthrough was verified on)
 
-Builds from each project's `nightly` branch, published without checksums or signatures. Until the VTI-Fig release, these are what the [walkthrough](02-walkthrough.md) matches: it was verified on the 2026-11-05 nightly. Nightly builds are only kept for a week or two, so the server may already be serving newer ones.
-
-Take every binary from the same night's builds, so the services all match each other.
-
-```bash
-curl -O https://download.firstperson.dev/vta/nightly/vta
-chmod +x vta && mv vta /usr/local/bin/
-
-curl -O https://download.firstperson.dev/vtc/nightly/vtc
-chmod +x vtc && mv vtc /usr/local/bin/
-
-# pnm-server: the server build of PNM — secrets live in plaintext config
-# rather than an OS keyring, which a headless host has no access to.
-# Do not "correct" this back to the pnm/ path.
-curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
-chmod +x pnm && mv pnm /usr/local/bin/
-
-# cnm-server: the same server build of CNM, the community administrator's
-# tool, used from this box in Explore 03. Same rule: not the cnm/ path.
-curl -O https://download.firstperson.dev/cnm-server/nightly/cnm
-chmod +x cnm && mv cnm /usr/local/bin/
-
-curl -O https://download.firstperson.dev/mediator/nightly/mediator
-chmod +x mediator && mv mediator /usr/local/bin/
-
-curl -O https://download.firstperson.dev/mediator/nightly/mediator-setup
-chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
-
-curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
-chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
-
-curl -O https://download.firstperson.dev/trust-registry/nightly/trust-registry
-chmod +x trust-registry && mv trust-registry /usr/local/bin/
-```
-
-#### Latest tagged release: VTI-Eucalyptus (older than the walkthrough)
-
-VTI-Eucalyptus predates the builds the walkthrough was verified on, so some prompts and outputs will differ from what it shows. Use the nightly builds above until VTI-Fig.
+The `latest/` downloads track the newest named release. Today that is `VTI-Fig`, which is what the [walkthrough](02-walkthrough.md) was verified on.
 
 ```bash
 curl -O https://download.firstperson.dev/vta/latest/vta
@@ -200,11 +163,46 @@ curl -O https://download.firstperson.dev/trust-registry/latest/trust-registry
 chmod +x trust-registry && mv trust-registry /usr/local/bin/
 ```
 
+#### Nightly builds (ahead of the walkthrough)
+
+Builds from each project's `nightly` branch, published without checksums or signatures. They may be ahead of the walkthrough, so some prompts and outputs can differ from what it shows. Nightly builds are only kept for a week or two. If you use them, take every binary from the same night's builds, so the services all match each other.
+
+```bash
+curl -O https://download.firstperson.dev/vta/nightly/vta
+chmod +x vta && mv vta /usr/local/bin/
+
+curl -O https://download.firstperson.dev/vtc/nightly/vtc
+chmod +x vtc && mv vtc /usr/local/bin/
+
+# pnm-server: the server build of PNM — secrets live in plaintext config
+# rather than an OS keyring, which a headless host has no access to.
+# Do not "correct" this back to the pnm/ path.
+curl -O https://download.firstperson.dev/pnm-server/nightly/pnm
+chmod +x pnm && mv pnm /usr/local/bin/
+
+# cnm-server: the same server build of CNM, the community administrator's
+# tool, used from this box in Explore 03. Same rule: not the cnm/ path.
+curl -O https://download.firstperson.dev/cnm-server/nightly/cnm
+chmod +x cnm && mv cnm /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/nightly/mediator
+chmod +x mediator && mv mediator /usr/local/bin/
+
+curl -O https://download.firstperson.dev/mediator/nightly/mediator-setup
+chmod +x mediator-setup && mv mediator-setup /usr/local/bin/
+
+curl -O https://download.firstperson.dev/did-hosting-daemon/nightly/did-hosting-daemon
+chmod +x did-hosting-daemon && mv did-hosting-daemon /usr/local/bin/
+
+curl -O https://download.firstperson.dev/trust-registry/nightly/trust-registry
+chmod +x trust-registry && mv trust-registry /usr/local/bin/
+```
+
 ### Option B: Build from source
 
 The setup script installed Rust and the C/C++ build toolchain, so you can also build the binaries yourself. The DID Hosting UI build also needs Node.js, which that step installs.
 
-The checkouts below default to the latest tagged release. Until VTI-Fig, check out `nightly` instead where a repo has that branch, to match what the [walkthrough](02-walkthrough.md) was verified on.
+The checkouts below use the `VTI-Fig` tag, which every repository here carries, so the source matches what the [walkthrough](02-walkthrough.md) was verified on. Check out `nightly` instead for the nightly branch.
 
 #### VTA, CNM, and PNM
 
@@ -213,7 +211,7 @@ cd ~
 mkdir fpp && cd fpp
 git clone https://github.com/OpenVTC/verifiable-trust-infrastructure.git
 cd verifiable-trust-infrastructure
-git checkout VTI-Eucalyptus # latest tagged release, or 'git checkout nightly' for the nightly branch
+git checkout VTI-Fig
 ```
 
 ```bash
@@ -232,7 +230,7 @@ cd ~
 mkdir affinidi && cd affinidi
 git clone https://github.com/affinidi/affinidi-messaging-mediator.git
 cd affinidi-messaging-mediator
-git checkout v0.42.0 # latest tagged release, or 'git checkout nightly' for the nightly branch
+git checkout VTI-Fig
 ```
 
 ```bash
@@ -240,15 +238,13 @@ cargo install --path crates/affinidi-messaging-mediator --no-default-features --
 cargo install --path crates/affinidi-messaging-mediator/tools/mediator-setup
 ```
 
-The mediator moved out of `affinidi-tdk-rs` into its own repository, which has no `VTI-Eucalyptus` tag; `v0.42.0` is its first release.
-
 #### DID Hosting Daemon
 
 ```bash
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-webvh-service.git
 cd affinidi-webvh-service
-git checkout VTI-Eucalyptus # latest tagged release, or 'git checkout nightly' for the nightly branch
+git checkout VTI-Fig
 ```
 
 ```bash
@@ -269,7 +265,7 @@ The default build of the registry has no VTA integration, so the feature list ma
 cd ~/affinidi
 git clone https://github.com/affinidi/affinidi-trust-registry-rs.git
 cd affinidi-trust-registry-rs
-git checkout v0.31.0 # latest tagged release, or 'git checkout nightly' for the nightly branch
+git checkout VTI-Fig
 ```
 
 ```bash

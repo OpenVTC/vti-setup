@@ -4,7 +4,7 @@ You use OpenVTC to take part in one or more VTCs. You'll run a Personal VTA that
 
 You do **not** run the community's infrastructure. That's the [sysop](../sysop/). You don't bootstrap or administer a community — that's a [community manager](../community-manager/).
 
-> **⚠️ Out of date until VTI-Fig.** These guides were verified on the builds in each page's **Verified with** table, which predate the VTI-Eucalyptus release. Prompts, flags and outputs may have changed since; where they differ, trust the tool. Take PNM, the VTA and OpenVTC from the same release so their versions match. All three guides will be re-verified on the upcoming VTI-Fig release. See [Versions](../README.md#versions).
+> **Verified on VTI-Fig, by automated runs.** The self-hosted path of 01, and all of 02 and 03, were run on a fresh Ubuntu server with the release's builds: the terminal tools through tmux, the browser and passkey screens through headless Chromium with a virtual passkey. 01's VTA Farm path is not part of the automated runs; its page says so. Take PNM, the VTA and OpenVTC from the same release so their versions match. See [Versions](../README.md#versions).
 
 ## Your path
 
@@ -25,7 +25,9 @@ Unless you use the [VTA Farm](https://vtafarm.firstperson.dev), you will need th
 
 PNM and OpenVTC run under WSL, with a few extra steps. This section has not yet been tested end to end by the maintainers; if something here doesn't match what you see, please open an issue.
 
-**Building from source** (OpenVTC Option B, or PNM with `cargo install`) needs these packages first. The pre-built downloads don't:
+**The pre-built OpenVTC download** needs the PC/SC library, even without a hardware token: `sudo apt install -y libpcsclite1`.
+
+**Building from source** (OpenVTC Option B, or PNM with `cargo install`) needs these packages first:
 
 ```bash
 sudo apt install -y build-essential pkg-config libssl-dev libpcsclite-dev pcscd libdbus-1-dev

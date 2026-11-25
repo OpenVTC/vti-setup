@@ -9,11 +9,11 @@ Stand up the full VTI stack — VTA, Mediator, DID Hosting Daemon, Trust Registr
 
 **Verified with:**
 
-| Build | VTA Version | PNM Version | Mediator Version | DID Hosting Daemon Version | Trust Registry Version | VTC Version |
+| Release | VTA | PNM | Mediator | DID Hosting | Trust Registry | VTC |
 | --- | --- | --- | --- | --- | --- | --- |
-| Nightly, 2026-11-05 | 0.75.0 | 0.54.0 | 0.51.0 | 0.12.0 | 0.31.0 | 0.23.0 |
+| VTI-Fig | 0.87.2 | 0.66.2 | 0.56.0 | 0.12.0 | 0.32.0 | 0.35.2 |
 
-**Verified on a nightly, not a release.** Nightly builds are only kept for a week or two, so these exact builds will soon be gone from the download server. This page will be re-verified on the upcoming VTI-Fig release, after which every guide in this repo tracks a coordinated release.
+**Verified by an automated run.** These are the `VTI-Fig` builds that the `latest/` downloads in [Server Setup, Step 5](01-server-setup.md#step-5-install-service-binaries) serve. The wizards were driven through tmux on a fresh Ubuntu 26.04 server, and the browser and passkey screens (the DID Hosting Daemon's enrollment, and the VTC's claim, sign-in and signing set-up) through headless Chromium with a virtual passkey. Not tested with a hardware security key.
 
 ## Prerequisites
 
@@ -140,11 +140,14 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 
-Before it asks anything else, PNM generates its admin identity and prints the `vta import-did` command that grants it access; copy it:
+Before it asks anything else, PNM generates its admin identity and prints a **Next steps** list. Copy the `vta import-did` command from it:
 
 ```text
-vta import-did --did did:key:z6Mk... --role admin
+         b. Or, on an already-running VTA:
+              vta import-did --did did:key:z6Mk... --role admin
 ```
+
+The list says the command is for an already-running VTA, but it works just as well on this VTA, which is not running yet. Ignore the other options in the list (`vta setup --from setup.toml` and `pnm setup continue`); they belong to other setup paths.
 
 Then answer the remaining prompts:
 
@@ -191,7 +194,7 @@ mediator-setup
 | Prompt | Action |
 | --- | --- |
 | Decide whether the VTA should...: | Choose **Pick up pre-provisioned mediator (offline export)** |
-| Which VTA context should the admin credential live in?: | `mediator` |
+| Which VTA context should the admin credential live in?: | Press **Enter** (default: `mediator`) |
 
 The wizard outputs:
 
@@ -258,7 +261,7 @@ mv ~/vta/bundle.armor ~/mediator/
 | Prompt | Action |
 | --- | --- |
 | Enter a path to bundle.armor, or paste its contents. | `/root/mediator/bundle.armor` |
-| Type the SHA-256 digest your VTA admin showed you. Leave blank to skip the OOB check. | Paste the **SHA-256 digest** (3a) |
+| Type the SHA-256 digest your VTA admin showed you on a separate channel. It is required. | Paste the **SHA-256 digest** (3a) |
 
 The wizard completes the VTA integration and displays:
 
@@ -300,7 +303,7 @@ Press **Enter** to continue.
 | --- | --- |
 | Configure transport security: | Choose **No SSL (use TLS-terminating proxy)** (default) |
 | Configure authentication tokens: | Choose **Generate a fresh JWT signing key (recommended)** (default) |
-| Network access posture: | Choose **Open network** (default) |
+| Network access posture: | Choose **Open network (default)**. The cursor may start on **Closed network**, so move up to it before pressing Enter |
 | CORS policy: | Choose **Allow any origin** |
 
 **Database:**
@@ -517,7 +520,7 @@ The command outputs a one-time use URL and a claim code, valid for 24 hours:
   the code by chat or phone). Either one alone redeems nothing.
 
   Enrollment URL:
-  https://dids.yourdomain.com/enroll?token=...
+  https://dids.yourdomain.com/enroll#token=...
 
   Claim code:
   XXXX-XXXX-XXXX
@@ -533,7 +536,8 @@ nohup did-hosting-daemon > log.txt 2>&1 &
 The daemon's `log.txt` fills with warnings on this box, none of which stop anything in this walkthrough:
 
 - `DID not yet resolvable — retrying` for the mediator DID, until you upload its log below.
-- `request from untrusted peer claims Forwarded / X-Forwarded-Host; ignoring`, once per request. Nginx sends that header and the daemon has no trusted-proxy setting, so it falls back to `public_url`, which is correct here.
+- `Error authenticating` and `authentication failed`, with a `502 Bad Gateway` page, once the mediator's DID resolves but before you start the mediator below. The daemon keeps retrying and connects once the mediator is up.
+- `request from a peer outside server.trusted_proxy_cidrs claims Forwarded / X-Forwarded-Host; ignoring the header`. Nginx sends that header, and `trusted_proxy_cidrs` in the daemon's `config.toml` is empty, so the daemon falls back to `public_url`, which is correct here.
 - `Wallet sign-in is not set up`, with a list of services to add to the daemon's DID document. This walkthrough signs in with a passkey, not a wallet, so you can leave the DID as it is.
 - `bootstrap_domains empty — falling back to legacy public_url host`, which gives the same result.
 
@@ -570,9 +574,9 @@ cd ~/mediator
 nohup mediator > log.txt 2>&1 &
 ```
 
-The mediator's log shows `VTA integration DEGRADED — booted from LAST-KNOWN CACHED secrets`. That is expected: the VTA is not running yet, so the mediator starts from the keys in its sealed bundle and refreshes them once it can reach the VTA. It also warns that inter-mediator relay is enabled implicitly and that no `local_endpoints` are set; neither matters on this box.
+The mediator's log shows `VTA integration DEGRADED — booted from LAST-KNOWN CACHED secrets`. That is expected: the VTA is not running yet, so the mediator starts from the keys in its sealed bundle and refreshes them once it can reach the VTA. It also warns that every new DID accepts messages from anyone (that is the **Open network** posture you chose), that inter-mediator relay is enabled implicitly, that no `local_endpoints` are set, and that `server.trust_xff_cidrs` is empty. None of these matter on this box.
 
-Wait one minute for the mediator to fully initialize, then start the VTA:
+Give the mediator about ten seconds to start, then start the VTA:
 
 ```bash
 cd ~/vta
@@ -586,7 +590,7 @@ cd ~/vta
 pnm did-mgmt servers add --id did-hosting-daemon --did <DID Host DID (4b)>
 ```
 
-## Verification
+**Check the DID Hosting Daemon:**
 
 Visit the DID Hosting Manager admin panel and confirm you can log in:
 
@@ -767,7 +771,7 @@ When prompted, use the values below. Replace `yourdomain.com` with your actual d
 | Trust registry DID (blank for none): | Paste the **Trust Registry DID** from 5b (see note below) |
 | Second administrator DID (blank for none): | Press **Enter** (use default) |
 | Run as a single-administrator community? [y/N] | Select **y** |
-| DIDComm messaging [Use the VTA's mediator]: | Press **Enter** (use default) |
+| Messaging mediator (TSP / DIDComm): | Press **Enter** (default: **Use the VTA's mediator**) |
 | Transports (space to toggle, enter to confirm): | Press **Enter** (use default: TSP & DIDComm) |
 | Provisioning transport: | Press **Enter** (default: **Automatic (TSP → DIDComm → REST)**) |
 
@@ -815,8 +819,9 @@ Then switch back to the terminal running the wizard:
 
 | Prompt | Action |
 | --- | --- |
+| DID method of the community's own DID: | Press **Enter** (default: **did:webvh**) |
 | Where should the VTC DID be published?: | Press **Enter** (use default: did-hosting-daemon) |
-| WebVH path (blank → server-assigned): | `vtc` |
+| did:webvh path (blank → server-assigned) []: | `vtc` |
 
 **Seed storage backend:**
 
@@ -832,16 +837,14 @@ Admin DID:     did:key:z6Mk...
 Config:        config.toml
 Data dir:      data
 Single-administrator mode: on ([acl] single_admin_mode in config.toml; VTI-APV-022)
+
+Admin key:     data/keys/admin-key.json (owner-only; needed for CLI access as the admin DID — ...)
 ```
 
 > **⚠️ SAVE THESE** (6a, 6b)
 >
 > - Save the **VTC DID** (6a), the `VTC DID:` line. It goes into the Trust Registry's `ADMIN_DIDS` below.
 > - Save the **VTC Admin DID** (6b), the `Admin DID:` line. This is a CLI identity, **not** the administrator the install URL creates. The install URL makes the `did:key` of the passkey you register the first administrator. The Admin DID gets no access unless you grant it yourself, which the wizard explains at the end (see the note after the install URL).
-
-| Prompt | Action |
-| --- | --- |
-| Display the admin private key now? It's needed for CLI access and is shown only once [y/N] | Press **Enter** (use default) |
 
 ```text
 Install URL (one-shot, 15 min TTL):
@@ -857,7 +860,7 @@ To grant it (CLI access, or instead of a browser), with the daemon stopped:
   vtc --config config.toml acl add --did did:key:z6Mk... --role admin --label "first admin"
 ```
 
-The install URL expires 15 minutes after it is printed, so do the rest of this step without a break. The `acl add` command is optional, and this walkthrough does not use it. Its admin DID can only be used from the CLI if you also chose to display its private key.
+The install URL expires 15 minutes after it is printed, so do the rest of this step without a break. The `acl add` command is optional, and this walkthrough does not use it. The Admin DID's private key is in `data/keys/admin-key.json`; if you do not plan to use the CLI as that DID, you can leave it there.
 
 **Finish and start the Trust Registry:**
 
@@ -881,19 +884,25 @@ cd ~/trust-registry
 nohup trust-registry > log.txt 2>&1 &
 ```
 
-Give it a few seconds, then check it:
+Give it about half a minute, then check it:
 
 ```bash
 curl -s http://127.0.0.1:3232/health
 ```
 
-A healthy registry answers `{"status":"OK","writes":"ok"}`. A `degraded` status means the mediator refused the ACL-mode update; `detail` says why. Then confirm from the log that it fetched its identity from the VTA and authenticated to the mediator:
+A healthy registry answers `OK`, with `ok` for each of its checks:
+
+```json
+{"givenUpMessages":0,"status":"OK","storage":"ok","transports":"ok","tspRelationships":"ok","verifier":"ok","writes":"ok"}
+```
+
+In its first seconds it can answer `degraded`, with `writes` `unavailable` and `the mediator connection dropped; reconnecting` in `detail`: the mediator closes the registry's first connections as duplicates (`replaced by a newer connection` in the log) while it settles. Wait a few seconds and check again. A `degraded` status that persists means something else is wrong; `detail` says what, for example that the mediator refused the ACL-mode update. Then confirm from the log that it fetched its identity from the VTA and authenticated to the mediator:
 
 ```bash
 grep -iE 'vta|mediator' ~/trust-registry/log.txt
 ```
 
-Look for `Connected to VTA (DIDComm)`, `Loaded fresh secrets from VTA` and `registry messaging connected to mediator`. Warnings about `environments.json`, a `WebSocket channel not set` for the registry's admin `did:key`, and in-memory message deduplication are expected on this box.
+Look for `Connected to VTA (DIDComm)`, `Loaded fresh secrets from VTA` and `receiving from the mediator`. Warnings about `environments.json` and a `WebSocket channel not set` for the registry's admin `did:key` are expected on this box.
 
 The registry's DID is also listed at `https://dids.yourdomain.com/dids`, published by the DID Hosting Daemon under the `trust-registry` path.
 
@@ -924,13 +933,15 @@ cd ~/vtc
 nohup vtc > log.txt 2>&1 &
 ```
 
-Open the **Install URL** in a browser and paste the **Claim code** in the input box on the browser page.
+Open the **Install URL** in a browser. The page is titled **Claim administrator access**. Enter the **Claim code** and press **Continue**.
 
-You are then prompted to save a passkey, so go ahead and save it.
-
-Ignore the **Claim Admin Passkey** screen for now. This is currently not used.
+You are then prompted to save a passkey, so go ahead and save it. The page shows **Admin set up ✅** with your new administrator DID, which is your passkey's own `did:key`.
 
 Navigate to `https://vtc.yourdomain.com/admin` and sign in with your new passkey.
+
+Straight after you sign in, the console shows **Set up signing**. Every administrator action in the console is a signed document, and this step gives your browser the key it signs them with, so the console is unusable until you complete it. Keep or change the suggested name under **Name this browser**, press **Set up signing with your passkey**, then **Use passkey** in the **Confirm with your passkey** dialog, and confirm with your passkey. The key lasts up to 30 days, and the console reminds you to renew it before then. It belongs to this browser and this address only, so another browser, profile or private window sets up its own.
+
+If the page stays on **Waiting for your passkey…** after you have confirmed, see [Set up signing stays on Waiting for your passkey](#set-up-signing-stays-on-waiting-for-your-passkey).
 
 You now have access to the VTC Admin Dashboard and can set up access for the community manager(s) of the VTC.
 
@@ -967,6 +978,8 @@ nohup did-hosting-daemon > log.txt 2>&1 &
 
 Then visit the new Enrollment URL in a browser and save a passkey when prompted.
 
+This only works while the DID has no passkey yet. If the first enrollment did succeed, the command refuses with `already has a login passkey; it adds another from its own session`: sign in with the passkey you have and add another from inside the console.
+
 ### VTC install URL expired or already used
 
 The install URL from `vtc setup` is single-use and expires 15 minutes after it is minted. If the browser shows **Install URL expired or already used**, mint a fresh passkey invitation. The command opens the VTC's store directly, which it can only do while the daemon is stopped:
@@ -990,7 +1003,15 @@ vtc --config config.toml admin invite --ttl 3600
 nohup vtc > log.txt 2>&1 &
 ```
 
-Then open the new install URL, enter the new claim code, and save a passkey as before. The daemon writes the new administrator's ACL entry when the claim completes, so nothing else needs repairing.
+Then open the new install URL, enter the new claim code, and save a passkey as before. The daemon writes the new administrator's ACL entry when the claim completes, so nothing else needs repairing. The install page may still say the URL expires after 15 minutes; `--ttl` is what applies.
+
+Because the invitation was written while the daemon was stopped, the console then lists it under **Actions** as an offline change for every administrator to acknowledge. That is expected. Once you have an administrator, you can invite another without stopping the daemon, from the console's **Access** → **Invite admin**.
+
+### Set up signing stays on Waiting for your passkey
+
+The VTC limits how fast one address can send it unsigned requests: a burst of 10, then one every 5 seconds. Claiming the install URL, signing in and setting up signing take about a dozen requests between them, so going through all three within half a minute or so can use up the burst. The console then shows no error and stays on **Waiting for your passkey…**, while the browser's developer tools show `429 Too Many Requests`.
+
+Wait a minute, reload `https://vtc.yourdomain.com/admin`, and press **Set up signing with your passkey** again. Once signing is set up, the console signs its requests, and signed requests have a much larger allowance.
 
 ### Trust Registry context already exists
 
