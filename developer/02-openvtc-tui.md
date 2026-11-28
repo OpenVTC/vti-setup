@@ -1,15 +1,15 @@
 # OpenVTC TUI Setup
 
 **Description:** Install and configure the OpenVTC TUI — the interactive text interface for working with your Personal VTA. Used for minting persona DIDs, managing community contexts, and exchanging credentials.  
-**Tested on:** Arch Linux desktop & macOS
+**Tested on:** Ubuntu Server 26.04
 
 **Verified with:**
 
-| OpenVTC Version | VTA Version | Mediator Version | DID Hosting Daemon Version |
-| --- | --- | --- | --- |
-| 0.3.1 | 0.39.0 | 0.28.36 | 0.8.3 |
+| Release | OpenVTC | VTA | PNM | Mediator | DID Hosting |
+| --- | --- | --- | --- | --- | --- |
+| VTI-Fig | 0.9.0 | 0.87.2 | 0.66.2 | 0.56.0 | 0.12.0 |
 
-> **⚠️ Out of date until VTI-Fig.** Verified on the builds above, which predate the VTI-Eucalyptus release. Where a prompt, flag or output differs, trust the tool. This page will be re-verified on VTI-Fig; see [Versions](../README.md#versions).
+**Verified by an automated run** on a fresh Ubuntu 26.04 server, against a Personal VTA set up with [Path B of 01](01-personal-vta.md#path-b--vta-the-hard-way-self-hosted): the wizard was driven through tmux and its screens compared with this page. Secrets were kept with `OPENVTC_SECURE_STORE=file`, as on a headless machine. Not tested on macOS, Windows/WSL, with a desktop OS keyring, or with a hardware security key. See [Versions](../README.md#versions).
 
 ## Prerequisites
 
@@ -33,37 +33,45 @@ The following values will be collected during setup. Save each one as prompted.
 
 #### Option A: Download pre-built binary (recommended)
 
-Saves the Rust toolchain install and ~2–5 minutes of build time:
+Saves the Rust toolchain install and ~2–5 minutes of build time. On Linux (x86-64):
 
 ```bash
 curl -O https://download.firstperson.dev/openvtc/latest/openvtc
 chmod +x openvtc && sudo mv openvtc /usr/local/bin/
 ```
 
+The Linux build includes hardware-token support, so it needs the PC/SC library even if you have no token. Without it, `openvtc` stops with `error while loading shared libraries: libpcsclite.so.1`. On Debian or Ubuntu:
+
+```bash
+sudo apt install -y libpcsclite1
+```
+
+A [macOS build](https://download.firstperson.dev/releases/latest/macOS/openvtc) is also available.
+
 #### Option B: Build from source
 
-Requires a Rust toolchain (1.94.0 or newer):
+Requires a Rust toolchain (1.95.0 or newer). Build from the `VTI-Fig` tag, which is the release in the table above:
 
 ```bash
-cd ~
 git clone https://github.com/OpenVTC/openvtc.git
 cd openvtc
-cargo install --path openvtc --no-default-features
+git checkout VTI-Fig
+cargo install --path openvtc --locked --no-default-features
 ```
 
-If you have a hardware token (OpenPGP card / YubiKey) and the PC/SC libraries available on the host, build with default features instead to enable hardware-token support:
+If you have a hardware token (OpenPGP card / YubiKey) and the PC/SC libraries available on the host, leave out `--no-default-features` to enable hardware-token support.
 
-```bash
-cargo install --path openvtc
-```
+OpenVTC is also on crates.io (`cargo install openvtc --version 0.9.0 --locked --no-default-features`), but the crates.io 0.9.0 was published before the release's last fix. Built that way, OpenVTC's activity log shows a harmless `device registration failed: VTA contract mismatch` warning ([openvtc#636](https://github.com/OpenVTC/openvtc/issues/636)).
 
 The binary lands in `~/.cargo/bin/`.
 
 #### Confirm
 
 ```bash
-openvtc --help
+openvtc --version
 ```
+
+It prints `openvtc 0.9.0`.
 
 ### Step 2: Run the setup wizard
 
@@ -104,7 +112,13 @@ You point OpenVTC at your VTA and authorise it through PNM. Only the PNM step ne
 | --- | --- |
 | Connect to your VTA | At **Enter the VTA's DID:**, paste your **Personal VTA DID**, then press **Enter** |
 
-**Authorise the setup DID via PNM.** OpenVTC mints a temporary admin `did:key` for this session and shows it as the **Setup DID**. Below it is a **Context id** field, pre-filled with `openvtc`, and a ready-to-copy `pnm contexts create` command built from both. Leave the context id as it is unless you need a different one; the command updates as you type, and **Esc** resets it to `openvtc`. Press **F2** to copy the command, then run it in the PNM session you set up in [01 — Personal VTA](01-personal-vta.md):
+**Run the PNM command.** OpenVTC mints a temporary admin `did:key` for this session and shows it as the **Setup DID**. Below it are a **Context id** field, pre-filled with `openvtc`, and a **Transport** row, `Automatic (TSP → DIDComm → REST)`, which **Tab** changes; leave both as they are unless you need otherwise. The page then lists three ready-to-copy commands built from them, which update as you type:
+
+- **F2**, *New context*: `pnm contexts create`. This is the one for a first setup.
+- **F3**, *Context already exists, or re-granting*: `pnm acl create`.
+- **F4**, *Re-granting? Delete the old entry first*: `pnm acl delete`.
+
+Press **F2** to copy the command, then run it in the PNM session you set up in [01 — Personal VTA](01-personal-vta.md):
 
 ```bash
 pnm contexts create --id openvtc --name "OpenVTC" \
@@ -113,7 +127,7 @@ pnm contexts create --id openvtc --name "OpenVTC" \
 
 `--admin-holder` also lets OpenVTC manage your own identity (attributes, profiles and disclosures), which sits above any single context. Without it, the **My Identity** panel's Attributes, Profiles and Disclosures tabs are refused.
 
-`--admin-handoff` lets the one-hour setup DID roll over once to the long-term admin DID the VTA mints at the end of setup. Without it, that last step is refused with `VTI-ACL-053`, and the flag can't be added to the context afterwards. If you already created the context without it, replace the setup DID's grant instead (OpenVTC's setup page prints these commands too):
+`--admin-handoff` lets the one-hour setup DID roll over once to the long-term admin DID the VTA mints at the end of setup. Without it, that last step is refused with `VTI-ACL-058`, and the flag can't be added to the context afterwards. If you already created the context without it, replace the setup DID's grant instead with **F4** and then **F3**:
 
 ```bash
 pnm acl delete did:key:z6Mk...
@@ -121,28 +135,30 @@ pnm acl create --did did:key:z6Mk... --role admin --contexts openvtc \
   --expires 1h --handoff --capabilities persona-holder
 ```
 
-Switch back to the TUI and press **Enter**. The grant lasts 1 hour — see [Known issues](#known-issues--edge-cases) if you overrun it.
+Wait for PNM to print `Admin ACL entry created`, then switch back to the TUI and press **Enter**. If PNM says the context `already exists … NOT added` instead, nothing was granted; use **F3**. The grant lasts 1 hour and the setup DID can use it once; see [Known issues](#known-issues--edge-cases) if you overrun it.
 
-**Bootstrapping with the VTA.** The wizard now works on its own, ticking off each check as it goes: the ephemeral `did:key` authenticates to the VTA, the VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out, and the wizard opens a TSP or DIDComm session against the VTA — whichever the VTA advertises in its DID document. When it reports `Bootstrap complete — admin key rotated, ephemeral setup DID retired.`, press **Enter**. If it fails, Enter returns you to the PNM page to check the grant and retry.
+**Connect to the VTA.** The wizard now works on its own, ticking off each check as it goes: the ephemeral `did:key` authenticates to the VTA, the VTA mints a long-term admin DID for OpenVTC and rotates the ephemeral key out, and the wizard opens a TSP or DIDComm session against the VTA — whichever the VTA advertises in its DID document. When it reports `Bootstrap complete — admin key rotated, ephemeral setup DID retired.`, press **Enter**. If it fails, **R** retries and **B** goes back to the PNM page, which then shows a banner naming the cause and the F-key command that fixes it.
 
-**If the context is already in use.** When the context you chose already holds an OpenVTC account (for example, from an earlier setup), the wizard stops at **This Trust Context is already in use** and lists what it contains. Press **R** to recover that account, **B** to go back and use a different context (the existing one is left untouched), or **C** to continue anyway and add a second account to it. A first-time setup never sees this page.
+**This Trust Context is already in use.** On VTI-Fig, a first-time setup stops here too. The page reports `Contains 1 persona` and lists a `did:key`: that is the long-term admin DID the VTA has just minted for OpenVTC, not an earlier account. Press **C** to continue. (This is an OpenVTC bug, [openvtc#632](https://github.com/OpenVTC/openvtc/issues/632). It is fixed on `main`, so an OpenVTC newer than 0.9.0 skips this page on a first-time setup and goes straight to **Set up hardware token**.) The page is meant for a context that really does hold an OpenVTC account, for example from an earlier setup; then press **R** to recover that account or **B** to go back and use a different context, which leaves the existing one untouched. **C** adds a second account to it.
 
 #### 2.3 Profile Security
 
 The unlock code encrypts your keys, configuration and private data.
 
-If your `openvtc` build includes hardware-token support (the default for `cargo install --path openvtc`), this section opens with **Step 1/6: Set up hardware token**. Press **S** to skip it unless you have an OpenPGP-compatible token (NitroKey or YubiKey) plugged in.
+If your `openvtc` build includes hardware-token support (the pre-built download and the default `cargo install` both do), this section opens with **Set up hardware token**. Press **S** to skip it unless you have an OpenPGP-compatible token (NitroKey or YubiKey) plugged in.
 
 | Page | Action |
 | --- | --- |
-| Step 1/2: Set up unlock code | Press **Enter** to accept **Yes, require unlock code (recommended)** |
-| Step 2/2: Enter unlock code | Type your unlock code (2a), press **Tab**, type it again under **Confirm unlock code:**, then press **Enter** |
+| Set up unlock code | Press **Enter** to accept **Yes, require unlock code (recommended)** |
+| Enter unlock code | Type your unlock code (2a), at least 8 characters, press **Tab**, type it again under **Confirm unlock code:**, then press **Enter** |
+
+Use **Tab** to move to the confirm field: **Enter** submits the page, so pressing it after the first field reports `Unlock codes do not match.` **Esc** goes back a page.
 
 Choosing **No, do not require unlock code** instead takes you to a **SECURITY WARNING** page and, if you confirm, leaves the config unencrypted.
 
 #### 2.4 Setup Complete
 
-The **Profile configuration** page shows an **Account Summary** with your VTA DID and the context (`openvtc` unless you changed it). Press **Enter** to leave the wizard for the dashboard.
+The **Profile configuration** page shows an **Account Summary** with your VTA DID and the context (`openvtc` unless you changed it). Press **Enter** to leave the wizard. A **Ready** page follows while OpenVTC connects in the background; press **Enter** again for the dashboard.
 
 ```text
 OpenVTC Dashboard                             No active community
@@ -154,7 +170,7 @@ OpenVTC Dashboard                             No active community
 │ * Vetting             ││ Find a Verifiable Trust Community and       │
 │ * My Identity         ││ choose who it will know you as.             │
 │ * Settings            ││                                             │
-│ * VTA Service         ││ Press  j  to join your first community.     │
+│ * VTA Service         ││ Press  n  to join your first community.     │
 │ * TSP Relationships   ││                                             │
 │ * Logs                ││                                             │
 │ * Help / Status       ││                                             │
@@ -175,7 +191,7 @@ openvtc setup -p alice
 openvtc -p alice
 ```
 
-There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc account <name>` on libsecret-based systems). Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries. You will also need to delete the contexts created in the PNM (e.g. `pnm contexts delete openvtc`).
+There is no `openvtc profiles list` or `openvtc profiles delete`. Inspect with `ls ~/.config/openvtc/`; remove one profile by deleting its `config-<name>.json` and clearing the matching keyring entry (e.g. `secret-tool clear service openvtc username <name>` on libsecret-based systems), or, with file storage, its file in `~/.config/openvtc/secrets/`. Wipe everything with `rm -rf ~/.config/openvtc/` plus the corresponding keyring entries. You will also need to delete the contexts created in the PNM (e.g. `pnm contexts delete openvtc`).
 
 ## Verification
 
@@ -188,7 +204,7 @@ Where a **Persona** row would sit, you instead get `Status: Ready — join a com
 
 ## Known issues / edge cases
 
-- **PNM grant is 1 hour.** If you take longer than that between running `pnm contexts create` and pressing Enter on the wizard's **Authorise the setup DID via PNM** page, provisioning fails. Re-running the wizard mints a fresh setup DID — re-run `pnm contexts create` against the new one.
+- **PNM grant is 1 hour.** If you take longer than that between running `pnm contexts create` and pressing Enter on the wizard's **Run the PNM command** page, provisioning fails and you are sent back to that page with a banner. Re-grant the same setup DID with **F4** (`pnm acl delete`) and then **F3** (`pnm acl create`). Running `pnm contexts create` again does not work: the context already exists, so PNM grants nothing.
 - **TUI eats stdout.** For tracing output, set `OPENVTC_DEBUG_LOG=/tmp/openvtc.log` before launching: the TUI writes structured logs to that file while you use the UI.
 
 ## Next

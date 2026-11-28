@@ -2,7 +2,7 @@
 
 Setup guides for the **Verifiable Trust Infrastructure** stack — VTA, DID Host, and the DIDComm Mediator — and for the things people do on top of it.
 
-The repo is organised by **who you are**, not by which service you're touching. Pick your role and follow the path.
+The repo is organized by **who you are**, not by which service you're touching. Pick your role and follow the path.
 
 ---
 
@@ -30,14 +30,16 @@ You run the VTI services so the other two can do their jobs. Provision the host,
 
 ## Versions
 
-Each guide states the builds it was verified with in a **Verified with** table near the top; trust that table over anything else. From the upcoming **VTI-Fig** release on, every guide tracks a coordinated VTI release, so they all agree on one set of versions.
+The guides track coordinated VTI releases, not nightly builds. They are currently verified on **VTI-Fig** ([release notes](https://github.com/OpenVTC/openvtc/releases/tag/VTI-Fig)). Each guide states the builds it was verified with in a **Verified with** table near the top; trust that table over anything else.
 
-Until then they are out of sync:
+Nightly builds are still published, and [Server Setup](sysop/explore/01-server-setup.md#step-5-install-service-binaries) shows how to install them. They can be ahead of the guides, and they are only kept for a week or two, so a run on them can't be reproduced later. The guides are updated once per release, when every page is re-run on the release's builds.
 
-- The [explore stream](sysop/explore/) was verified on the **2026-10-17 nightly**. Nightly builds are only kept for a week or two, so those exact builds will soon be gone.
-- The [developer guides](developer/) were verified on builds that **predate** the VTI-Eucalyptus release, and are out of date in places.
+Two parts are not on VTI-Fig:
 
-Both will be re-verified on VTI-Fig, which is expected shortly.
+- [Explore 03](sysop/explore/03-verifiable-git-infrastructure.md) was a one-off run on the **2026-10-22 nightly**. It needs a GitHub organization owner, so it isn't re-run with each release.
+- The VTA Farm path of [developer 01](developer/01-personal-vta.md) needs an email sign-up, so the automated runs skip it. Its page says which parts are older.
+
+Every run is automated: the terminal tools are driven through tmux on a fresh Ubuntu server, and the browser and passkey screens through headless Chromium with a virtual passkey. Nothing is tested on macOS, Windows/WSL, or with a hardware security key unless a page says so.
 
 ---
 

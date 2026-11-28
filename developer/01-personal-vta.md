@@ -1,15 +1,15 @@
 # Personal VTA
 
 **Description:** Stand up a Personal VTA — the per-developer trust anchor that mints and manages your own DIDs and keys.  
-**Tested on:** [Ubuntu Server](../sysop/explore/01-server-setup.md) (Path B only — Path A runs in VTA Farm's managed cluster)
+**Tested on:** [Ubuntu Server](../sysop/explore/01-server-setup.md) 26.04 (Path B only — Path A runs in VTA Farm's managed cluster)
 
 **Verified with:**
 
-| VTA Version | Mediator Version | DID Hosting Daemon Version |
-| --- | --- | --- |
-| 0.39.0 | 0.28.36 | 0.8.3 |
+| Release | VTA | PNM | Mediator | DID Hosting |
+| --- | --- | --- | --- | --- |
+| VTI-Fig | 0.87.2 | 0.66.2 | 0.56.0 | 0.12.0 |
 
-> **⚠️ Out of date until VTI-Fig.** Verified on the builds above, which predate the VTI-Eucalyptus release. Where a prompt, flag or output differs, trust the tool. This page will be re-verified on VTI-Fig; see [Versions](../README.md#versions).
+**Path B was verified by an automated run** on a fresh Ubuntu 26.04 server: every wizard was driven through tmux and its screens compared with this page. Not tested on macOS, Windows/WSL, or with a hardware security key. **Path A is not part of the automated runs**, because VTA Farm's sign-up needs an email address. Its PNM step below matches the VTI-Fig `pnm`, but its VTA Farm screens past the sign-up form are from an earlier release. See [Versions](../README.md#versions).
 
 ## Two paths
 
@@ -22,10 +22,12 @@ Pick whichever fits how much infrastructure you want to manage. If you're new to
 
 ## Path A — VTA Farm (streamlined)
 
+> **ℹ️ Just want a VTA, without an account?** The VTA Farm's home page also offers **Create your first Trust Agent**. It needs no Farm account: you install the **Keyring** app on your phone, press **Get my Trust Agent**, scan the QR code with Keyring and compare a six-character code, and the Farm hands Keyring a VTA it has already prepared. The page then walks you through joining a demo community from Keyring. That VTA's administrator is Keyring, not PNM, so this path doesn't lead into the PNM and OpenVTC guides here. To follow them, set up an account as below.
+
 ### Prerequisites
 
 - A computer with **passkey** support.
-- **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. [Download the PNM](https://firstperson.dev/#downloads). PNM changes quickly and some of its changes break older VTAs, so take it from the same release as your VTA.
+- **PNM installed locally.** PNM is a CLI tool and can run on your computer — it does not need its own server. Download it for [Linux (x86-64)](https://download.firstperson.dev/pnm/latest/pnm) or [macOS](https://download.firstperson.dev/releases/latest/macOS/pnm). PNM changes quickly and some of its changes break older VTAs, so take it from the same release as your VTA.
 
 The following values will be collected during setup. Save each one as prompted — they are needed across steps.
 
@@ -38,7 +40,7 @@ The following values will be collected during setup. Save each one as prompted �
 
 #### Step 1: Create the VTA in VTA Farm
 
-1. Create an account at the [VTA Farm](https://vtafarm.firstperson.dev).
+1. At the [VTA Farm](https://vtafarm.firstperson.dev), click **Set up an account**, enter your email address, and click **Create account with Passkey**.
 2. Complete the passkey prompt on your computer.
 3. Click **Create VTA**.
 4. Enter a **name** for your VTA, leave the default image selected, and click **Create session**.
@@ -60,17 +62,23 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter the **same name** you used in Step 1 |
-| VTA DID: | Paste the **Personal VTA DID** from 1a |
+| VTA DID (leave blank to finish setup later): | Paste the **Personal VTA DID** from 1a |
 
-PNM prints a `vta import-did` command containing a generated Temp DID unique to this session:
+PNM first generates a temporary admin identity and prints it, with a **Next steps** list, before it asks for the name. After you paste the VTA DID, it stores the session and prints it again:
 
 ```text
-vta import-did --did did:key:z6Mk... --role admin
+Session stored for '<your-vta-name>'.
+
+  VTA slug: <your-vta-name>
+  VTA DID:  did:webvh:...
+  Temp DID: did:key:z6Mk...
 ```
+
+PNM then checks whether the VTA accepts the Temp DID yet. It doesn't, so PNM prints a `vta import-did` command for it. That command is for a self-hosted VTA; on the VTA Farm you paste the DID into the browser instead.
 
 > **⚠️ SAVE THIS** (2a)
 >
-> The **Temp DID** — the `did:key:z6Mk...` value from PNM's output. You'll paste it into VTA Farm in the next step. Don't copy the entire line; just the DID, for example: **did:key:z6MkqYgeCR8hJS9A5Eu98hfMBiYHb8MZ8S9R2Mz4PqErZyLF**
+> The **Temp DID**: the `Temp DID:` line from PNM's output. You'll paste it into VTA Farm in the next step. Copy just the DID, for example: **did:key:z6MkqYgeCR8hJS9A5Eu98hfMBiYHb8MZ8S9R2Mz4PqErZyLF**
 
 #### Step 3: Provision the agent
 
@@ -100,7 +108,7 @@ Assuming the health check is successful, you can now install the TUI and bind it
 
 Complete the [Ubuntu Server](../sysop/explore/01-server-setup.md) deployment before continuing, but only install `vta` and `pnm` in **Step 5**.
 
-> **Which PNM build?** Step 5 of that guide installs the `pnm-server` build, which keeps secrets in plaintext config instead of an OS keyring — the right choice for the headless server you are standing up. If you would rather drive that VTA from your own workstation, install the default build there via [Download the PNM](https://firstperson.dev/#downloads) instead. Either way the binary is called `pnm`, so every command below is unchanged.
+> **Which PNM build?** Step 5 of that guide installs the `pnm-server` build, which keeps secrets in plaintext config instead of an OS keyring — the right choice for the headless server you are standing up. If you would rather drive that VTA from your own workstation, install the default build there instead, from the [Linux (x86-64) download](https://download.firstperson.dev/pnm/latest/pnm). Either way the binary is called `pnm`, so every command below is unchanged.
 
 You also need the **Community Mediator DID** before starting — obtain it from the operator of the mediator you intend to use. You will paste it in Step 1.
 
@@ -136,7 +144,7 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | --- | --- |
 | Config file path [config.toml]: | Press **Enter** (use default) |
 | VTA name (leave empty to skip): | Enter a name for this VTA |
-| Services to enable (select at least one): | Also select TSP and press **Enter** (all three services selected) |
+| Services to enable (select at least one): | Press **Enter** (REST, DIDComm and TSP are all selected by default) |
 | Server host [0.0.0.0]: | Press **Enter** (use default) |
 | Server port [8100]: | Press **Enter** (use default) |
 | VTA REST URL [http://localhost:8100]: | `https://vta.yourdomain.com` |
@@ -144,13 +152,11 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | Log format: | Press **Enter** (default: **text**) |
 | Audit-log retention (days) [28]: | Press **Enter** (use default) |
 | Data directory [data/vta]: | Press **Enter** (use default) |
-| Configure advanced server options (CORS, trusted proxy header, WebAuthn)? [y/N] | Press **Enter** (use default) |
+| Configure advanced server options (CORS, trusted proxy CIDRs, WebAuthn)? [y/N] | Press **Enter** (use default) |
 | Seed storage backend: | Press **Enter** (default: Config file) |
 | Enable hardened configuration? (encrypts the fjall store...) y/N | Press **Enter** (use default) |
 
-**Seed storage backend:**
-
-- Choose: **Config file (hex-encoded seed in config.toml)**
+**Seed storage backend:** the default, **Config file (hex-encoded seed in config.toml)**, is first in the list. The other choices are **Encrypted file (passphrase, systemd-creds or TPM key)** and **Plaintext file (NOT recommended)**.
 
 **DIDComm Messaging:**
 
@@ -158,18 +164,22 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | --- | --- |
 | DIDComm messaging: | Choose **Use an existing mediator DID** |
 | Mediator DID: | Paste the **Community Mediator DID** from 0a (e.g. `did:webvh:...:did-host.com:mediator`) |
-| Mediator hostname for vsock-bridged TEE deployments: | Press **Enter** (skip) |
-| Automatically provision ACL on mediator after connecting? y/N | Press **Enter** (use default) |
+| Mediator hostname for vsock-bridged TEE deployments (leave empty to skip): | Press **Enter** (skip) |
+| Automatically provision ACL on mediator after connecting? (enable if mediator uses ExplicitAllow mode) [y/N] | Press **Enter** (use default) |
+
+The wizard then checks the mediator and prints `Mediator did:webvh:... advertises TSP.` If it says the mediator advertises no TSP service instead, TSP is dropped from your VTA's services; DIDComm still works.
 
 **VTA DID:**
 
 | Prompt | Action |
 | --- | --- |
-| VTA DID: | Choose **Create a new `did:webvh` DID** |
-| VTA DID URL: | `https://did-host.com/your-did-path` |
-| DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document**) |
+| VTA DID: | Press **Enter** (default: **Create a new did:webvh DID (recommended for production)**) |
+| VTA DID URL [http://localhost:8000/]: | `https://did-host.com/your-did-path` |
+| DID creation mode: | Press **Enter** (default: **Simple — VTA creates keys and document (recommended)**) |
 | Make this DID portable (can move to a different domain later)? [Y/n]: | Press **Enter** → **Y** |
 | Number of pre-rotation keys [1]: | Press **Enter** (use default) |
+| Present this VTA's DIDs as: | Press **Enter** (default: **did:webvh (recommended; what every existing peer expects)**) |
+| List the did:scid alias in alsoKnownAs, so peers can also use that form? [Y/n] | Press **Enter** → **Y** |
 
 **BIP-39 mnemonic:**
 
@@ -182,21 +192,22 @@ When prompted, use the values below. Replace the host placeholders (see Prerequi
 | --- | --- |
 | Save DID log to file [VTA-did.jsonl]: | Press **Enter** (use default) |
 
-When all prompts are complete, the wizard prints:
+When all prompts are complete, the wizard prints `To self-host this DID, upload VTA-did.jsonl to the DID URL.` (that is Step 2) and then:
 
 ```text
-Setup complete!
-  Config saved to: config.toml
-  Seed stored in configured backend
-  Seed backend: config file (hex-encoded in config.toml)
-  VTA Name: <your VTA name>
-  VTA REST URL: https://vta.yourdomain.com
-  VTA DID: did:webvh:...:did-host.com:your-did-path
-  Services: REST, DIDComm
-  Server: 0.0.0.0:8100
-  Mediator DID: did:webvh:...:did-host.com:mediator
-  Contexts: vta (m/26'/2'/0')
+Setup complete.
+  Config:   config.toml
+  Data dir: data/vta
+  Name:     <your VTA name>
+  URL:      https://vta.yourdomain.com
+  VTA DID:  did:webvh:...:did-host.com:your-did-path
+  Mediator: did:webvh:...:did-host.com:mediator
+
+  ACL is empty. Seed the first admin:
+  ...
 ```
+
+The rest of the summary describes two ways to add the first admin. Step 3 uses the first, `vta import-did`.
 
 > **⚠️ SAVE THIS** (1b)
 >
@@ -264,12 +275,16 @@ When prompted:
 | --- | --- |
 | What would you like to do?: | Choose **Connect to an existing non-TEE VTA** |
 | Name for this VTA: | Enter a name for this VTA |
-| VTA DID: | Paste the **Personal VTA DID** from 1b |
+| VTA DID (leave blank to finish setup later): | Paste the **Personal VTA DID** from 1b |
 
-PNM will output a `vta import-did` command. Note it down — it contains a generated temp DID unique to this session:
+PNM first generates a temporary admin identity and prints it, with a **Next steps** list, before it asks for the name. After you paste the VTA DID, it stores the session, prints the `Temp DID:`, and checks whether the VTA accepts it yet. The VTA isn't running, so expect an error like this, followed by the command to run:
 
 ```text
-vta import-did --did did:key:z6Mk... --role admin
+Could not reach did:webvh:... to check whether it accepts did:key:z6Mk...: tsp transport error:
+ TSP relationship failed: ... status(403) ... "Message not accepted for delivery" ...
+If the VTA has not granted this identity admin access yet, ask your VTA admin to run:
+
+  vta import-did --did did:key:z6Mk... --role admin
 ```
 
 Run that command in the `~/vta` directory on the machine where you installed the VTA:
@@ -298,6 +313,25 @@ cd ~/vta
 nohup vta > log.txt 2>&1 &
 ```
 
+#### Step 4: Get DID hosting for your personas
+
+OpenVTC, in the next two guides, mints a `did:webvh` persona for each community you join. It asks your VTA to create the persona on a **DID hosting server**, and that server must let your VTA in. A VTA Farm VTA comes with this already; a self-hosted one does not. Without it, creating a persona stalls at `Creating persona DID via did-hosting-daemon…`. The VTA retries every 30 seconds, and the server's log says `trust task refused: sender has no ACL entry`.
+
+Ask the operator of a DID Hosting Daemon (on an [explore box](../sysop/explore/02-walkthrough.md#step-4-set-up-did-hosting-daemon), that's you) to add your **Personal VTA DID** (1b) to its ACL. The command needs the daemon stopped, so it is a short restart:
+
+```bash
+cd ~/dids
+pkill -f did-hosting-daemon
+did-hosting-daemon add-acl --did <Personal VTA DID (1b)> --label personal-vta
+nohup did-hosting-daemon >> log.txt 2>&1 &
+```
+
+The default role, `owner`, is enough. Then, from your PNM, register that server with your VTA, using the daemon's own DID (**DID Host DID (4b)** on an explore box):
+
+```bash
+pnm did-mgmt servers add --id did-hosting-daemon --did <DID Hosting Daemon DID>
+```
+
 ### Verification
 
 Confirm the VTA is responding:
@@ -314,7 +348,7 @@ You can also check it from the machine running the PNM:
 pnm health
 ```
 
-It should return the status of a number of checks it runs against the VTA, the Mediator and DIDComm/TSP trust pings.
+It should return the status of a number of checks it runs against the VTA, the Mediator and DIDComm/TSP trust pings, each marked ✓. The first successful connection also replaces PNM's temporary DID with a long-lived one.
 
 ### Next
 

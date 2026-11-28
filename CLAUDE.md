@@ -8,7 +8,7 @@ A documentation-only repository — no build system, no tests, no application co
 
 ## Layout
 
-Organised by **persona** — who's reading — not by topic.
+Organized by **persona** — who's reading — not by topic.
 
 | Folder | Reader | Contents |
 | --- | --- | --- |

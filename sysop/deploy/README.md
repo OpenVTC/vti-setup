@@ -14,12 +14,13 @@ A farm provisions each user's stack with the same **offline sealed-bundle bootst
 | Step 2 — `pnm setup`, then `vta import-did` | You still run `pnm setup` on your own machine and hand the admin DID to the farm. The farm runs the `vta import-did --role admin` Job for you, after the mediator and DID host steps and just before the VTA starts |
 | Step 3 — mediator phase 1, `vta contexts reprovision`, mediator phase 2 | Three Jobs. The reprovision Job mounts both the VTA and mediator volumes so it can read `bootstrap-request.json` and write `bundle.armor`, exactly as the two home directories are used on the single host |
 | Step 4 — DID host phase 1, `vta bootstrap provision-integration`, DID host phase 2, admin invite, `did-mgmt servers add` | The same three-Job handoff, then Jobs for the admin invite, for loading the VTA and mediator DID logs into the daemon, and for registering the daemon with the VTA |
-| Step 5 — `vtc setup`, `contexts create` | Three Jobs: generate the VTC's setup key, grant it on the VTA, then `vtc setup --from` once VTA, mediator, and DID host are all reachable |
+| Step 5 — Trust Registry | Nothing by default. The registry is an opt-in add-on to a Full Stack, off unless the owner enables it, at creation or later on a running stack; see [`docs/optional-trust-registry-design.md`](https://github.com/ic3software/vtafarm-api/blob/main/docs/optional-trust-registry-design.md) |
+| Step 6 — `vtc setup`, `contexts create` | Three Jobs: generate the VTC's setup key, grant it on the VTA, then `vtc setup --from` once VTA, mediator, and DID host are all reachable |
 | `nohup <binary> &` | A Deployment per component |
 
 The difference is who holds the secrets: every component stores them in the farm Vault via Kubernetes auth, so no secret sits in plaintext on a volume. The full mapping is in [`docs/full-stack-setup-design.md`](https://github.com/ic3software/vtafarm-api/blob/main/docs/full-stack-setup-design.md) in `vtafarm-api`.
 
-This applies to **Full Stack** sessions, which provision VTA, mediator, DID host, and VTC per user. A **VTA Only** session, which is what a developer's Personal VTA is, points its VTA at the farm's shared mediator and DID host instead, so no bundle exchange is needed.
+This applies to **Full Stack** sessions, which provision VTA, mediator, DID host, and VTC per user, plus a Trust Registry if the owner opts in. A **VTA Only** session, which is what a developer's Personal VTA is, points its VTA at the farm's shared mediator and DID host instead, so no bundle exchange is needed.
 
 ## The three repos
 
